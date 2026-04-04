@@ -1,0 +1,33 @@
+﻿\section{结论与讨论}\label{sec:conclusion}
+我们提出了一种高阶壳（high-order shell），它是一种用于光滑双射属性传递的有效新结构。
+该壳由三角棱柱组成，并在其内部关联连续向量场以定义投影算子。
+%
+随后，我们提出了一个实用的构造算法，采用内点策略来生成该高阶壳。
+具体而言，算法从一个具有较小厚度且有效的线性壳出发，然后通过局部操作（包括边塌缩、棱柱几何优化、边翻转和棱柱缩放）逐步优化壳结构，直至达到指定厚度。
+%
+通过在 8300 多个模型上的测试，我们验证了该构造方法的鲁棒性与性能。
+与线性壳相比，我们的双射投影更光滑，且壳与输入网格之间的空间分布更加均匀。
+
+
+尽管如此，仍有进一步改进空间。
+%\paragraph{linear shell}
+\tr{首先，与 ~\cite{Jiang2020BijectivePI} 类似，线性壳方法的若干局限在本工作中仍然存在：我们并未解决更一般的非刚性对应问题，不能将现有重网格算法作为“黑盒”直接调用，并且方法仍受限于流形且可定向的曲面。}
+%\paragraph{Numerical errors}
+其次，由于实现中的数值误差，沿向量方向的投影可能产生极小偏差。
+这些误差会在多个计算过程中累积，例如通过求解三次方程寻找根以及计算重心坐标。
+%\todo{Are there any solutions?}
+如何进一步降低这些数值误差对投影的影响，值得继续研究。
+第三，%\paragraph{Uniform space}
+尽管我们的高阶壳比线性壳呈现出更均匀的重网格约束空间，但目前尚无理论保证该空间总是均匀。
+其主要原因是高阶壳构造时需要同时满足多种硬约束，限制了可达几何形态。
+%
+此外，我们当前通过简单拟合构造中间 \Bezier 三角面，再依据命题~\ref{prop:mid2topbase} 生成上下 \Bezier 三角面。
+未来一个有意义的方向是探索更优构造方式，以获得更稳定且更均匀的厚度分布。
+%Moreover, we construct the middle \Bezier triangle by a simple fitting process.
+%Currently, our algorithm constructs a high-order shell around the input mesh. But we do not utilize all the appropriate abilities of the \Bezier triangles.
+%\paragraph{Computational cost}
+最后，当前方法在效率方面仍不够理想。
+大量时间消耗在约束检查以及差分进化优化过程中对中层、上层和下层 \Bezier 三角面的构造上。
+%
+%\todo{Are there any solutions?}
+未来可以研究减少约束检查次数与加速 \Bezier 三角面构建的策略。

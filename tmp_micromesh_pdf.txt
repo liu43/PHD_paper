@@ -1,0 +1,1206 @@
+Micro-Mesh Construction
+ANDREA MAGGIORDOMO, University of Milan, Italy
+HENRY MORETON, NVIDIA, USA
+MARCO TARINI, University of Milan, Italy
+                                                                        Input                              Subdivision                                       𝜇-Mesh
+
+
+
+
+                                                                                 Base mesh                              Displacement
+
+Fig. 1. A model automatically constructed using our algorithm, the Dark Fingered Reef Crab from https://threedscans.com. The input triangle mesh of 2,141,606
+triangles is remeshed to a directly renderable micro-mesh representation of 21,312 base-triangles, with ray tracing accelerated by dedicated hardware. The
+micro-mesh is expanded on-demand to 2,223,780 displaced 𝜇-triangles and achieves a 15:1 compression ratio.
+
+Micro-meshes (𝜇-meshes) are a new structured graphics primitive supporting                    Additional Key Words and Phrases: Micro-meshes, Remeshing, Mesh simpli-
+a large increase in geometric fidelity, without commensurate memory and                       fication, Displacement mapping, Mesh compression
+run-time processing costs, consisting of a base mesh enriched by a displace-
+ment map. A new generation of GPUs supports this structure with native                        ACM Reference Format:
+hardware 𝜇-mesh ray-tracing, that leverages a self-bounding, compressed                       Andrea Maggiordomo, Henry Moreton, and Marco Tarini. 2023. Micro-Mesh
+displacement mapping scheme to achieve these efficiencies.                                    Construction. ACM Trans. Graph. 1, 1 (May 2023), 18 pages. https://doi.org/
+   In this paper, we present an automatic method to convert an existing multi-                10.1145/nnnnnnn.nnnnnnn
+million triangle mesh into this compact format, unlocking the advantages
+of the data representation for a large number of scenarios. We identify the                   1   INTRODUCTION
+requirements for high-quality 𝜇-meshes, and show how existing re-meshing
+and displacement-map baking tools are ill-suited for their generation. Our
+                                                                                              Displaced micro-meshes (abbreviated 𝜇-meshes) are a recently in-
+method is based on a simplification scheme tailored to the generation of high-                troduced polygonal representation for 3D models [NVIDIA 2022],
+quality base meshes, optimized for tessellation and displacement sampling, in                 designed for efficient GPU rendering, particularly ray tracing. 𝜇-
+conjunction with algorithms for determining displacement vectors to control                   meshes are natively ray traced and greatly reduce mesh size and
+the direction and range of displacements. We also explore the optimization                    the size and construction time of acceleration structures.
+of 𝜇-meshes for texture maps and the representation of boundaries.                               A 𝜇-mesh is a special type of displacement-mapped mesh, consist-
+   We demonstrate our method with extensive batch processing, converting                      ing of a coarse base triangular mesh and a set of scalar displacement
+an existing collection of high-resolution scanned models to the micro-mesh                    values modeling the high-frequency details. At rendering time, each
+representation, providing an open-source reference implementation, and,                       base-mesh face is subdivided into 𝜇-triangles and the resulting 𝜇-
+as additional material, the data and an inspection tool.
+                                                                                              vertices are displaced along interpolated directions (details of the
+CCS Concepts: • Computing methodologies → Computer graphics;                                  𝜇-mesh structure are provided in Sec. 1.1).
+Mesh geometry models.                                                                            Hardware is available that natively supports the rendering of
+                                                                                              𝜇-meshes, unlocking unprecedented triangle counts in interactive
+Authors’ addresses: Andrea Maggiordomo, University of Milan, Dipartimento di Infor-           applications such as videogames and virtual reality, and, ultimately
+matica, via Celoria 18, Milan, Italy; Henry Moreton, NVIDIA, Santa Clara, California,         improving the quality of real-time rendering.
+USA; Marco Tarini, University of Milan, Dipartimento di Informatica, via Celoria 18,
+Milan, Italy.                                                                                    The construction of 𝜇-meshes is an unexplored area, whereas
+                                                                                              traditional hi-res meshes can be produced with a variety of well-
+Permission to make digital or hard copies of all or part of this work for personal or
+                                                                                              established approaches, including manual digital sculpting, 3D ac-
+classroom use is granted without fee provided that copies are not made or distributed         quisition techniques, subdivision surfaces, and more. To allow digital
+for profit or commercial advantage and that copies bear this notice and the full citation     artists to produce 𝜇-meshes, asset authoring pipelines would have to
+on the first page. Copyrights for components of this work owned by others than ACM
+must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,       be devised anew or modified, incorporating new tools and modeling
+to post on servers or to redistribute to lists, requires prior specific permission and/or a   approaches.
+fee. Request permissions from permissions@acm.org.                                               In this paper, we explore the problem of the automatic production
+© 2023 Association for Computing Machinery.
+0730-0301/2023/5-ART $15.00                                                                   of a high-quality 𝜇-mesh from a traditional high-resolution mesh.
+https://doi.org/10.1145/nnnnnnn.nnnnnnn                                                       This is intended both as a bridge from traditional representations
+
+                                                                                                          ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+2 •    Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+to 𝜇-meshes and as a tool in new potential asset creation pipelines          Multiresolution. 𝜇-Meshes support four, watertight levels of detail.
+designed to directly produce 𝜇-meshes.                                    HW ray queries may include a LOD bias where all 𝜇-meshes encoun-
+   𝜇-Meshes share many characteristics with other forms of dis-           tered during the trace are treated as though their subdivision level is
+placement-mapped surfaces, and a natural solution would be to             reduced by up to three, one sixty-fourth the 𝜇-triangles. Shader code
+resort to a pipeline of existing tools to convert an input mesh into a    can exploit the 𝜇-mesh structure to arbitrarily reduce LOD, all the
+displacement-mapped surface (including tools for mesh decimation,         way to the base mesh itself. As long as LOD is uniformly reduced by
+displacement map baking, semi-regular remeshing, and so on). How-         lowering the subdivision level, the resulting mesh remains bit-exact
+ever, the 𝜇-mesh scenario poses stringent requirements, and specific      watertight.
+objectives (see Sec. 1.2). The primary motivation of the present work
+is to automatically construct a satisfactory 𝜇-mesh, something very
+challenging with existing tools (see experiments in Sec. 10.8 and
+10.9).                                                                    1.2   Problem statement and objectives
+                                                                          Motivation: why 𝜇-meshes. The 𝜇-mesh representation is designed
+1.1    Background: the 𝜇-mesh structure                                   to exploit the inherent coherence of high-quality geometry and pos-
+                                                                          sess qualities that significantly reduce the impact of using extremely
+In this section, we summarize aspects of the 𝜇-mesh representation,
+                                                                          detailed models. The primary value of 𝜇-meshes is their extreme
+the output of our method. For further details, see the white paper
+                                                                          compactness in video RAM, while maintaining high-efficiency ray
+[NVIDIA 2022].
+                                                                          traced or rasterized rendering. The compression ratios mitigate
+   Base mesh. The base mesh of a 𝜇-mesh is a triangle mesh with
+                                                                          the storage and transmission time costs of detailed models, and
+position and displacement vectors defined at the mesh vertices.
+                                                                          the intrinsic LOD amplifies these benefits by largely obviating the
+Each base mesh face is divided into a regular grid of 4𝑘 𝜇-triangles,
+                                                                          need to maintain multiple, redundant LODs. Additionally, because
+specified by a per-face subdivision level k (Fig. 2-b). Note that each
+                                                                          each 𝜇-mesh face serves as a good bounding structure for its con-
+unmodified base mesh triangle edge is composed of 2𝑘 segments.
+                                                                          stituent 𝜇-triangles, the BVH size and build time are greatly reduced
+   Micro-displacements. At each 𝜇-vertex the base mesh positions
+                                                                          when compared to an equivalent triangle-based model (build time
+and direction vectors are barycentrically interpolated. The direction
+                                                                          improvements of 7-15× and size savings of 5-20× are reported in
+vector is then scaled by a per-𝜇-vertex scalar displacement value and
+                                                                          [NVIDIA 2022]). These strengths and the emerging hardware sup-
+added to the interpolated position to produce the displaced 𝜇-vertex
+                                                                          port make 𝜇-meshes a rendering primitive that could make possible
+(Fig. 2d).
+                                                                          a dramatic increase in attainable geometric complexity.
+   Water tightness. Bit-exact water-tightness between displaced base
+                                                                             To realize this benefit, a reliable construction method is needed,
+faces is achieved through shared base mesh vertex positions and
+                                                                          tailored to the specific needs of the 𝜇-mesh structure. We want to
+displacement vectors, and duplication of displacement values on
+                                                                          produce an accurate and efficient 𝜇-mesh representation of an input
+shared edges, plus by using a per base face edge decimation control
+                                                                          surface expressed as a high-resolution triangle mesh. With this high-
+bit to reduce the number of triangle edge segments by one half
+                                                                          level objective we see the need for trade-offs among a number of
+along the associated edge. This imposes a constraint on adjacent
+                                                                          conflicting goals, due to the specifics of the 𝜇-mesh representation:
+subdivision levels, they may differ by no more than one. We discuss
+                                                                             Goal: Coarseness of base mesh. 𝜇-Meshes are more memory effi-
+how to satisfy this requirement in Sec. 6 (Fig. 2c).
+                                                                          cient the coarser the base mesh. More geometric detail is placed in
+   Encoding. The scalar displacements associated with each base
+                                                                          the scalar displacements with 𝜇-triangles generated on demand. The
+mesh face are stored in a micro-map (𝜇-map), a structure for storing
+                                                                          current 𝜇-mesh design supports high amplification factors, more
+per       attributes.
+ 𝜇-vertex                Each displacement 𝜇-map contains
+                                                                         than 1000 to 1. As a consequence, we seek a base mesh that is as
+ 2𝑘 + 1 2𝑘−1 + 1 , 11-bit normalized displacement values. The 𝜇-          much as three orders of magnitude more coarse than the input sur-
+map is laid out for efficiency of access and to facilitate compression    face. However, as we have stated, this increased coarseness may
+beyond the quantization to 11 bits.                                       conflict with other desirable properties. Note that a wider range of
+   Rendering. The 𝜇-mesh is designed with ray tracing in mind,            levels of detail may be provided by a coarser base mesh with higher
+allowing 𝜇-triangles to be created as needed during rendering. By         levels of subdivision.
+construction, the displaced surface is bounded by the hull formed by         Goal: Reprojectability. To reproduce the input surface, the 𝜇-mesh
+the base mesh face and the face defined by the tips of the displace-      must hit it with the set of rays defined by the 𝜇-mesh’s interpolated
+ment vectors; we refer to this as a prismoid. (Fig. 3). The bounding      displacement vectors. This requirement is both difficult to fulfill and
+nature of the prismoid is exploited in the construction of the ray        to test for satisfaction. Still, the desire for reprojectability pulls on
+tracer’s bounding volume hierarchy (BVH) as well as during the            our algorithmic choices in multiple phases where it is in tension
+actual tracing of rays.                                                   with the other objectives. Ideally, the displacement direction rays
+   Texture mapping support. 𝜇-Meshes can optionally support tex-          are locally orthogonal where they strike the input surface.
+ture mapping by storing texture coordinates at base mesh vertices            Goal: Isotropy. The regular grid of the subdivided 𝜇-mesh means
+(as in any standard mesh) and linearly interpolating their values us-     that their 𝜇-triangles inherit their shape and aspect ratio (prior to
+ing the base mesh barycentric coordinates of the hit point. 𝜇-meshes      displacement). A consequence is that roughly equilateral-shaped
+may also implement Mesh Colors with a 𝜇-map of colors [Yuksel             base triangles will tend to more efficiently sample the final surface.
+et al. 2010].                                                             To preserve sampling efficiency we favor low aspect ratio base
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                     Micro-Mesh Construction      • 3
+
+
+
+
+        (a) Base-mesh triangle          (b) Regular subdivision into 𝜇-triangles (c) Optional tessellation modification          (d) 𝜇-vertex displacement
+
+Fig. 2. The 𝜇-mesh geometric primitive. A base triangle is first refined using regular 1-to-4 subdivision, then border edges are optionally decimated to control
+the triangulation density of 𝜇-mesh complexes while ensuring water-tightness, and finally, the refined geometry is displaced along linearly interpolated
+directions sampled at base vertices. Scalar micro-vertex displacements are normalized in [0, 1].
+
+
+triangles. Conversely, less accuracy is gained from samples taken                  of the local frame of the subdivided surface at the previous level,
+by long, thin base triangles.                                                      making it a less ideal fit with hardware implementation.
+    Goal: Minimal prismoid volume. Since the prismoid envelopes the                   Alternative approaches designed around fast GPU tessellation
+represented surface (and 𝜇-triangles), and because the base trian-                 schemes and displacement mapping have also been proposed [Bou-
+gle area grows with mesh coarsening, the length of displacement                    bekeur and Schlick 2008; Lorenz and Döllner 2008; Schwarz and
+vectors is an important factor in reducing prismoid volume. Shorter                Stamminger 2009]. These approaches represent a high-resolution
+displacement vectors are desirable for two reasons: First, shorter                 surface with displacement values stored in a texture image (e.g.,
+vectors mean greater accuracy from a fixed number of scalar dis-                   height-fields), and adaptively refine and displace a low-resolution
+placement bits, 11 in this case. Second, short displacement vectors                base (or control) mesh according to the desired level. Typically, the
+mean the prismoid serves as a tighter bounding hull, improving                     connectivity and density of the resulting finely tessellated mesh are
+culling and rendering performance. Since the prismoid is an enve-                  determined by simple subdivision schemes that might be efficiently
+lope, we penalize a base mesh farther from the surface.                            implemented in hardware or dedicated shader code. However, these
+    Finally, our method needs to be efficient, scalable, and robust, if            works share the need to decode them into simple triangles so that
+it is to convert real-world, high-resolution models.                               a hardware-consumable ray tracing acceleration structure can be
+                                                                                   built. This results in significant BVH construction costs and a loss
+                                                                                   of compactness.
+2   RELATED WORK
+   Efficient representations for high-resolution geometries. 𝜇-Meshes                 Remeshing and mesh simplification. One central task of our pro-
+belong to a long-lived line of research seeking methods and data                   posal is to construct the base mesh that serves as the starting point
+structures to lower the resources (computing power and memory                      of tessellation and displacement. This can be seen as an instance of
+storage) for representing and rendering complex surfaces rich in                   the remeshing or mesh-simplification problem, where the task is to
+geometric detail.                                                                  optimize or coarsen the triangulation of a surface while preserving
+   Progressive schemes are adaptive multi-resolution representa-                   the original surface appearance. The literature on these methods is
+tions that control the tessellation density dynamically across the                 vast and spans several decades. We refer the reader to an appropriate
+surface, significantly reducing the transition artifacts. Pioneered                survey [Khan et al. 2022; Luebke 2001].
+by Hoppe with the Progressive Mesh data structure [Hoppe 1996],                       A common trend, which we also follow, is to optimize the mesh-
+these schemes encode the sequence of operations performed by an                    ing through a sequence of carefully selected local operations [Hoppe
+edge-collapse decimation of the high-resolution mesh and smoothly                  et al. 1993] such as edge collapses, splits, flips, vertex smoothing
+transition across resolutions by traversing the decimation sequence                [Botsch and Kobbelt 2004; Cohen et al. 1998; Garland and Heckbert
+(forward to coarsen the mesh, and reverse to refine it). Early ap-                 1997, 1998; Garland and Zhou 2005; Hoppe 1999; Hu et al. 2017;
+proaches encoded transitions at triangle granularity [De Floriani                  Lindstrom and Turk 2000; Surazhsky et al. 2003]. When remeshing
+et al. 1998; Hoppe 1996; Puppo 1998], while more recent multi-                     is done to reduce the triangle count of the input mesh, the focus is on
+resolution schemes adopt patch-granularity at a few thousand trian-                faithfully reproduction of the original surface, and state-of-the-art
+gles to take advantage of the support of modern GPUs [Cignoni et al.               methods determine the decimation sequence and vertex spatial loca-
+2003, 2004; Sander and Mitchell 2005; Yoon et al. 2004]. This trend                tions by approximating the geometric error produced by the mesh
+culminated in Nanite [Karis et al. 2021], with its LOD hierarchy                   simplification. Most methods rely on vertex quadrics [Garland and
+composed of 128 triangle clusters. Normal Meshes [Guskov et al.                    Heckbert 1997] to estimate the geometric error and compute optimal
+2000] are similar to 𝜇-Meshes in spirit, as they also represent the                vertex placements for the decimated mesh. Quadrics have been later
+high-resolution surface by subdivision and scalar displacement. In a               extended to incorporate additional appearance information other
+Normal Mesh, new vertices are displaced along the normal direction                 than the surface geometry, such as colors [Garland and Heckbert
+
+                                                                                                ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+4   •   Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+1998] and texture coordinates [Garland and Zhou 2005; Hoppe 1999].                                         𝑑𝑘
+Other methods incorporate texture-deviation terms to minimize tex-          𝑑𝑖
+turing artifacts [Cohen et al. 1998], or visual differences [Lindstrom                       𝑑𝑗
+and Turk 2000], to guide the simplification; however, these methods
+are quite costly as they require rendering texture patches or the                                           𝑣𝑘
+entire object during the simplification process. An alternative to the         𝑣𝑖
+error quadrics is to compute the bidirectional Hausdorff distance
+on local patches to guide the remeshing operations [Hu et al. 2017].                𝑙𝑏 = 2
+   Our goal to produce isotropic triangulations is the central focus                                𝑣𝑗
+of many semi-regular remeshing techniques. Among others, tech-
+niques include Centroidal Voronoi Tessellation (CVT) [Alliez et al.        Fig. 3. A single base face, with per-vertex displacement vectors, corresponds
+2005; Liu et al. 2009; Yan et al. 2009] to field-guided methods [Jakob     to a bilinear prismoid that bounds the surface of the represented 𝜇-mesh.
+et al. 2015], to bounds to local remeshing operations [Hu et al. 2017]
+disallowing the production of unfavorably shaped triangles. This
+latter method shares similarities with our own but is not focused          2008] propose a brute-force solution which has 𝑂 (𝑛 4 ) complexity in
+on other objectives, such as coarseness.                                   the number of faces; [Jiang et al. 2020] solve the optimization prob-
+   All the above methods are general-purpose, whereas ours is de-          lem formulation directly with a constrained quadratic programming
+signed around the specific needs and goals dictated by our objective       solver; both strategies are impractical to integrate into the iterative
+(Sec. 1.2). This gives it a clear advantage, as exemplified by the di-     coarsening scheme that we use to generate a low-resolution base
+rect comparison we offer in Sec. 10.8 against a popular tool in this       mesh.
+category [Cignoni et al. 2008].                                               Bijective shells [Jiang et al. 2020] and high-order tetrahedral
+                                                                           meshes [Jiang et al. 2021] have been recently proposed as a geo-
+   Displacement map generation. Displacement mapping, i.e. the idea        metric framework for which attribute transfer and displacement
+of representing a high-resolution surface by combining a coarse            map synthesis are primary applications. Their generation employs
+surface representation with displacement values sampling the small-        a similar approach to ours, based on local remeshing operations,
+scale surface detail, has a long history [Cook 1984]. The task of          but the input surface must satisfy strong assumptions to guaran-
+producing the values and storing them in a texture image can be            tee the existence of the bijection (manifold, self-intersection free)
+seen as a form of texture baking [Cignoni et al. 1999; Lee et al. 2000],   that are generally violated by many meshes in practice. We offer a
+an operation commonly supported, today, by common 3D modeling              comparison with [Jiang et al. 2020] in Sec. 10.9.
+suites [Adobe 2021; Blender Development Team 2022; Help 2021;
+Marmoset 2022].                                                               Displacement map and texture maps. One additional issue with
+   The displacement values can consist of either vector or scalar          any displacement map surface, which we face in Sec. 9.2, is that
+data. Using scalars is clearly more efficient, but requires solving        if the surface has additional textures (e.g. for storing colors), the
+intricate problems.                                                        displacement negatively contributes to the distortion of the texture
+   One is the need to ensure “re-projectability", i.e., that the in-       map. This problem was observed in the past [McGuire and Whit-
+tended surface is expressible as a warped heights-field defined over       son 2008; Zirr and Ritschel 2019], and existing solutions include
+the coarse representation. Several solutions have been proposed            compensating for the deformation by using indirect textures: a 2D
+to address this problem [Collins and Hilton 2002; Lee et al. 2000],        offset field is computed and stored, and applied to texture accesses
+often tailored around specific cases, such as displacement of sub-         to counter the distortion introduced by the displacements. Our so-
+division surfaces [Panozzo et al. 2011]. Our solution, defined for         lution is tailored to the 𝜇-mesh scenario, and, working on texture
+triangular meshes, compares favorably with similarly aimed exist-          coordinates alone, conforms to the targeted data structure.
+ing method [Microsoft 2022] that combines displacement mapping
+and base-mesh creation (see Sec. 10.8).                                    3        OVERVIEW
+   Another closely related problem is the determination of the di-         Our algorithm for constructing a 𝜇-mesh representation of a given
+rections to use for the displacement. Studies focused on this sub-         high-resolution input mesh 𝑀𝐼 is structured in multiple phases.
+problem already observed that good solutions coincide with the                In the first phase, we construct the base mesh 𝑀𝐵 by coarsening
+visibility directions [Tarini et al. 2003], and our solution, enunciated   𝑀𝐼 (Sec. 5). To do so, we adapt existing mesh iterative decimation
+in Sec. 4, follow this route.                                              approaches to pursue an appropriate trade-off between the goals
+   A recurring geometrical sub-problem that emerges in this context        of coarseness, isotropy, small displacement volume, and, especially,
+and other contexts is relative to the cone of viewing directions from      reprojectability (which we translate into characteristics we impose
+which all the faces surrounding a vertex are visible without local oc-     on the face normals on 𝑀𝐵 ).
+clusions. [Aubry and Löhner 2008; Cohen et al. 1997; Kim et al. 1995],        A central sub-problem we have to address is to determine the
+Our algorithm (Sec. 4.1 can be seen as a more efficient way to deter-      per-vertex displacement directions on 𝑀𝐵 (that is, the displacement
+mine if this cone is empty, and, if not, to find its centroid. [Cohen      vectors, including their magnitude). This is crucial for reprojectabil-
+et al. 1997] resort to an approximate solution based on linear pro-        ity, and we interleave this computation during the coarsening to
+gramming, which assumes that a solution exists; [Aubry and Löhner          ensure that 𝑀𝐵 admits valid directions.
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                  Micro-Mesh Construction      • 5
+
+
+
+
+      Input mesh               Base-mesh A               Base-mesh B
+
+Fig. 4. In this example, using base-mesh A is drastically preferable to base-
+mesh B, as it results in a smaller displacement volume, and smaller quan-
+tization and aliasing issues. One way to detect this situation is to observe                             Input mesh (2M triangles)
+that the top vertex of base-mesh B has a much lower visibility value.
+
+
+
+
+    Ideally, the interpolated displacement directions should be as
+orthogonal as possible to both their origin on the base mesh and
+their intersection point on the input surface. Because the latter is
+expensive to enforce, we use a simpler proxy; we only consider the
+base mesh geometry and ensure that the interpolated displacement
+directions and local surface normals are consistently oriented. Be-
+cause this criterion is also used to drive the coarsening, we discuss
+it in the next section (Sec. 4).                                                        (a) Vertex normals                         (b) Optimal visibility
+    The next phase is to determine subdivision levels for each face
+of 𝑀𝐵 pursuing the objectives of accuracy and memory parsimony,                 Fig. 5. Choosing the wrong displacement directions can lead to visible
+while abiding by the constraints of the 𝜇-mesh structure (Sec. 6).              geometric artifacts when the high-resolution surface is re-sampled by ray-
+    Next (Sec. 7), we produce the scalar displacement value for each            casting along interpolated vectors. Left: results obtained with naive vertex
+                                                                                normals (weighted average of the surrounding face normals). Right: results
+𝜇-vertex, by ray-casting over 𝑀𝐼 (similar to a standard displace-
+                                                                                from the same base mesh using the optimal visibility directions computed
+ment map baking). This also determines an initial estimation of the             as detailed in Sec. 4.1.
+required magnitude of the displacement vectors.
+    Finally, we strive to minimize the displacement volume, redefining
+the magnitude of the displacement vectors (Sec. 8).
+                                                                                   Formally, given a vertex 𝑣, let N be the set of face normals of all
+                                                                                its adjacent faces; the visibility value 𝑉 (𝑣) of 𝑣 is given by
+4   DETERMINATION OF DISPLACEMENT DIRECTIONS
+In our context, the choice of displacement directions is critical. In
+                                                                                                                                      
+this section, we show an effective criterion to guide this choice, that                                𝑉 (𝑣) = max min (d · n) ,                                (1)
+                                                                                                                  d∈Ω n∈N
+depends only on the base-mesh 𝑀𝐵 . We employ this criterion both
+as guidance for the construction of a good 𝑀𝐵 , and as a way to                 Ω being the set of unit directions. The maximizer of (1), d𝑚𝑎𝑥 , de-
+specify the actual displacement directions over it.                             fines the displacement direction for vertex 𝑣, while the visibility
+   Similarly to standard per-vertex normals, displacement directions            value, which ranges from -1 (when N covers the entire Ω) to +1
+are unit vectors defined at mesh vertices, that point outward from the          (when the faces adjacent to 𝑣 are all co-planar), serves a predictor
+surface. This similitude would suggest that displacement directions             of the quality of the 𝜇-mesh in the region around 𝑣. Crucially, we
+can be constructed the same way as per-vertex normals are, e.g. with            restrict ourselves to strictly positive values, as negative values imply
+an area-weighted average of per-face normals. Doing so, however,                artifacts such as vanishing interpolated displacement directions in-
+often results in noticeable artifacts, exemplified in Fig. 5, showing           side base-mesh faces. Also, (1) does not necessarily admit a unique
+that more care must be used in selecting the appropriate directions.            maximizer for negative values.
+   The criterion that consistently worked best in our scenario is, for             A problem equivalent to (1) emerged in a different context in
+a given base-mesh vertex 𝑣, to pick the direction that maximizes the            [Jiang et al. 2020], where it is reformulated in a way that can be
+orthogonality with all the base-mesh faces incident to 𝑣; specifically,         solved using Quadratic Programming (QP). This approach proved
+the direction that maximizes the minimal orthogonality (measured                too inefficient for our case, where this task occurs inside nested
+as the dot product between the face normal and the direction 𝑑). We             loops (as we verify with the experimental comparison reported in
+denote this maximal value as the visibility of the vertex 𝑣.                    Sec. 10.9). Instead, we devise the following algorithm.
+
+                                                                                             ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+6 •    Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+                  n0                 d𝑚𝑎𝑥                    n0               d𝑚𝑎𝑥       equalities. This is because any choice of (d𝑚𝑎𝑥 , 𝑘) that fulfills more
+                                                                                         than three constraints in (2) as equalities can be equivalently iden-
+                                                                              n2         tified by imposing any three of them as equalities. Moreover, it is
+                                                                                         easy to verify that, when N ′ has two elements, then no possible
+                            n1                                      n1                   choice that fulfills (2) for both elements can improve the tentative
+                                                                                         solution; when N ′ has three elements, and no pair produces a tenta-
+                                 Ω                                        Ω              tive solution satisfying (2) for the third, then no choice that fulfills
+                                                                                         (2) for all three elements can improve the tentative solution; this
+          Fig. 6. A graphical representation of the solution in (3).                     implies that when a tentative solution is found that verifies (2) for
+                                                                                         every element in N , it must be optimal.
+                                                                                            Termination guarantee. Even if an element is initially excluded
+4.1    Finding the optimal visibility direction
+                                                                                         from N ′ it can be reintroduced in a later iteration, the algorithm is
+Given N , our algorithm finds 𝑘 = 𝑉 (𝑣) and d𝑚𝑎𝑥 when 𝑘 is strictly                      guaranteed to terminate, as the value for 𝑘 necessarily decreases at
+positive or detects when that is not the case, terminating with a                        each iteration.
+failure. It has a similar structure to Welzl’s algorithm [1991] for
+computing the minimum enclosing disk of a set of 2D points (the                              Estimation of algorithmic complexity. We do not have an a priori
+main difference is the necessity for us to detect failure cases).                        bound on the number of iterations, beyond the 𝑂 (|N | 3 ) number
+   We seek the maximal value 𝑘 and a unit vector d𝑚𝑎𝑥 subject to                         of possible candidate subsets. However, from empirical testing over
+                                                                                         hundreds of millions of problem instances, we found that the number
+                                  d𝑚𝑎𝑥 · n𝑖 ≥ 𝑘                                    (2)   of iterations surpassed |N | in fewer than 10−5 of the cases, and never
+for all n𝑖 in N .                                                                        reached twice |N |.
+   When |N | = 1, the solution is trivially 𝑘 = 1, and d𝑚𝑎𝑥 is the
+only element in |N |.                                                                    5     BASE MESH GENERATION BY COARSENING
+   Otherwise, we use an iterative algorithm. At any point, we keep an                    We generate the base mesh by performing a sequence of local coars-
+active subset N ′ ⊆ N with |N ′ | = 2 or 3, and we derive a tentative                    ening operations on 𝑀, edge-collapses [Hoppe et al. 1993], progres-
+solution as the normal with the largest 𝑘 among all the normals                          sively turning it into 𝑀𝐵 . An edge-collapse contracts an edge into a
+fulfilling (2) in the equality sense for all n𝑖 ∈ N ′ , disregarding the                 vertex, which is positioned in some appropriate position, removing
+rest of N . Specifically, d𝑚𝑎𝑥 is the normalization of (see Fig. 6)                      its two adjacent faces from 𝑀. Our coarsening framework follows
+                                                                                         the well-established mesh decimation approach first presented in
+                                               when |N ′ | = 2
+                    (
+                      (n0 + n1 )                                                         [Garland and Heckbert 1997], adapting it to our scenario.
+          d𝑡𝑚𝑝 =                                                      (3)
+                      (n1 − n0 ) × (n2 − n0 ) when |N ′ | = 3,
+                                                                                            Initialization. As normal, we associate to each vertex 𝑣𝑖 of 𝑀 a
+flipped if it has a negative dot product with any arbitrarily chosen                     quadric error function Q𝑖 [Garland and Heckbert 1997] that is initial-
+n𝑖 ∈ N ′ , and 𝑘 = d𝑚𝑎𝑥 · 𝑛𝑖 (in the rare cases when 𝑘 = 0 the                           ized, for each vertex, as the sum of the quadric functions measuring
+algorithm returns a failure ).                                                           the squared distances from the planes of each face adjacent to 𝑣𝑖 .
+   We start by setting N ′ as two arbitrary elements of N . At each                      We also associate to each vertex 𝑣𝑖 a normal n𝑖 , thus defining a local
+iteration, we find the tentative solution (d𝑚𝑎𝑥 ,𝑘) for N ′ , and check                  tangent plane at each vertex.
+whether that solution fulfills (2) also for all other elements in N ;
+if so, the algorithm terminates, returning the tentative solution.                       5.1    Modified edge-collapse
+Otherwise, the active subset N ′ is updated with the inclusion of an                     Isotropy of 𝑀𝐵 is crucial for us, therefore we modify the edge col-
+infringing n𝑖 , as follows.                                                              lapse operation toward fulfilling this goal, by tweaking the position
+   We consider any non-strict subset of N ′ with cardinality 1 or 2,                     of the vertex generated by every collapse to make the resulting faces
+(a total of three possibilities, when |N ′ | = 2, or six, when |N ′ | = 3),              more regularly shaped, compatible with other objectives. Specifi-
+and insert n𝑖 into this subset, obtaining a new potential active set                     cally, given an edge 𝑒 = (𝑣𝑖 , 𝑣 𝑗 ), we first compute the edge quadric
+N ′′ with cardinality 2 or 3. For each possibility, we solve with (3)                    Q𝑒 as usual as the weighted average of the two vertex quadrics Q𝑖
+over N ′′ and test if the solution also verifies (2) for the (zero, one                  and Q 𝑗 . We find the tangent smoothing position p that improves
+or two) elements of N ′ excluded from N ′′ . If no valid choice of                       the aspect ratio of the triangles after the collapse; after [Botsch
+N ′′ is found, we determined that no 𝑘 > 0 solution exists and                           and Kobbelt 2004], we define p as the barycenter of 𝑒 (the average
+the algorithm fails; otherwise, we set N ′ to the valid N ′′ with the                    position of the union of the stars of 𝑣𝑖 and 𝑣 𝑗 ), and, we project p
+smallest cardinality and proceed with the next iteration.                                on the tangent plane associated with either 𝑣𝑖 or 𝑣 𝑗 ; we pick the
+   For robustness to numerical precision issues, we test (2) within                      one yielding a lower value of Q𝑒 (p). Then, we define a “smoothing”
+a small numerical tolerance (that is, a small constant value is sub-                     quadric that measures the squared distance from p:
+tracted from 𝑘).
+                                                                                                                   Q𝑠 (𝑥) = ∥x − p∥ 22,                      (4)
+   Validity. In a spirit similar to [Welzl 1991], our algorithm stems
+from the observation that the optimal solution can always be iden-                       and we combine it with the original quadric using a weight 𝜆
+tified by imposing up to three constraints in (2) to be fulfilled as                                                Q𝑒′ = Q𝑒 + 𝜆Q𝑠 .                         (5)
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                Micro-Mesh Construction      • 7
+
+
+We take the minimizer of Q𝑒′ as the position for the vertex generated          5.3   Operation prioritization strategy
+by the collapse. The effect of Q𝑠 is to pull the resulting vertex toward       At any given step, we have a potential operation for each edge of the
+p, without forcing it in areas resulting in an excessive geometric             current mesh, except for the ones which would compromise two-
+distortion. In our experiments, we use 𝜆 = 0.1.                                manifoldness [Dey et al. 1999]. Ideally, we would like to perform
+                                                                               operations in reverse order of aggregated costs, but this is costly to
+5.2    Operation cost evaluation                                               compute.
+At the core of mesh coarsening techniques is the strategy to evaluate             We employ two strategies: at the beginning of the process, we
+potential operations, in order to select the ones to perform, and,             employ an approximate randomized strategy, which is faster but
+crucially, the order of execution. In our case, for a given potential          only approximates the ideal order. When the number of faces drops
+collapse of edge 𝑒, we simulate it and evaluate a set of costs estimat-        below a threshold (we always used 1 million), and operation order
+ing its adverse effect on our objectives. Specifically, if 𝑣 is the vertex     becomes more crucial, we switch to a slower, more accurate strategy,
+position resulting from the collapse, and 𝑓𝑖 the faces sharing 𝑣 in            that guarantees the ideal order of collapses.
+the potential configuration after the collapses:                                  The rationale is that, as is well-known from previous literature
+      • 𝐶 g (𝑒) estimates the geometric error increase, and is evaluated       [Puppo 1998], several sequences of local simplification operations
+        by applying the combined error quadric Q𝑒 at the position of           lead to the same final mesh, and so the order of operations is less
+        𝑣;                                                                     crucial the furthest the current mesh is from the final base mesh.
+      • 𝐶 n (𝑒) measures the maximum deviation from the normal of                 In the accurate strategy, we score all potential operations with
+        𝑓𝑖 to its original normal in the initial mesh, computed as their       their costs and store them in a priority queue (implemented as a
+        dot product (or 0 if negative);                                        heap). Operations are extracted from the top of the queue and per-
+      • 𝐶 a (𝑒) estimates the impact on the shape of triangles, and is         formed in succession. Each edge collapse resulting in the creation
+        measured as the worst aspect ratio (see below) of any 𝑓𝑖 ;             of vertex 𝑣 invalidates all previously scored operations at edges in
+      • 𝐶 v (𝑒) estimates the impact on the reprojectability as the visi-      the entire 2-star of 𝑣 (including edges at its boundaries). Invalidated
+        bility of 𝑉 (𝑣) (equation 1) after the collapse (or 0 if negative).    operations are flagged (so that they are ignored and discarded when
+                                                                               they reach the top of the queue), and substituted with new opera-
+   𝐶 g is best at 0, larger values denoting more geometric discrepancy         tions, which are reevaluated for costs and reinserted in the queue.
+being introduced; 𝐶 n , 𝐶 a , and 𝐶 v are factors between 0 (worst) to 1       This strategy is costly because each performed operation requires
+(best).                                                                        the evaluation of an average of 42 potential operations.
+   𝐶 g and 𝐶 n contribute to the geometrical similarity between 𝑀 and             The approximated strategy is a heuristic where only 𝑛𝑜𝑝 randomly
+𝑀𝐵 ; 𝐶 n also prevents the creation of folded configurations, where a          selected potential operations are evaluated for cost, and the least
+triangle of 𝑀 survives in 𝑀𝐵 with an incoherently oriented normal.             costly one is either performed, or discarded if its cost exceeds an
+   𝐶 v is crucial in ensuring reprojectability and drastically reduces         adaptive cost threshold 𝐶 max . The advantage of this strategy is that
+the displacement volume. For example, it discourages the edge col-             it bypasses the need to upkeep the queue and to pre-evaluate and
+lapses that would turn configuration A into configuration B in Fig. 4.         re-evaluate operation costs, resulting in a much faster process. The
+   𝐶 a favors the creation of quasi-equilateral triangles. After [Field        parameters 𝑛𝑜𝑝 and 𝐶 max balance between adherence to the ideal
+2000], we quantify the aspect-ratio of a triangle 𝑇 as twice the ratio         order and computational time, and we determined them by repeated
+of the inradius to the circumradius, resulting in a number from 0              testing. We use 𝑛𝑜𝑝 = 3 and increase 𝐶 max by 30% every 20 consec-
+for degenerate triangles to 1 for perfectly equilateral triangles:             utive rejected operations; to find an initial guess for 𝐶 max we pick
+                                                                               the lowest cost from a set of 50 randomly sampled collapses.
+                                         16 · area(𝑇 ) 2
+                 aspect(𝑇 ) =                                            (6)
+                                  (𝑠 0 + 𝑠 1 + 𝑠 2 ) · 𝑠 0 · 𝑠 1 · 𝑠 2
+                                                                               5.4   Strict isotropy enforcement
+(but 0 if any 𝑠𝑖 is 0), where 𝑠𝑖 are the edge lengths of 𝑇 .
+                                                                               In our context, face isotropy is an important goal (Sec. 1.2); specifi-
+   Aggregate cost. We aggregate the costs of collapsing edge 𝑒 into            cally, faces in 𝑀𝐵 with an aspect ratio much lower than 0.5 can be
+a single scalar value 𝐶 tot (𝑒), with                                          considered extremely undesirable, especially for larger base-mesh
+                                                                               triangles that will be tessellated more densely. Ideally, it would be de-
+                                            𝐶 g (𝑒)
+                𝐶 tot (𝑒) =                                              (7)   sirable to avoid, almost completely, any such faces in 𝑀𝐵 , something
+                              𝐶 n (𝑒)𝜔 n · 𝐶 a (𝑒)𝜔 a · 𝐶 v (𝑒)𝜔 v             that we failed to achieve by solely manipulating the cost function.
+The exponents 𝐶 n,a,v are constants controlling the relative impor-               A natural strategy would be to just disallow any edge collapse
+tance of the penalty terms; for our experiments, we always use                 producing a face with an aspect ratio smaller than a given threshold
+𝜔 n = 0.1, 𝜔 a = 0.5, and 𝜔 v = 0.5.                                           value 𝑎𝑚𝑎𝑥 , irrespective of its cost. We found that this strategy
+                                                                               causes the simplification process to run out of viable operations
+   Disallowed operations. If 𝐶 n,a,v is 0, the aggregated cost diverges        too early, in several areas of 𝑀 (Fig. 7, middle). Instead, we keep
+to ∞ and the operation is never performed. Additionally, we set a              track, for each face, of the best aspect ratio experienced by that
+bound to the geometric error 𝐶 gmax , which we default to the square of        face during the simplification, and only disallow an operation if
+0.01 times the of the bounding box diagonal of 𝑀, and also disallow            it produces a face worse than 𝑎𝑚𝑎𝑥 and also worse than its best
+operations with an associated cost 𝐶 g exceeding 𝐶 gmax .                      aspect ratio minus a fixed delta (we used 0.1). Combined with the
+
+                                                                                           ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+8 •    Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+
+
+                                                                                                          (a) Uniform subdivision
+
+
+
+
+      1.5M Faces                         15K Faces, 𝜏𝐴𝑅 = 0.4
+      Input mesh                Simple bound          Smoothed collapses
+                                                     Adaptive thresholding
+
+Fig. 7. Decimating a 1.5M faces input mesh 𝑀 (left) to 15K faces while
+enforcing a minimal aspect ratio threshold of 0.4. Middle: direct enforcement
+of this constraint locks all operations early during the simplification in
+certain areas, resulting in clusters of small faces in 𝑀𝐵 . Right: our strategy
+(see text) counters this effect.
+                                                                                                         (b) Adaptive subdivision
+
+                                                                                  Fig. 8. Comparison between uniform and adaptive subdivision strategies.
+smoothing strategy (Sec. 5.1) this is effective at enforcing the desired
+constraint on aspect ratio without hindering the coarsening (Fig. 7,
+right).                                                                              We devise two different strategies, targeting either uniform 𝜇-
+                                                                                  triangle sizes or sizes of 𝜇-triangle that are adaptive to the local
+5.5    Stopping criteria                                                          shape complexity. Depending on the context, either can make sense.
+We run the coarsening until all residual operations are disallowed                For example, if textures are forfeited in favor of per-𝜇-triangle data
+for either having an infinite cost (with equation 7), exceeding the               (see Sec. 9.2), uniform 𝜇-triangle can be desirable. A comparison is
+geometric error 𝐶 gmax , or violating the isotropy criteria. This means           shown in Fig. 8.
+that our system determines on its own the coarsest base mesh and
+therefore the most efficient representation of the input surface as a                Uniform 𝜇-triangle area. A regular subdivision of a triangle at
+𝜇-mesh. Optionally, a maximal number of base-mesh faces can also                  level 𝑙 produces 22𝑙 𝜇-triangles; therefore, an estimation of the con-
+be set, and the coarsening stops as soon as that number is reached.               stant subdivision level that would produce the desired number of
+   Our simplification algorithm preserves positive visibility in all              micro-triangles can be derived as
+produced vertices, while safeguarding other properties of common
+                                                                                                               1         |𝐹 𝜇 |
+                                                                                                                               
+remeshing and simplification algorithms, to prevent inversion of                                            𝑙 = log2              .                  (8)
+                                                                                                               2         |𝐹𝐵 |
+normals or loss of manifoldness [Dey et al. 1999].
+   Even if we never introduce vertices failing to admit a positive-               This gives an estimation for the expected average 𝜇-triangle area
+visibility direction, such configurations may be present in the input.            𝑎𝑚 as
+In such cases, we allow the simplification to proceed by setting the                                         A         A𝐵
+visibility score of a collapse 𝐶 v (𝑒) to a very small positive value: in                              𝑎𝑚 = 𝐵 =                 ,                (9)
+                                                                                                             |𝐹 𝜇 | 22𝑙 · |𝐹𝐵 |
+our experiments, this solves the problem because the input mesh
+undergoes a multitude of coarsening operations that tend to fix                   where A𝐵 is the total area of the base mesh. Then, for a given base
+such issues without ever introducing new ones (in any case, any                   triangle 𝑏, its estimated number of 𝜇-triangles is simply the ratio of
+surviving problems are strictly local).                                           its area 𝑎𝑏 to the average micro-triangle area:
+                                                                                                                         𝑎
+6     DETERMINATION OF REFINEMENT LEVELS                                                                       |𝐹 𝜇𝑏 | = 𝑏 .                         (10)
+                                                                                                                        𝑎𝑚
+After computing the base mesh, the tessellation factor 2𝑘 must be
+                                                                                  and we set the subdivision level of a base triangle 𝑏 as the rounding
+determined for each of its faces, taking advantage of the 𝜇-mesh
+                                                                                  to the nearest integer of
+ability to vary the tessellation levels across base-mesh faces.
+  We roughly target a given number of 𝜇-triangle count |𝐹 𝜇 |. By                                      1                 1
+                                                                                                                                  
+                                                                                                                                  𝑎
+                                                                                                  𝑠𝑏 = log2 |𝐹 𝜇𝑏 | = 𝑙 + log2 𝑏 ,                  (11)
+default, we set |𝐹 𝜇 | at the number of faces of the original mesh.                                    2                 2        𝑎𝐵
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                              Micro-Mesh Construction      • 9
+
+
+
+
+                                                 𝜖 𝑣𝑙+1
+
+                          𝜖𝑢𝑙+1
+
+
+                                                                                          Global bounds. Total volume: 2.15 × 106 units3
+            𝑢𝑙        𝑢𝑙+1         𝑣𝑙         𝑣 𝑙+1       𝑤𝑙
+
+Fig. 9. Error estimation for adaptive subdivision. The current subdivision
+level 𝑙 and the displaced micro-geometry are shown in blue. The displace-
+ments of the micro-vertices added at level 𝑙 + 1 are shown in red.
+
+
+
+This has a straightforward interpretation as the global subdivision
+level 𝑙 plus a correction that depends on the base triangle area 𝑎𝑏                        Local bounds. Total volume: 0.63 × 106 units3
+relative to the average base triangle area 𝑎𝐵 = A𝐵 /𝐹𝐵 .
+                                                                             Fig. 10. Displacement vector lengths determined with global vs. local
+   Adaptive 𝜇-triangle area. In this strategy, we use an iterative           bounds.
+algorithm to determine subdivision levels of base triangles, driven by
+the residual displacement error incurred by the actual displacement
+of 𝜇-vertices.                                                               larger than 1, because the displacement vectors are unitary, and the
+   Start with 𝑙 = 0 at all faces (corresponding to no refinement),           input mesh surface will in general run both above and below the
+and for each face, we predict the effect on the geometric error              base mesh.
+of a potential increase of the subdivision level by one. To do so,              To accelerate the ray-casting procedure, we use a BVH of axis-
+we simulate the subdivision level increase, project all the newly            aligned bounding boxes for the input mesh. We ensure robustness to
+introduced 𝜇-vertex on the input mesh, and record the maximum                self-intersections and other geometric artifacts in the input mesh, by
+distance from any of them to the surface represented by the current          adopting standard mitigation techniques, such as only intersecting
+subdivision level (Fig. 9).                                                  the high-resolution surface at faces that are coherently oriented
+   We store in a priority queue all potential resolution increase oper-      with respect to the ray.
+ations (always exactly one per base-mesh face), sorted according to             We also exploit the smoothness of the scalar displacement field to
+the predicted effect on the geometric error; we extract and perform          improve robustness with respect to outlier rays and missed intersec-
+the most impactful refinement operation (reinserting in the queue a          tions. If we detect intersection outliers (e.g. rays that travel too far
+new operation representing a further increase of resolution), until          before hitting the input surface), we clear the corresponding scalar
+the targeted number of micro-faces is reached.                               displacements and replace them by interpolating the displacement
+   Enforcing water-tightness. Both strategies operate on base trian-         distances from valid neighbors.
+gles in isolation, potentially infringing the 𝜇-mesh constraint about
+neighboring faces differing by at most one tessellation level (under
+                                                                             8   OPTIMIZATION OF BASE DISPLACEMENT LENGTHS
+the penalty of introducing gaps between base faces). The constraint          At this point, we determine the length of the displacement vectors,
+is enforced by a correction phase, where all pairs of adjacent faces         striving to keep these lengths short so as to reduce the volume of
+with a difference larger than one are corrected by (conservatively)          the displacement prismoids, as per our goal (Sec 1.2).
+rising the lower tessellation level to the higher level minus one, until        We shift the base mesh and assign a length to all its displacement
+no such pair remains. Finally, we set the edge decimation flags at           vectors to ensure that the displacement volume encapsulates the
+each pair of faces with a mismatching tessellation level, ensuring a         entire displaced surface.
+watertight 𝜇-mesh surface.                                                      We identify, for each base-mesh vertex 𝑣, the global minimum
+                                                                             and maximum unnormalized displacements values 𝛿¯𝑚𝑖𝑛 and 𝛿¯𝑚𝑎𝑥 ,
+7   DETERMINATION OF SCALAR DISPLACEMENT                                     among all 𝜇-vertex in the star of faces around 𝑣. Then, the position
+    VALUES BY RAY-CASTING                                                    p𝑣 and displacement vector d𝑣 of 𝑣 is updated to
+Once the base mesh geometry is defined, we tessellate each base                                      p𝑣 ← p𝑣 + 𝛿¯𝑚𝑖𝑛 d𝑣 ,                                  (12)
+face according to its subdivision level, and determine the scalar dis-
+                                                                                                     d ′ ← (𝛿¯𝑚𝑎𝑥 − 𝛿¯𝑚𝑖𝑛 )d𝑣 .                            (13)
+placement values; this is done by ray-casting each 𝜇-vertex from its                                   𝑣
+
+position on the base mesh, along the interpolated directions, against        While not necessarily optimal, this simple strategy results in tight
+the original mesh. For each 𝜇-vertex, we record its unnomralized             displacement volumes.
+displacement values as the parametric position, on the ray, of the              Scaling each displacement direction differently causes the orienta-
+intersection with the input mesh. These values can be negative or            tion of the interpolated directions to change slightly, which requires
+
+                                                                                         ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+10    •   Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+                                                                                            they are both tangential to the surface and orthogonal to the open
+
+
+
+
+                                                                               Input mesh
+                                                                                            boundary edges of the base mesh. The boundary 𝜇-vertices will
+                                                                                            thus be displaced to form the boundary curve. This trades, in the
+                                                                                            proximity of the boundary, the ability to express height fields on
+                                                                                            the surface with the ability to reproduce a detailed boundary curve.
+                                                                                               To define appropriate scalar displacement values, prior to the
+
+
+
+
+                                                                                𝜇-Mesh
+                                                                                            ray-casting phase, we enrich the input mesh with a band of “flap”
+                                                                                            triangles departing from the boundaries, orthogonally to the surface.
+                                                                                            These triangles are designed to be hit by the rays stemming from
+                      Orthogonal displacements         Tangent displacements                the 𝜇-vertices at the boundary of the 𝜇-mesh (see Fig. 11).
+Fig. 11. In order to more accurately reproduce the boundary curves of the
+input mesh, we can use displacement directions that are tangential to                       9.2   Texture-mapped 𝜇-meshes
+the surface (right), rather than orthogonal, at 𝜇-mesh boundaries. In these
+cases, we also add, in the input mesh, a vertical “wall” (in red) made of small             In many cases, the input mesh can come with its own set of orig-
+polygons orthogonal to the surface boundary, as a target to be hit by the                   inal texture maps (storing, for example, colors), and our 𝜇-mesh
+ray-casting procedure.                                                                      construction procedure may optionally be required to preserve the
+                                                                                            textured signal information in the final 𝜇-mesh. There are several
+                                                                                            routes to accomplish this result.
+repeating the ray-casting phase to update them; additionally, due to                           The increased triangle count afforded by 𝜇-meshes opens the
+curvature, even the updated displacements are not guaranteed to                             possibility to avoid using traditional texture maps and simply re-
+be limited to the 0 to 1 interval.                                                          bake the input textures into attributes stored at 𝜇-vertex, using the
+   A simple way to bypass this costly update would be to define                             𝜇-mesh schema. This resulting solution closely resembles in concept
+𝛿¯𝑚𝑖𝑛 and 𝛿¯𝑚𝑎𝑥 to be the global bounds of the un-normalized dis-                           the Mesh-Color approach to texture mapping [Yuksel et al. 2010].
+placement values across the entire surface; the scalar values can                              In other cases, however, it can still be desirable to store the original
+then be normalized by a linear mapping. However, this strategy                              signal in traditional textures. As we discussed in Sec. 1.1, the 𝜇-
+leads to much larger displacement volumes, by more than a factor                            meshes schema accommodates texture coordinates, just like any
+of 3 in our experiments (see Fig. 5).                                                       standard mesh: simply, UV-coordinates are stored at base mesh
+   As a time-saving approximation, at the expense of introducing                            vertices and interpolated linearly, during rendering, at each 𝜇-vertex.
+only a negligible increase in the surface approximation error, we                              This route requires generating a parametrization, or UV-map, for
+resort to a quick update of displacement values after changing the                          the base mesh (including texture cuts). Many automatic or semiau-
+displacement vectors at base-mesh vertices: for each 𝜇-vertex, we                           tomatic tools can be used for this purpose, treating the base mesh
+simply re-project the displaced position on the old ray into the                            as a traditional triangle mesh. A vast literature exists covering this
+newly defined ray.                                                                          task [Sheffer et al. 2006], and it is beyond the scope of this work to
+                                                                                            discuss it; we observe that the task is eased by the relative coarse-
+9     EXTENSIONS                                                                            ness of the base mesh. Considering the intrinsic multi-resolution
+We extend our general framework for 𝜇-meshes construction to                                nature of 𝜇-mesh, this route constitutes an excellent answer to the
+tackle two cases of practical importance: 𝜇-meshes enriched with                            open problem of how to share textures or UV-maps across different
+traditional texture data, and open 𝜇-meshes featuring semantically                          levels of detail [Yuksel et al. 2019].
+important boundaries.                                                                          A residual problem, however, remains. The parametrization is
+                                                                                            unaware of the displacements, which negatively affect it by aggra-
+9.1       𝜇-Meshes with detailed boundaries                                                 vating texture distortions. We introduce a way to re-optimize any
+When the input surface is open, its boundary curves are subject to                          existing parametrization defined on the base mesh of a 𝜇-mesh to
+being coarsened, losing their geometric details. In many scenarios,                         account for its actual shape. This strongly mitigates the problem
+this can be acceptable, but there are cases where the shape of the                          and warrants the use of any existing tool to UV-map 𝜇-meshes.
+boundary is semantically important; consider for example the eye-                              Traditionally, UV-maps are optimized by defining a function mea-
+shaped holes depicted in Fig. 11.                                                           suring the distortion of the map (e.g. angle or area distortions),
+   A straightforward solution is to flag border edges and disallow                          and minimizing this function over the space of all per-vertex UV-
+coarsening them, so as to keep them finely tessellated in the base                          assignment.
+mesh; this is a trade-off with an obvious cost in terms of increased                           We reformulate the distortion function so that it sums the con-
+base-mesh complexity and triangulation quality. We propose a                                tributions across all displaced micro-triangles instead, whose ver-
+cheaper alternative where we let boundary edges be coarsened                                tices are expressed as convex combinations of base mesh texture
+in the base mesh, and we reuse the displacement map mechanism                               coordinates, and minimize this function over all base vertex UV-
+to recover the original boundary shape in the 𝜇-meshes.                                     assignments.
+   To this end, we redefine displacement directions at boundary                                This concept can be applied to any distortion energy function; we
+vertices of the base mesh to be tangent to the surface, rather than                         used the ARAP energy [Liu et al. 2008], which has the benefit of pe-
+approximately orthogonal to it. We define such directions so that                           nalizing both angle and area distortions, resulting in a maximization
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                                           Micro-Mesh Construction   •   11
+
+
+                x2                                                    u2
+
+                𝜃𝑖 𝑗                       J𝑡 (𝑢)
+
+                (𝑖, 𝑗)                                   u0
+                                                                                     u1
+                                                                                              0.15
+ x0                                  x1
+
+
+
+
+                                                                                              ARAP Energy
+2D isometric projection (local)                         UV configuration (global)
+
+           Fig. 12. Notation used for the ARAP energy formulation.
+                                                                                              0.00
+
+
+    𝑌                                               𝑉
+                                                                           u2
+           𝑋
+                            𝜃1
+𝑍
+                       𝜃0
+                             𝜃2
+                                                                                z0
+                                                                z1
+
+                                                                     z2
+                                                        u0                            u1
+                                                                                      𝑈
+        Fig. 13. Notation for the barycentric ARAP energy formulation.
+
+
+
+of isometry, a crucial property for texture mapping. On standard
+triangle meshes, ARAP energy can be efficiently minimized using a
+local/global minimization scheme, which we adapt to 𝜇-meshes, as
+follows.                                                                                                    UV-mapped                     after 𝜇-mesh             𝜇-mesh after UV
+                                                                                                            base mesh                     displacement             re-optimization
+   Recap: ARAP optimization (for standard meshes). Let 𝑡 be the index
+of a mesh triangle x𝑡 = (x𝑡0, x𝑡1, x𝑡2 ) and, and let u𝑡 = (u𝑡0, u𝑡1, u𝑡2 ) be                               Fig. 14. Our minimization of texture distortions for 𝜇-meshes.
+the 2D texture coordinates associated to 𝑡. Then, let J𝑡 (𝑢) be the
+2 × 2 Jacobian of the map from x𝑡 to u𝑡 , and R𝑡 ∈ R an auxiliary
+                                                                                            where the base UV coordinates have been arranged as columns of a
+matrix encoding a 2D rotation.
+                                                                                            2 × 3 matrix U multiplying the vector of the barycentric weights w𝑖 .
+   The ARAP energy [Liu et al. 2008] is defined as
+                                                                                               In the local step, we compute the best-fitting rotation R𝑡 associ-
+              1 ∑︁                                                                          ated with each displaced micro-triangle 𝑡. This is easily computed as
+   𝐸 (u, R) =          cot 𝜃𝑖 𝑗 ∥(u𝑖 − u 𝑗 ) − R𝑡 (𝑖,𝑗) (x𝑖 − x 𝑗 )∥ 2 (14)
+              2                                                                             the linear map between the isometric 2D projection of the displaced
+                       (𝑖,𝑗) ∈ℎ𝑒
+                                                                                            micro-triangle x𝑡 and its interpolated parameter-space position z𝑡 .
+where 𝑡 (𝑖, 𝑗) is the triangle to which half-edge (𝑖, 𝑗) belongs and 𝜃𝑖 𝑗                      When solving the global step, the energy term associated to a
+is the opposite angle within 𝑡 (𝑖, 𝑗) (Figure 12).                                          generic “micro” half-edge (𝑖, 𝑖 + 1) which can be written in quadratic
+   This energy is minimized by alternating local and global steps:                          form:
+in the local steps, the parametric coordinates u are kept fixed, and
+                                                                                                            𝐸 (𝑖, 𝑖 + 1) = cot 𝜃𝑖+2 ∥(U(w𝑖 − w𝑖+1 ) − R𝑡 (x𝑖 − x𝑖+1 ) ∥ 2,            (16)
+the best fitting rotation matrices L are determined per triangle by
+computing the SVD decomposition of J𝑡 (u) = UΣV⊤ and setting                                with R𝑡 encoding the rigid alignment of the isometric 2D projection
+R𝑡 = UV⊤ ; in the global steps, the rotation matrices are kept fixed,                       (x0, x1, x2 ) of the displaced micro-triangle to its UV counterpart.
+yielding a quadratic energy in u (equation 14) that can be minimized                          The gradient of the energy term (16) with respect to u 𝑗 is then
+by setting the gradient to zero and solving the resulting sparse linear
+system.                                                                                          ∇u 𝑗 𝐸 (𝑖, 𝑖 + 1) =
+                                                                                                                          2
+                                                                                                                                                                      !
+   Extending ARAP to 𝜇-meshes. Given a displaced micro-triangle 𝑡,                              = 2 cot 𝜃𝑖+2                   u𝑘⊤ (𝑤𝑘𝑖               − R𝑡 (x𝑖 − x𝑖+1 ) (𝑤 𝑖𝑗 − 𝑤 𝑖+1
+                                                                                                                         ∑︁
+                                                                                                                                          − 𝑤𝑘𝑖+1 )                               𝑗 ).
+its UV coordinates z𝑖 in parameter space are expressed as a linear                                                       𝑘=0
+combination of the base UV coordinates u0, u1, u2 (Figure 13):                                                                                                         𝑗 = 0, 1, 2    (17)
+                                                                                            We compute the global gradient by accumulating the micro half-
+                                                | ©𝑤 0 ª
+                                                       𝑖
+                           |               |
+                                                                                            edge terms, and set it to zero by solving the global ARAP step with
+               z𝑖 = Uw = ­u0     𝑖        u1   u2 ® ­𝑤 1 ® , 𝑖 = 0, 1, 2             (15)
+                         ©                        ª­ 𝑖®
+                                                                                            fixed L matrices.
+                         «|                |    |¬ 𝑖
+                                                    ­ ®
+                                                    «𝑤 2 ¬                                     We show the results of this strategy in Figure 14 and Sec. 10.7.
+
+                                                                                                                    ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+12   •   Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+                                                                                𝜇-mesh surface. We provide a table with aggregated and individual
+                                                                                measurements in the additional materials.
+
+
+                                                                                10.3   Memory size and accuracy
+                                                                                The experiment shown in Figure 16 evaluates the impact of the res-
+                                                                                olution of the base mesh on both the GPU occupancy and accuracy
+                                                                                of the produced 𝜇-mesh. In this experiment, we force the coarsening
+                                                                                of the base mesh to stop only at a 1/𝑛 fraction of the input mesh
+          Directly from input              With preliminary mesh optimization   triangle count, and in each case, we set the subdivision levels to
+                                                                                match the resolution of the input mesh.
+Fig. 15. An example of base mesh generation for a bas-relief scan without
+and with a preliminary input optimization step, improving isotropy of the
+base triangulation at the back of the model.                                       GPU size. The 𝜇-mesh is more compact than the input mesh
+                                                                                (considering it as an indexed mesh with 32-bit indices and 32-bit
+                                                                                floats for coordinates, with no attribute) already for a reduction of
+10       RESULTS AND COMPARISONS                                                1/4. The GPU occupancy is reduced for coarser base meshes, but for
+We perform an extensive quantitative and qualitative evaluation of              fewer faces than 1/64, the improvements become negligible, as the
+our 𝜇-mesh generation framework. Our reference implementation                   majority of memory is used to store the scalar displacements. At
+is publicly released as open-source software at the project page.               that point, the 𝜇-mesh uses only about 0.14 of the memory required
+                                                                                by the explicit indexed mesh representation.
+   Input preparation. Before starting the iterative coarsening, the
+input mesh triangulation is optimized with local topology transfor-
+                                                                                   Reproduction accuracy. The reproduction accuracy is always very
+mations [Hoppe et al. 1993] to remove large triangles and slivers,
+                                                                                high. We estimate the geometric error as the area-weighted average
+as these can affect the quality of the final base mesh (see Fig. 15).
+                                                                                of the projection distance from the original surface to the 𝜇-mesh
+We iterate operations until no edge that is longer than 5 times the
+                                                                                surface, expressed as a percentage of the input AABB diagonal. For
+average input edge length exists, alternating between splits, flips,
+                                                                                higher resolution base meshes, the error is closer to zero, while for
+and collapses.
+                                                                                a wide range of reduction factor, from 1/8 to 1/128 it is measured
+10.1      Batch-conversion of high-resolution models                            at roughly 2 × 10−5 the bounding box diagonal, due to the effect of
+                                                                                re-sampling the geometry.
+To demonstrate the robustness and feasibility of our method for
+general conversion of 3D models, we run our algorithms over the
+ThreeDScans repository [Three D Scans 2022], on commodity hard-                 10.4   Effect of scalar quantization
+ware, reporting aggregate data about runtime and compression                    A crucial part of the 𝜇-mesh data structure is that scalar displace-
+efficiency, as well as average geometric error and isotropy distribu-           ments are quantized to a small number of bits (see Sec. 1.1). In our
+tion across the entire collection comprising of 121 high-resolution             outputs, this quantization can be made more aggressive thanks to
+meshes (mean input triangle count is 1.7M). We provide all result-              our displacement minimization (Sec. 8), which also reduces the ef-
+ing 𝜇-meshes for inspection, in the additional material, as well as a           fect of the aliasing. The impact can be significant, because, on our
+𝜇-mesh preview tool.                                                            outputs, the scalar displacement values account for 85% to 90% of
+   The results of this experiment are shown in Fig. 19. On average,             the final storage, so reducing the number of bits has almost a linear
+we achieve a 15:1 compression ratio and the processing time per                 effect on the total GPU storage size.
+model is less than five minutes. At the same time, our method                      The experiment in Figure 17 visually shows the impact of quan-
+consistently produces highly isotropic displaced 𝜇-meshes while                 tization on a 𝜇-mesh obtained with our method. This visual com-
+keeping the geometric error at reasonable levels.                               parison suggests that as low as 7 bits are already sufficient to avoid
+                                                                                noticeable quantization artifacts. In all other experiments, however,
+10.2      𝜇-Mesh ray-tracing performance                                        we conservatively used 11 bits, which is standard for the 𝜇-mesh
+We measure the rendering performance of the batch-converted 𝜇-                  format and roughly matches the precision that would be afforded
+meshes from Sec. 10.1 using an NVIDIA GeForce RTX 4090, which                   by standard 32-bit floating point numbers around the value +1.
+supports 𝜇-mesh ray-tracing. Compared to an equivalent standard
+triangle mesh, the 𝜇-meshes produced by our construction method,
+improve BVH size by a median factor of 6 and BVH build time                     10.5   Level of Details
+by a factor of 4, while the tracing of rays is a median of 1.3 times            One of the expected advantages of the 𝜇-mesh representation is
+slower. The relative performance may be attributed to the dynamic               its multi-resolution capabilities, i.e. the ability to be rendered at a
+generation of watertight 𝜇-triangles, which are then subject to the             range of different Levels of Detail (without introducing any crack
+standard ray-triangle intersection computation. Crucially, prismoid             or artifact), simply by dynamically capping the subdivision levels.
+optimization produces a 3 to 4-fold speedup in rendering perfor-                Figure 18 showcases this on one example produced by our method,
+mance by better fitting the bounding prismoids to the displaced                 confirming the expectations.
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                           Micro-Mesh Construction      •      13
+
+
+                                                                                        Table 2. Displacement-aware parametrization of 𝜇-Meshes. Textured results
+                                                                                        are shown in Figure 20
+
+                                                                                               Model       Fig.   |𝐹𝐵 |   |𝐹 𝜇 |   ARAP    𝜇−ARAP 𝜇−ARAP Gain          Time
+                                                                                                                                   base    before    after
+                                                                                         Wooden Dragon     20a     20 K   3.3 M    0.007    0.035     0.021   39.9 %    20 s
+                                                                                         Grotesque02       20b     30 K   6.5 M    0.012    0.033     0.025   39.3 %    28 s
+                                                                                         Wooden Lion       20c     10 K   1.5 M    0.021    0.039     0.029   25.6 %     8s
+                                                                                         Tokay Gecko       20d     10 K    2.3M    0.035    0.089     0.069   22.4 %    10 s
+
+
+
+
+                                                                                        texture cuts [Maggiordomo et al. 2021], and followed by a pass of
+                                                                                        ARAP texture coordinate optimization [Liu et al. 2008].
+                 Input mesh                                 𝜇-Mesh                         In Table 2 we report energy measures before and after optimizing
+               2.4M triangles                          1:256 decimation                 base-texture coordinates with our re-weighted formulation, as well
+                                                                                        as the optimized standard ARAP energy on the base mesh, which is
+                                                                                        used as initialization for the displacement-aware minimization. The
+                                                                                        energy decrease is quite noticeable despite significantly restricting
+                                                                                        the degrees of freedom of the system. The resolution of the base
+                                                                                        mesh ultimately determines the system variables, and coarser base
+                                                                                        meshes result in smaller gains in terms of distortion energy (rows 3
+                                                                                        and 4 of Table 2). In terms of performance, our method is extremely
+                                                                                        fast as it operates on a reduced set of variables. In fact, when mini-
+                                                                                        mizing the re-weighted ARAP energy with the local-global method
+                                                                                        the bottleneck is the local optimization step, and not from the sparse
+                                                                                        linear solve required in the global step. The local step requires com-
+                                                                                        puting the SVD of a possibly huge number of small 2 × 2 matrices
+Fig. 16. Used GPU RAM and introduced geometric error for various deci-
+                                                                                        (one for each micro-triangle), but this process is trivial to parallelize
+mation rates of the base mesh.                                                          to gain a significant speed-up. As can be seen from the table, the time
+                                                                                        required to minimize the re-weighted energy is extremely small.
+Table 1. Conversion of high-resolution 3D models to 𝜇-Meshes. Visual
+results are shown in Figure 24.                                                         10.8     Comparison with standard mesh simplification
+                                                                                        As our 𝜇-mesh generation procedure has no perfect predecessor,
+       Model       |𝐹 |     |𝐹𝐵 |    |𝐹 𝜇 |   Input    𝜇 -Mesh   Iso-    Error   Time   we compare it against the use of existing tools to achieve the same
+                                               MBs      MBs      tropy   ×10−6 (sec)    effect. The base mesh can be constructed with simplification tools,
+  Telegraph (A)
+  GW Bust (B)
+                      8M
+                    26 M
+                             35 K
+                             30 K
+                                     8.5 M
+                                     27 M
+                                               136.3
+                                               447.2
+                                                           7.5
+                                                          20.2
+                                                                 0.69
+                                                                 0.73
+                                                                         6.79
+                                                                         3.28
+                                                                                  436
+                                                                                 1660
+                                                                                        or with tools designed for general displacement-map generation.
+  Murex (C)         3.5 M    30 K      4M       60.4       3.9   0.81    10.3     317      For this comparison, we choose Meshlab [Cignoni et al. 2008]
+  Lucy (D)          28 M     35 K   29. 5M     475.3      22.7   0.75    3.38    1661
+  Statuette (E)     10 M     40 K   10.5 M     171.5      22.7   0.75    13.1     563
+                                                                                        because of its popularity and Simplygon [Microsoft 2022] because it
+  Dragon (F)          7M     30 K    7.5 M     123.9       6.7   0.81    9.16     399   natively supports the generation of displacement-mapped surfaces
+  Fangyi (G)       21.5 M   100 K    23 M      370.3      20.5   0.74    6.77    1215
+  Ewer (H)            8M    100 K      8M      136.2       9.8   0.78    13.5     462   with its simplification and resampling workflow.
+                                                                                           In Figure 21 we show a qualitative comparison of the results
+                                                                                        obtained using as starting point the base meshes obtained with
+10.6      Scalability                                                                   Meshlab, Simplygon, and our decimation strategies. In all cases, an
+We test our method on a collection of high-resolution meshes with                       input mesh, 2.1M faces, is decimated to 25K faces to produce the
+face counts in the order of 107 . Results are shown in Figure 24 re-                    base mesh. Displacing base meshes obtained with Meshlab and
+ported in Table 1. Our method fares well in terms of the compression                    Simplygon produce geometric artifacts and self-intersections, while
+ratios, processing times, resulting geometric errors (as a percentage                   our base mesh does not suffer from such issues because it ensures
+of bounding box diagonal), and triangle shape isotropy, measured                        that consistently oriented displacement directions can always be
+as the area-weighted average of the micro triangle aspect ratios.                       defined. Our method outperforms competing methods also in terms
+                                                                                        of geometric error, 𝜇-triangles isotropy, and processing times (see
+10.7      Textures and UV-maps                                                          Figures 22 and 22).
+The experiments in Figures 14 and 20 assess the efficacy of our strat-
+egy to mitigate the texture distortion induced by the displacement                      10.9     Comparison with Bijective shells [Jiang et al. 2020]
+(Sec. 9.2).                                                                                Base mesh construction. In Figure 23, we compare against Bijec-
+   For these models, we construct an initial parametrization over the                   tive shell [Jiang et al. 2020] as a way to construct the base mesh;
+base mesh using Blender automatic parametrization tools [Blender                        this work is akin to our framework in that care is taken to ensure
+Development Team 2022], followed by an automatic tool to reduce                         re-projectability of a coarsened mesh into the input mesh. In [Jiang
+
+                                                                                                       ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+ 14                         •       Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+
+
+                                                                    11 Bits                                                              7 Bits                                               6 Bits                                                                     5 Bits
+
+                                                                                              Fig. 17. Effect of quantization of scalar displacements.
+
+
+
+
+                                                 Fig. 18. Dynamically controlling the level of detail of a 𝜇-Mesh by progressively decreasing the subdivision level of base faces.
+
+                                     ×106
+                                                                                                                                                                                                                                                            2
+                                4                                                                                                                                                                                                            0.85
+                                                                                                                                                                                                                                                            2
+                                                                                                                                   60                                                                                   Isotropy (Average)                                   9
+                                                                                                               Input size in MBs
+
+
+
+
+                                3                                                                                                                                                                                                            0.80                                     14
+             Input FN
+
+
+
+
+                                                                                                                                                                                                                                                                                                 26
+                                                                                                                                   40                                                                                                        0.75
+                                2                                                                                                                                                                                                                                                                              31
+                                                                                                                                                                                                                                                                                           19
+
+                                                                                                                                   20                                                                                                        0.70                            9
+                                1
+                                                                                                                                                                                                                                                                         8
+                                                                                                                                                                                                                                             0.65       1
+                                0                                                                                                   0
+                                     0           100           200      300   400    500                                                                         1          2         3                4                                            0                        10         20                30
+                                                              Time in seconds                                                                                         Output size in MBs                                                                                     Number of models
+                                     ×10 −4                                                                                               ×10 −3
+                                                                                                                                                                                                                                            0.025
+                                                                                              Geometric Error (99th Percentile)
+
+
+
+
+                                         1                                                                                                   1                                                                                                          1
+                                                                                                                                                                                                                Geometric Error (Maximum)
+
+
+
+
+                                         1
+                            1.0                                                                                                   1.25
+Geometric Error (Average)
+
+
+
+
+                                         1
+                                                                                                                                                                                                                                            0.020
+                                         1
+                            0.8          1
+                                             2
+                                                                                                                                  1.00
+                                         1
+                                                                                                                                             1
+                                                                                                                                                                                                                                            0.015
+                            0.6          1
+                                             2                                                                                    0.75           2
+                                                      5
+                                                          6
+                                                                                                                                                 2
+                                                                                                                                                         5                                                                                  0.010
+                            0.4                       5                                                                           0.50               3
+                                                               8                                                                                             6                                                                                          1
+                                                                   10                                                                                                      12                                                                                   5
+                                                                        13                                                                                       7                                                                          0.005                   7
+                            0.2                                                     23                                            0.25                                                       27                                                                                  19
+                                                                                         25                                                                                                                36                                                                                        41
+                                                                             15                                                                                                   19                                                                                                                           47
+                                                                                                                                  0.00                                                                                                      0.000
+                                    0             5             10      15     20    25                                                  0                           10           20              30                                                0               10         20       30      40
+                                                              Number of models                                                                                            Number of models                                                                                   Number of models
+
+
+ Fig. 19. Batch-processing the ThreeDScans [Three D Scans 2022] mesh repository. For each dataset, we report the end-to-end processing time, data compression,
+ and quality metrics for the displaced 𝜇-mesh: average isotropy, and average, 99th percentile, and maximum geometric error (expressed as a fraction of the
+ bounding box diagonal).
+
+
+
+
+ ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                               Micro-Mesh Construction      •   15
+
+
+
+
+                      (a) RWT180 – Wooden Dragon                                                     (b) RWT205 – Grotesque02
+
+
+
+
+                       (c) RWT236 – Wooden Lion                                                      (d) RWT295 – Tokay Gecko
+
+Fig. 20. Examples of produced textured 𝜇-Meshes, from models taken photogrammetry reconstructions dataset [Maggiordomo et al. 2020]. The color maps
+show the ARAP energy before and after the optimization with our re-weighted scheme (see legend in Fig. 14). Also see Table 2.
+
+                                                                 A
+
+
+
+              A
+       B
+
+                                                                 B
+
+
+
+
+                                                                       Input              Meshlab                  Simplygon                       Ours
+
+Fig. 21. Comparison with other mesh simplification approaches. The two close-ups show failures due to the presence of base mesh vertices with negative
+visibility, resulting in displacement directions that are not coherently oriented.
+
+
+et al. 2020], this is guaranteed by redefining the displacement to             of (1) proposed in [Jiang et al. 2020], using a state-of-the-art QP
+occur along a more complex path than a straight line. However, as              solver [Stellato et al. 2020]: our method is more than 26× faster (0.64
+the case in Figure 23 shows, the existence of this bijective map is            against 17.24 seconds to solve 1M instances).
+not sufficient to ensure correct reproduction when the paths are
+straight, as with 𝜇-meshes.
+
+
+   Visibility direction computation. We tested our new algorithm
+to compute optimal visibility (Sec. 4.1) against the QP formulation
+
+                                                                                           ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+16   •   Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+
+
+                                                                                                                                                                         Error
+          Meshlab – Error = 2.14 × 10−5                          Simplygon – Error = 2.20 × 10−5                       Ours – Error = 2.07 × 10−5
+
+
+
+
+                                                                                                                                                                         Aspect ratio
+             Meshlab – Isotropy = 0.78                             Simplygon – Isotropy = 0.65                           Ours – Isotropy = 0.83
+
+                             Fig. 22. 𝜇-Mesh geometric error (above) and isotropy (below) for different base mesh generation approaches.
+
+
+                                                                                         accurate, compact models directly consumable by GPUs today. 𝜇-
+                                                                                         meshes offer significant BVH savings and good tracing performance
+                                                                                         with nothing blocking increased performance should usage warrant
+                                                                                         the investment. With this combination, we significantly lower the
+                                                                                         barrier to rendering extremely detailed geometries and could bring
+                                                                                         previously unattainable geometric fidelity to the full spectrum of
+         784 base faces            Distance = 9.73 × 10−3         Isotropy = 0.57
+                                                                                         systems.
+                  Bijective shell – Processing time 2 minutes                               This work is intended as a stepping stone towards enabling the
+                                                                                         adoption of extremely high-resolution geometries in interactive and
+                                                                                         real-time graphics applications, allowing a wide variety of high-
+                                                                                         quality 3D assets to be readily available by means of a robust and
+                                                                                         reliable conversion process.
+
+                                                                                         ACKNOWLEDGMENTS
+         784 base faces            Distance = 6.37 × 10−5         Isotropy = 0.78        We would like to thank the anonymous reviewers for their helpful
+                                                                                         comments. We are also grateful to Yury Uralsky for extensive dis-
+                          Ours – Processing time 40 seconds                              cussions and resulting insights, to Christoph Kubisch for his help
+                                                                                         with performance measurements and to Manuel Kraemer for his
+Fig. 23. RWT1 (The Thinker Sculpture by OpenMVS) – Comparison with                       feedback and valuable pointers. We acknowledge a gift of support
+Bijective shell [Jiang et al. 2020]. The input mesh has 220K faces. This is a
+                                                                                         from NVIDIA.
+failure case for Bijective shells, resulting in a base mesh that is unable to
+reproduce the original surface by means of scalar displacements.
+                                                                                         REFERENCES
+                                                                                         Adobe. 2021. Bake Mesh Maps. Substance 3D Documentation, https://helpx.adobe.com/
+                                                                                            substance-3d-painter/using/baking.html.
+                                                                                         Pierre Alliez, Éric Colin de Verdière, Olivier Devillers, and Martin Isenburg. 2005.
+                                                                                            Centroidal Voronoi diagrams for isotropic surface remeshing. Graphical Models 67,
+11       CONCLUSIONS                                                                        3 (2005), 204–231. https://doi.org/10.1016/j.gmod.2004.06.007 Special Issue on SMI
+                                                                                            2003.
+In this paper, we introduced a robust method to automatically con-                       Romain Aubry and Rainald Löhner. 2008. On the ‘most normal’ normal. Communications
+vert a high-resolution triangle mesh into a 𝜇-mesh, a recently dis-                         in Numerical Methods in Engineering 24, 12 (2008), 1641–1652. https://doi.org/10.
+closed representation, designed for direct hardware rendering us-                           1002/cnm.1056
+                                                                                         Blender Development Team. 2022. Blender. Blender Project. https://blender.org
+ing commercially available GPUs. Our remeshing algorithms are                            Mario Botsch and Leif Kobbelt. 2004. A Remeshing Approach to Multiresolution
+specifically designed to produce high-quality 𝜇-meshes, delivering                          Modeling. In Proceedings of the 2004 Eurographics/ACM SIGGRAPH Symposium on
+
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+                                                                                                                                            Micro-Mesh Construction      •   17
+
+
+
+
+              A                                               B                                 C                                                         D
+
+
+
+
+    E                   F                                                           G                                        H
+
+
+
+
+                      Fig. 24. A selection of 𝜇-Meshes generated from very high-resolution inputs. For quantitative measures, see Table 1.
+
+
+   Geometry Processing (Nice, France) (SGP ’04). Association for Computing Machinery,      Performance Terrain Visualization. Computer Graphics Forum 22, 3 (sept 2003),
+   185–192. https://doi.org/10.1145/1057432.1057457                                        505–514.
+Tamy Boubekeur and Christophe Schlick. 2008. A Flexible Kernel for Adaptive Mesh        Paolo Cignoni, Fabio Ganovelli, Enrico Gobbetti, Fabio Marton, Federico Ponchio, and
+   Refinement on GPU. Computer Graphics Forum (2008). https://doi.org/10.1111/j.           Roberto Scopigno. 2004. Adaptive Tetrapuzzles: Efficient out-of-Core Construction
+   1467-8659.2007.01040.x                                                                  and Visualization of Gigantic Multiresolution Polygonal Models. ACM Trans. Graph.
+Paolo Cignoni, Marco Callieri, Massimiliano Corsini, Matteo Dellepiane, Fabio Ganov-       23, 3 (aug 2004), 796–803. https://doi.org/10.1145/1015706.1015802
+   elli, and Guido Ranzuglia. 2008. MeshLab: an Open-Source Mesh Processing             Paolo Cignoni, Claudio Montani, Claudio Rocchini, Roberto Scopigno, and Marco Tarini.
+   Tool. In Eurographics Italian Chapter Conference, Vittorio Scarano, Rosario De          1999. Preserving attribute values on simplified meshes by resampling detail textures.
+   Chiara, and Ugo Erra (Eds.). The Eurographics Association. https://doi.org/10.          The Visual Computer 15, 10 (1999), 519–539. https://doi.org/10.1007/s003710050197
+   2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136                         Jonathan Cohen, Dinesh Manocha, and Marc Olano. 1997. Simplifying Polygonal Models
+Paolo Cignoni, Fabio Ganovelli, Enrico Gobbetti, Fabio Marton, Federico Ponchio, and       Using Successive Mappings. In Proceedings of the 8th Conference on Visualization ’97
+   Roberto Scopigno. 2003. BDAM: Batched Dynamic Adaptive Meshes for High                  (Phoenix, Arizona, USA) (VIS ’97). IEEE Computer Society Press, 395–ff.
+
+
+                                                                                                       ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+18   •   Andrea Maggiordomo, Henry Moreton, and Marco Tarini
+
+
+Jonathan Cohen, Marc Olano, and Dinesh Manocha. 1998. Appearance-Preserving                  Ligang Liu, Lei Zhang, Yin Xu, Craig Gotsman, and Steven J. Gortler. 2008. A Lo-
+   Simplification. In Proceedings of the 25th Annual Conference on Computer Graphics            cal/Global Approach to Mesh Parameterization. In Proceedings of the Symposium on
+   and Interactive Techniques (SIGGRAPH ’98). Association for Computing Machinery,              Geometry Processing (Copenhagen, Denmark) (SGP ’08). Eurographics Association,
+   115–122. https://doi.org/10.1145/280814.280832                                               1495–1504.
+Gordon Collins and Adrian Hilton. 2002. Mesh Decimation for Displacement Mapping.            Yang Liu, Wenping Wang, Bruno Lévy, Feng Sun, Dong-Ming Yan, Lin Lu, and Chenglei
+   In Eurographics 2002 - Short Presentations. Eurographics Association. https://doi.           Yang. 2009. On Centroidal Voronoi Tessellation—Energy Smoothness and Fast
+   org/10.2312/egs.20021033                                                                     Computation. ACM Trans. Graph. 28, 4, Article 101 (sep 2009), 17 pages. https:
+Robert L. Cook. 1984. Shade Trees. SIGGRAPH Comput. Graph. 18, 3 (jan 1984), 223–231.           //doi.org/10.1145/1559755.1559758
+   https://doi.org/10.1145/964965.808602                                                     Haik Lorenz and Jürgen Döllner. 2008. Dynamic mesh refinement on GPU using
+Leila De Floriani, Paola Magillo, and Enrico Puppo. 1998. Efficient implementation of           geometry shaders. (2008).
+   multi-triangulations. In Proceedings Visualization ’98 (Cat. No.98CB36276). 43–50.        David P. Luebke. 2001. A developer’s survey of polygonal simplification algorithms.
+   https://doi.org/10.1109/VISUAL.1998.745283                                                   IEEE Computer Graphics and Applications 21, 3 (2001), 24–35. https://doi.org/10.
+Tamal K Dey, Herbert Edelsbrunner, Sumanta Guha, and Dmitry V Nekhayev. 1999.                   1109/38.920624
+   Topology Preserving Edge Contraction. Publications de l’Institut Mathématique 86          Andrea Maggiordomo, Paolo Cignoni, and Marco Tarini. 2021. Texture Defragmentation
+   (1999), 23–45.                                                                               for Photo-Reconstructed 3D Models. Computer Graphics Forum 40, 2 (2021), 65–78.
+David A. Field. 2000. Qualitative measures for initial meshes. Internat. J. Numer. Methods      https://doi.org/10.1111/cgf.142615
+   Engrg. 47, 4 (2000), 887–906. https://doi.org/10.1002/(SICI)1097-0207(20000210)47:        Andrea Maggiordomo, Federico Ponchio, Paolo Cignoni, and Marco Tarini. 2020. Real-
+   4<887::AID-NME804>3.0.CO;2-H                                                                 World Textured Things: A repository of textured models generated with modern
+Michael Garland and Paul S. Heckbert. 1997. Surface Simplification Using Quadric                photo-reconstruction tools. Computer Aided Geometric Design 83 (2020), 101943.
+   Error Metrics. In Proceedings of the 24th Annual Conference on Computer Graphics             https://doi.org/10.1016/j.cagd.2020.101943
+   and Interactive Techniques (SIGGRAPH ’97). ACM Press/Addison-Wesley Publishing            Marmoset. 2022. Baking in Toolbag. https://marmoset.co/toolbag/baking/.
+   Co., 209–216. https://doi.org/10.1145/258734.258849                                       Morgan McGuire and Kyle Whitson. 2008. Indirection Mapping for Quasi-Conformal
+Michael Garland and Paul S. Heckbert. 1998. Simplifying surfaces with color and texture         Relief Texturing. In Proceedings of the 2008 Symposium on Interactive 3D Graphics and
+   using quadric error metrics. In Proceedings Visualization ’98 (Cat. No.98CB36276).           Games (Redwood City, California) (I3D ’08). Association for Computing Machinery,
+   263–269. https://doi.org/10.1109/VISUAL.1998.745312                                          191–198. https://doi.org/10.1145/1342250.1342280
+Michael Garland and Yuan Zhou. 2005. Quadric-Based Simplification in Any Dimension.          Microsoft. 2022. Simplygon: The Standard in 3D Games Content Optimization. https:
+   ACM Trans. Graph. 24, 2 (apr 2005), 209–239. https://doi.org/10.1145/1061347.                //www.simplygon.com/.
+   1061350                                                                                   NVIDIA. 2022. NVIDIA Ada GPU Architecture. https://www.nvidia.com/it-it/geforce/
+Igor Guskov, Kiril Vidimče, Wim Sweldens, and Peter Schröder. 2000. Normal Meshes.              ada-lovelace-architecture. https://images.nvidia.com/aem-dam/Solutions/geforce/
+   In Proceedings of the 27th Annual Conference on Computer Graphics and Interactive            ada/ada-lovelace-architecture/nvidia-ada-gpu-architecture-whitepaper-1.03.pdf
+   Techniques (SIGGRAPH ’00). ACM Press/Addison-Wesley Publishing Co., 95–102.               Daniele Panozzo, Enrico Puppo, Marco Tarini, Nico Pietroni, and Paolo Cignoni. 2011.
+   https://doi.org/10.1145/344779.344831                                                        Automatic Construction of Quad-Based Subdivision Surfaces Using Fitmaps. IEEE
+Autodesk Help. 2021. Transfer Maps. Autodesk Knowledge Network, https://knowledge.              Transactions on Visualization and Computer Graphics 17, 10 (2011), 1510–1520. https:
+   autodesk.com/support/maya/learn?s=Transfer+Maps.                                             //doi.org/10.1109/TVCG.2011.28
+Hugues Hoppe. 1996. Progressive Meshes. In Proceedings of the 23rd Annual Conference         Enrico Puppo. 1998. Variable resolution triangulations. Computational Geometry 11, 3
+   on Computer Graphics and Interactive Techniques (SIGGRAPH ’96). Association for              (1998), 219–238. https://doi.org/10.1016/S0925-7721(98)00029-7
+   Computing Machinery, 99–108. https://doi.org/10.1145/237170.237216                        Pedro V. Sander and Jason L. Mitchell. 2005. Progressive Buffers: View-dependent
+Hugues Hoppe. 1999. New quadric metric for simplifying meshes with appearance                   Geometry and Texture for LOD Rendering. In Eurographics Symposium on Geometry
+   attributes. In Proceedings Visualization ’99 (Cat. No.99CB37067). 59–510. https:             Processing 2005, Mathieu Desbrun and Helmut Pottmann (Eds.). The Eurographics
+   //doi.org/10.1109/VISUAL.1999.809869                                                         Association. https://doi.org/10.2312/SGP/SGP05/129-138
+Hugues Hoppe, Tony DeRose, Tom Duchamp, John McDonald, and Werner Stuetzle.                  Michael Schwarz and Marc Stamminger. 2009. Fast GPU-based Adaptive Tessellation
+   1993. Mesh Optimization. In Proceedings of the 20th Annual Conference on Computer            with CUDA. Computer Graphics Forum 28, 2 (2009), 365–374. https://doi.org/10.
+   Graphics and Interactive Techniques (Anaheim, CA) (SIGGRAPH ’93). Association for            1111/j.1467-8659.2009.01376.x
+   Computing Machinery, 19–26. https://doi.org/10.1145/166117.166119                         Alla Sheffer, Emil Praun, and Kenneth Rose. 2006. Mesh Parameterization Methods
+Kaimo Hu, Dong-Ming Yan, David Bommes, Pierre Alliez, and Bedrich Benes. 2017.                  and Their Applications. Found. Trends. Comput. Graph. Vis. 2, 2 (jan 2006), 105–171.
+   Error-Bounded and Feature Preserving Surface Remeshing with Minimal Angle                    https://doi.org/10.1561/0600000011
+   Improvement. IEEE Transactions on Visualization and Computer Graphics 23, 12              Bartolomeo Stellato, Goran Banjac, Paul Goulart, Alberto Bemporad, and Stephen Boyd.
+   (2017), 2560–2573. https://doi.org/10.1109/TVCG.2016.2632720                                 2020. OSQP: an operator splitting solver for quadratic programs. Mathematical
+Wenzel Jakob, Marco Tarini, Daniele Panozzo, and Olga Sorkine-Hornung. 2015. Instant            Programming Computation 12, 4 (2020), 637–672. https://doi.org/10.1007/s12532-
+   Field-Aligned Meshes. ACM Trans. Graph. 34, 6, Article 189 (nov 2015), 15 pages.             020-00179-2
+   https://doi.org/10.1145/2816795.2818078                                                   Vitaly Surazhsky, Pierre Alliez, and Craig Gotsman. 2003. Isotropic Remeshing of Surfaces:
+Zhongshi Jiang, Teseo Schneider, Denis Zorin, and Daniele Panozzo. 2020. Bijective              a Local Parameterization Approach. Research Report RR-4967. INRIA.
+   Projection in a Shell. ACM Trans. Graph. 39, 6, Article 247 (nov 2020), 18 pages.         Marco Tarini, Paolo Cignoni, and Roberto Scopigno. 2003. Visibility based methods
+   https://doi.org/10.1145/3414685.3417769                                                      and assessment for detail-recovery. In IEEE Visualization, 2003. VIS 2003. 457–464.
+Zhongshi Jiang, Ziyi Zhang, Yixin Hu, Teseo Schneider, Denis Zorin, and Daniele                 https://doi.org/10.1109/VISUAL.2003.1250407
+   Panozzo. 2021. Bijective and Coarse High-Order Tetrahedral Meshes. ACM Trans.             Three D Scans. 2022. Three D Scans - Free 3D scan archive. https://threedscans.com/
+   Graph. 40, 4, Article 157 (jul 2021), 16 pages. https://doi.org/10.1145/3450626.3459840   Emo Welzl. 1991. Smallest enclosing disks (balls and ellipsoids). In New Results and
+Brian Karis, Rune Stubbe, and Graham Wihlidal. 2021. Nanite – A Deep Dive. In                   New Trends in Computer Science, Hermann Maurer (Ed.). Springer Berlin Heidelberg,
+   Advances in Real-Time Rendering in Games. ACM SIGGRAPH 2021 Courses) (Virtual)               359–370.
+   (SIGGRAPH ’21).                                                                           Dong-Ming Yan, Bruno Lévy, Yang Liu, Feng Sun, and Wenping Wang. 2009. Isotropic
+Dawar Khan, Alexander Plopski, Yuichiro Fujimoto, Masayuki Kanbara, Gul Jabeen,                 Remeshing with Fast and Exact Computation of Restricted Voronoi Diagram. Com-
+   Yongjie Jessica Zhang, Xiaopeng Zhang, and Hirokazu Kato. 2022. Surface Remesh-              puter Graphics Forum 28, 5 (2009), 1445–1454. https://doi.org/10.1111/j.1467-
+   ing: A Systematic Literature Review of Methods and Research Directions. IEEE                 8659.2009.01521.x
+   Transactions on Visualization and Computer Graphics 28, 3 (2022), 1680–1713.              Sung-Eui Yoon, B. Salomon, R. Gayle, and D. Manocha. 2004. Quick-VDR: interactive
+   https://doi.org/10.1109/TVCG.2020.3016645                                                    view-dependent rendering of massive models. In IEEE Visualization 2004. 131–138.
+Deok-Soo Kim, Panos Y. Papalambros, and Tony C. Woo. 1995. Tangent, normal, and                 https://doi.org/10.1109/VISUAL.2004.86
+   visibility cones on Bézier surfaces. Computer Aided Geometric Design 12, 3 (1995),        Cem Yuksel, John Keyser, and Donald H. House. 2010. Mesh colors. ACM Transactions on
+   305–320. https://doi.org/10.1016/0167-8396(94)00016-L                                        Graphics 29, 2, Article 15 (2010), 11 pages. https://doi.org/10.1145/1731047.1731053
+Aaron Lee, Henry Moreton, and Hugues Hoppe. 2000. Displaced Subdivision Surfaces.            Cem Yuksel, Sylvain Lefebvre, and Marco Tarini. 2019. Rethinking Texture Mapping.
+   In Proceedings of the 27th Annual Conference on Computer Graphics and Interactive            Computer Graphics Forum 38, 2 (2019), 535–551. https://doi.org/10.1111/cgf.13656
+   Techniques (SIGGRAPH ’00). ACM Press/Addison-Wesley Publishing Co., 85–94.                   arXiv:https://onlinelibrary.wiley.com/doi/pdf/10.1111/cgf.13656
+   https://doi.org/10.1145/344779.344829                                                     Tobias Zirr and Tobias Ritschel. 2019. Distortion-Free Displacement Mapping. Com-
+Peter Lindstrom and Greg Turk. 2000. Image-Driven Simplification. ACM Trans. Graph.             puter Graphics Forum 38, 8 (2019), 53–62.          https://doi.org/10.1111/cgf.13760
+   19, 3 (jul 2000), 204–241. https://doi.org/10.1145/353981.353995                             arXiv:https://onlinelibrary.wiley.com/doi/pdf/10.1111/cgf.13760
+
+
+
+
+ACM Trans. Graph., Vol. 1, No. 1, Article . Publication date: May 2023.
+

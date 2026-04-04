@@ -1,0 +1,83 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 21 items.
+The style file: ustcthesis-numerical.bst
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+A level-1 auxiliary file: chapters/innovations.aux
+Reallocating 'name_of_file' (item size: 1) to 22 items.
+A level-1 auxiliary file: chapters/abstract.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap1.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap2.aux
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+A level-1 auxiliary file: chapters/Chap3_query.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap3.aux
+Reallocating 'name_of_file' (item size: 1) to 26 items.
+A level-1 auxiliary file: chapters/Chap5_cauchy.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap5.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap6.aux
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+Reallocating 'name_of_file' (item size: 1) to 30 items.
+A level-1 auxiliary file: chapters/acknowledgements.aux
+Reallocating 'name_of_file' (item size: 1) to 26 items.
+A level-1 auxiliary file: chapters/achievements.aux
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 150 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 9000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'glb_str_end' (item size: 4) to 20 items.
+Reallocating 'glb_str_ptr' (item size: 4) to 20 items.
+Reallocating 'global_strs' (item size: 1) to 4000000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'field_info' (item size: 4) to 10772 items.
+Database file #1: bib/ustc.bib
+You've used 156 entries,
+            6830 wiz_defined-function locations,
+            2101 strings with 34882 characters,
+and the built_in function-call counts, 5363037 in all, are:
+= -- 594181
+> -- 149051
+< -- 449530
++ -- 51214
+- -- 15546
+* -- 29483
+:= -- 200620
+add.period$ -- 468
+call.type$ -- 156
+change.case$ -- 279
+chr.to.int$ -- 318924
+cite$ -- 156
+duplicate$ -- 856069
+empty$ -- 9434
+format.name$ -- 4597
+if$ -- 1182393
+int.to.chr$ -- 2324
+int.to.str$ -- 157
+missing$ -- 0
+newline$ -- 825
+num.names$ -- 468
+pop$ -- 93483
+preamble$ -- 1
+purify$ -- 1234
+quote$ -- 0
+skip$ -- 297275
+stack$ -- 0
+substring$ -- 689037
+swap$ -- 390672
+text.length$ -- 3172
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 1691
+warning$ -- 0
+while$ -- 18355
+width$ -- 0
+write$ -- 2242

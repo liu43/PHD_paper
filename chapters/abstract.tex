@@ -1,0 +1,34 @@
+% !TeX root = ../main.tex
+
+\ustcsetup{
+  keywords  = {包围几何；包含查询；高阶壳；柯西坐标；双调和坐标},
+  keywords* = {Enclosing geometry, Containment query, High-order shell,  Cauchy coordinates, Biharmonic coordinates},
+}
+
+\begin{abstract}
+包围几何是数字几何处理中常用的中间表示。通过在目标形状外构造壳或笼等辅助结构，可将复杂几何上的属性传递、交互形变等问题转化为更稳定、可控的映射构造问题。围绕“包围几何上的高质量映射”这一主题，本文以双射性、光滑性、高效性和低扭曲为核心目标，系统研究了壳空间与笼空间中的映射构造方法，并在几何属性传递与编辑等任务上验证了方法的有效性。
+
+本文第一个工作研究由有理参数曲线构成的包围几何上的鲁棒内外判断问题。针对射线法、离散近似和局部线性化方法在复杂曲边、非严格闭合边界与脏几何场景下鲁棒性不足的问题，本文以广义环绕数作为统一判据，将有理参数曲线上的内外判断转化为多项式 B\'{e}zier 曲线上的有理多项式积分，并借助留数定理给出闭式计算表达，同时进一步处理查询点位于边界上的特殊情形并推导广义环绕数导数。实验结果表明，所提出方法在复杂曲边包围边界上具有良好的鲁棒性与效率，在二次与三次曲线的环绕数查询任务上可取得约 $7\times$ 的速度优势。
+
+本文第二个工作研究壳空间内的光滑双射投影问题，提出一种高阶壳表示及其实用构造算法。该方法以初始线性壳为起点，通过边塌缩、几何优化、边翻转与棱柱缩放等局部操作，在满足包围约束、角度约束和厚度约束的前提下，逐步得到由高阶三角棱柱组成的壳结构，并在壳内构造连续向量场以定义投影算子。实验表明，该方法可在 8300 余个模型上稳定生成高阶壳；与线性壳相比，高阶壳上的投影更光滑，壳空间分布更均匀，更适合支撑重网格化后的属性回传、布尔运算与位移贴图等应用。
+
+本文第三个工作研究笼空间上的高阶 Cauchy 坐标，给出了坐标、导数与相关有理积分的统一闭式解析表达。针对传统线性输入笼对复杂边界贴合不足、边界附近光滑性欠佳的问题，本文将 Cauchy 坐标推广到高阶输入笼，并基于留数定理构建有理积分的闭式求解流程，同时说明该解析框架可进一步扩展到高阶 Green 坐标。实验结果表明，高阶笼可在保持保角变形优势的同时提供更贴合边界、更平滑且更符合编辑意图的结果，坐标计算的最大数值误差不超过 $10^{-11}$。
+
+本文第四个工作研究笼空间上的高阶双调和坐标，提出面向曲边边界的高阶 BEM 求解框架。该方法通过高阶边界单元、高阶形函数与统一代数系统，将双调和边值问题推广到高阶笼，并结合不同边界导数设计与加权策略，在严格边界插值与内部低扭曲之间提供连续可调的平衡机制。实验表明，本文方法能够在复杂曲边笼编辑中提供更稳定的内部形变传播；相较现有坐标方法，所得变形更自然、失真更低，并能根据应用需求在保角性与插值性之间灵活折中。
+
+综上，本文围绕包围几何上的高质量映射，建立了“鲁棒内外判断---壳空间光滑双射投影---笼空间解析高阶 Cauchy 坐标---高阶 BEM 双调和坐标”的互补技术体系，形成了从几何谓词、几何构造到解析计算与数值求解的完整方法链路，为数字几何处理中的包含查询、属性传递和交互编辑提供了新的理论与算法支撑。
+\end{abstract}
+
+\begin{abstract*}
+Enclosing geometry is a common intermediate representation in digital geometry processing. By constructing auxiliary structures such as shells or cages around a target shape, problems such as attribute transfer and interactive deformation on complex geometry can be reformulated as mapping construction problems on a more stable and controllable domain. Centered on the theme of high-quality mapping on enclosing geometry, this dissertation takes bijectivity, smoothness, efficiency, and low distortion as its core objectives, systematically studies mapping construction methods in shell spaces and cage spaces, and validates the effectiveness of the proposed methods in tasks such as geometric attribute transfer and editing.
+
+The first contribution investigates robust inside-outside tests on enclosing geometries composed of rational parametric curves. To address the limited robustness of ray casting, discrete approximation, and local linearization in scenarios involving complex curved boundaries, non-strictly closed boundaries, and dirty geometry, this dissertation adopts the generalized winding number as a unified criterion. It transforms inside-outside tests on rational parametric curves into rational polynomial integrals over polynomial B\'{e}zier curves, derives closed-form evaluation formulas via the residue theorem, further handles the special case where the query point lies on the boundary, and derives the derivatives of the generalized winding number. Experimental results show that the proposed method achieves good robustness and efficiency on complex curved enclosing boundaries, with about a $7\times$ speedup in winding-number queries on quadratic and cubic curves.
+
+The second contribution studies smooth bijective projection in shell spaces and proposes a high-order shell representation together with a practical construction algorithm. Starting from an initial linear shell, the method progressively performs local operations including edge collapse, geometric optimization, edge flip, and prism scaling. While satisfying enclosing, angle, and thickness constraints, it gradually constructs a shell composed of high-order triangular prisms and defines the projection operator through a continuous vector field inside the shell. Experiments show that the method can stably generate high-order shells on more than 8,300 models. Compared with linear shells, the projection defined on high-order shells is smoother and the shell space is more uniformly distributed, making it more suitable for applications such as attribute back-transfer after remeshing, Boolean operations, and displacement mapping.
+
+The third contribution studies high-order Cauchy coordinates in cage spaces and derives unified closed-form analytic expressions for the coordinates, their derivatives, and related rational integrals. To address the insufficient boundary fitting of traditional linear input cages on complex boundaries and the limited smoothness near the boundary, this dissertation extends Cauchy coordinates to high-order input cages and constructs a closed-form evaluation pipeline based on the residue theorem. It also shows that the same analytic framework can be further extended to high-order Green coordinates. Experimental results show that high-order cages preserve the conformal advantages of Cauchy-coordinate-based deformation while producing results that better fit the boundary, are smoother, and better align with editing intent. The maximum numerical error of coordinate evaluation is below $10^{-11}$.
+
+The fourth contribution studies high-order biharmonic coordinates in cage spaces and proposes a high-order BEM solving framework for curved boundaries. By combining high-order boundary elements, high-order shape functions, and a unified algebraic system, the biharmonic boundary-value problem is extended to high-order cages. Different boundary-derivative designs and weighting strategies are further incorporated to provide a continuously adjustable balancing mechanism between strict boundary interpolation and low interior distortion. Experiments show that the proposed method provides more stable interior deformation propagation in complex curved-cage editing. Compared with existing coordinate methods, it produces more natural deformations with lower distortion and allows flexible trade-offs between conformality and interpolation according to application needs.
+
+In summary, this dissertation, centered on high-quality mapping on enclosing geometry, establishes a complementary technical framework consisting of robust inside-outside tests, smooth bijective projection in shell spaces, analytic high-order Cauchy coordinates in cage spaces, and high-order-BEM biharmonic coordinates. Together, these components form a complete methodological pipeline from geometric predicates and geometric construction to analytic evaluation and numerical solution, providing new theoretical and algorithmic support for attribute transfer, interactive editing, and curve query in digital geometry processing.
+\end{abstract*}

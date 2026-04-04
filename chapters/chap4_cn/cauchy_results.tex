@@ -1,0 +1,309 @@
+\section{实验与评估}\label{sec:cau-results}
+本文方法采用 C++ 实现。
+所有实验均在一台台式机上完成，配置为 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存。
+%
+除图~\ref{fig:cau-rational} 外，其他图中的高阶输入笼边均为多项式曲线。
+
+\paragraph{基于笼的变形}
+本文在图~\ref{fig:cau-more-example} 中展示了多组图像变形示例。
+本文坐标能够对有机形状和机械形状提供光滑且保角的变形结果。
+本文方法也支持对曲线段多项式次数进行升阶和降阶（图~\ref{fig:cau-diff-order}）。
+%\paragraph{Different orders}
+%We allow \( n_j < m_j \); 
+当输出次数低于输入次数时，先对曲线降阶会改变笼的初始形状，但不会影响艺术家后续的编辑过程。
+此外，引理~\ref{pro:cau-lemma_holo} 保证了所得变形在边界附近仍保持光滑。
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap5_cau_diff_order_new.pdf}
+		{
+		}
+	\end{overpic}
+	\vspace{-2mm}
+	\caption{
+		高阶输入笼可被变形为不同次数的高阶输出笼。上排输入笼为二次曲线，下排输入笼为三次曲线。
+	}
+	\label{fig:cau-diff-order}
+\end{figure}
+
+\paragraph{点到点（P2P）变形}
+%To achieve better control over the cage's deformation, 
+为支持由把手驱动的变形，本文利用坐标导数构建目标函数并进行优化求解，这与文献 \cite{Weber2009} 和 文献\cite{Lin2024PolynomialCC} 的做法类似。
+目标函数包含把手点之间距离平方和，以及一个由边界上坐标二阶导数的 $\ell_2$ 范数组成的光滑项。
+%
+该优化问题是最小二乘问题。
+通过线性求解得到最优解。
+此外，在线性系统中，拖动把手时系数矩阵保持不变；因此本文在预处理阶段仅做一次预分解，从而支持交互式把手编辑（图~\ref{fig:cau-teaser}、\ref{fig:cau-more-example} 和 \ref{fig:cau-diff-order}）。
+%Minimizing this function is a least-squares problem, allowing users to edit handles interactively (Fig. \ref{fig:cau-teaser}, \ref{fig:cau-diff-order}).
+%for real-time handle editing by the user (Fig. \ref{fig:cau-teaser}, \ref{fig:cau-diff-order}).}
+%point-to-point term 
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap4_comparep2p.pdf}
+		{
+			\put(6,0){\small 线性输入笼}
+			\put(56,0){\small 高阶输入笼}
+			\put(29,0){\small Cauchy 坐标}
+			\put(86,0){\small 本文方法}
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		在相同控制点数量下，与经典 Cauchy 坐标的点到点变形对比。红框突出显示了边界附近的光滑性差异。
+	}
+	\label{fig:cau-comparep2p}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap4_comparep2p_poly.pdf}
+		{
+			\put(3,-2){\small 多项式 Cauchy 坐标}
+			\put(30,-2){\small 本文方法}
+			\put(45,-2){\small 多项式 Cauchy 坐标}
+			\put(79,-2){\small 本文方法}
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		与多项式 Cauchy 坐标的点到点变形对比。两种方法的输入笼具有相同数量的控制点。
+	}
+	\label{fig:cau-comparep2p_poly}
+\end{figure}
+
+\paragraph{时间与内存}
+%All the cage-based deformation algorithms run in real time for all the examples shown in this paper. 
+%All cage-based and P2P deformations achieve real-time performance across all demonstrated examples. 
+在文中展示的所有案例中，基于笼与 P2P 两类变形均可实时运行。
+%We focus solely on analysing the pre-computation time. 
+本文只分析预计算时间。
+如第~\ref{sec:cau-details} 节所述，一旦根 \(\{\zeta_j\}\) 已确定，积分解析式的求值只涉及少量复数乘法和对数运算。
+在实践中，使用闭式表达计算 \(\{\zeta_j\}\) 会占据较多预计算时间（对二次曲线约占 24\%，对三次曲线约占 33\%）。
+%
+%During precomputation, our coordinates are based on the integral convolutions of monomials, allowing artists to precompute the coordinates up to a certain degree \( n_j \). This flexibility lets them adjust the degree of the editing curves \(  \leq n_j \) at runtime without the need for coordinate recomputation. 
+因此，在 \(\{\zeta_j\}\) 计算完成后，先把有理多项式积分预计算到一个较高指定次数会更方便。
+%This approach gives artists the runtime flexibility to modify the degree of editing curves to any value less than or equal to the specified degree, without necessitating coordinate recomputation.
+%
+这种做法使艺术家能够在不重算坐标的前提下，自由调整曲线编辑次数（不超过预设上限）。
+% In practice, once the degree of the deformed curves is determined, we express the control points of the polynomial basis as a linear combination of the control points of the Bernstein basis. When subjected to this linear transformation, our coordinates yield the coordinates of the control points of the \Bezier curve.
+%the total memory during preprocessing does not exceed 90 MB
+在测试中，预处理内存占用不超过 90 MB。
+该上限由图~\ref{fig:cau-cmp-cages} 中的 Crab 模型达到：其笼由 24 条三次曲线组成，内部包围约 27000 个点。
+
+\paragraph{与柯西坐标~\cite{Weber2009} 的比较}
+Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
+%\todo{closeness}Cauchy coordinates
+线性笼通常需要过高自由度才能表示复杂曲边形状，这会显著削弱交互操控性（图~\ref{fig:cau-cmp-cages} 与 \ref{fig:cau-cmp-linearcages}）。
+%In contrast, the curved cage achieves more natural deformations with fewer control points, enabling intuitive shape editing through fewer adjustments.
+相比之下，曲边笼用更少控制量即可产生更自然的变形，且只需更少调整即可完成编辑。
+%
+在图~\ref{fig:cau-cmp-cages} 的示例中，线性笼方法需要更复杂操作和更长时间，才能接近高阶笼结果。
+%achieve deformation comparable to high-order-cage results. % and~\ref{fig:cau-cmp-linearcages}
+%
+此外，线性笼与复杂形状之间常存在空隙，导致笼附近变形不光滑（见图~\ref{fig:cau-rational} 的基于笼变形和图~\ref{fig:cau-comparep2p} 的 P2P 变形）。
+而高阶笼具有更高几何贴合度，因此能得到更光滑的变形。
+%\todo{smoothness}
+
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.95\linewidth]{chap4_zoomin_mvc} %
+    {
+    \put(7,-0.5){\small \textbf{(a)}}
+ \put(23,-0.5){\small \textbf{(b)}}
+ \put(43,-0.5){\small \textbf{(c1)}}
+ \put(63,-0.5){\small \textbf{(c2)}}
+ \put(85,-0.5){\small \textbf{(c3)}}
+    }
+  \end{overpic}
+  \vspace{3mm}
+  \caption{
+  (a) 输入线性笼。
+  (b) 三次 MVC。
+(c1, c2, c3) 对输入边 (a) 采用三种不同初始参数化时，采用我们的方法得到的变形结果。
+  %Starting from a linear cage, we apply different parameterizations to one of its edges to obtain various deformation results (c1, c2, c3). Compared to MVC (b), our coordinates achieve conformal deformation, preserving local details of the image (a).
+  }
+  \label{fig:cau-cmp-mvc}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.95\linewidth]{chap4_compare2polyGC} %
+    {
+    \put(6.5,6.5){\small 初始姿态}
+ \put(53,6.5){\small 初始姿态}
+    \put(18,-2){\small 多项式 Cauchy 坐标}
+\put(78,-2){\small 我们的方法}
+    }
+  \end{overpic}
+  \vspace{2mm}
+  \caption{
+  与多项式 Cauchy 坐标比较：输入线性笼（左）和高阶笼（右）控制点数量相同，且均变形为三次笼。
+  %, our cage remains closer to the image both initially and after deformation, resulting in more intuitive deformations.
+  }
+  \label{fig:cau-cmp-pgc}
+\end{figure}
+
+
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.92\linewidth]{figures/chap4_rational.pdf}
+		{
+			\put(10,-1){\small \textbf{(a1)}}
+			\put(35,-1){\small \textbf{(a2)}}
+			\put(63,-1){\small \textbf{(b1)}}
+			\put(90,-1){\small \textbf{(b2)}}
+		}
+	\end{overpic}
+	\vspace{3mm}
+	\caption{
+		在相同控制点数量下，线性笼 (a1) 与二次有理笼 (b1) 的对比。采用高阶输入笼得到的变形结果 (b2) 比线性笼上的 Cauchy 变形 (a2) 更光滑。
+	}
+	\label{fig:cau-rational}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap5_cau_gallery.pdf}
+		{
+		}
+	\end{overpic}
+	\vspace{0mm}
+	\caption{
+		利用本文坐标及其导数在高阶输入笼上实现的多组基于笼变形与点到点变形结果。
+	}
+	\label{fig:cau-more-example}
+\end{figure}
+
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap4_cage_complex.pdf}
+		{
+			\put(1,-1.5){\small 线性输入笼（151 点）}
+			\put(43,-1.5){\small 三次输入笼（41 点）}
+			\put(22,-1.5){\small Cauchy 坐标的 P2P}
+			\put(64,-1.5){\small 本文坐标的 P2P}
+			\put(82,-1.5){\small 本文的笼变形}
+		}
+	\end{overpic}
+    \vspace{2mm}
+	\caption{
+		线性输入笼与高阶输入笼的对比。线性笼需要大量边段才能包围给定形状，而三次高阶笼只需更少参数即可完成包围与编辑。
+	}
+	\label{fig:cau-cmp-linearcages}
+\end{figure}
+
+
+\paragraph{与三次均值坐标~\cite{Li2013} 的比较}
+三次均值坐标（Cubic MVCs）~\cite{Li2013} 支持将直边笼变形为三次曲线。
+%
+由于线性笼是高阶笼的特例，本文坐标也可用于直边笼并实现保角变形。
+%
+本文通过为线性输入笼的每条边指定不同的非线性参数化，获得不同的保角变形结果（图~\ref{fig:cau-cmp-mvc}）。
+但 Cubic MVC 的结果存在较高畸变。
+
+\paragraph{与多项式柯西坐标~\cite{Lin2024PolynomialCC} 的比较}
+%polynomial Cauchy coordinates, polynomial Green coordinate
+在给定相同线性输入笼与高阶变形笼时，多项式 Cauchy 坐标~\cite{Lin2024PolynomialCC} 与多项式 Green 坐标~\cite{MichelThiery2023} 产生相同变形。
+因此，这里只比较使用直边输入笼时的多项式 Cauchy 坐标~\cite{Lin2024PolynomialCC}。
+%
+为公平比较，多项式 Cauchy 坐标与本文方法使用相同数量的控制点。
+在其变形中，变形曲线控制点在初始姿态共线，因此线性输入笼可能缺乏足够自由度来紧贴输入形状。
+%
+%For initially straight shapes, we compare our method with the polynomial Green coordinate (PolyGC)~\cite{MichelThiery2023}. 
+%Due to its conformal deformation results, PolyGC is often preferred by artists over Cubic MVC~\cite{Li2013} in shape deformation applications. 
+当线性输入笼无法贴合复杂形状边界时，变形后边界附近会出现不光滑（图~\ref{fig:cau-cmp-smoothness}）；并且相较其方法，采用我们的方法得到的变形形状更贴近变形笼（图~\ref{fig:cau-cmp-pgc}）。
+%closeness
+%Moreover, %given the same number of control points, higher-order cages approximate the shape's contour more closely than linear cages. %This means that artists can achieve editing results that better align with their intentions when manipulating the cage.
+%as shown in Fig.~\ref{fig:cau-cmp-pgc}, the deformed shape is closer to the deformed cage using the higher-order cage via our coordinates than theirs.
+%This enables artists to obtain deformations that match their creative intent more precisely through high-order cage-based manipulation.
+因此，艺术家通过高阶笼操控可获得更光滑、也更符合意图的变形。
+%
+最后，在图~\ref{fig:cau-comparep2p_poly} 中，本文比较了在输入笼自由度相同条件下的 P2P 变形。
+%
+在这些案例里，其线性笼无法紧密贴合输入形状（例如图~\ref{fig:cau-comparep2p_poly} 中大象后腿之间没有分离），从而产生不自然的 P2P 变形。
+高阶笼能够紧密包围形状，可避免该问题。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.965\linewidth]{chap4_compare_cauchy} %
+    {
+    % \put(17,25){\small (a1)}
+    % \put(44,25){\small (a2)}
+    % \put(30,-2){\small (c)}
+    % \put(85,25){\small (b)}
+    % \put(85,-2){\small (d)}
+     \put(2,24){\small 高阶输入笼}
+    \put(36,24){\small 中间笼}
+    \put(18,-2){\small 高阶输入笼}
+    \put(62,25.5){\small 多项式 Cauchy 坐标}
+\put(84,-2){\small 我们的方法}
+    }
+  \end{overpic}
+  \vspace{3mm}
+  \caption{
+在高阶输入笼上的比较。其方法需要两个输入笼、需要后验调整且不具备闭式表达（上）；我们的方法只需一个输入笼，可直接变形且具有闭式表达（下）。 %does not require post-adjustments
+  }
+  \vspace{-2mm}
+  \label{fig:cau-cmp-poly-Cauchy}
+\end{figure}
+
+%\todo{high-order cages Fig.~\ref{fig:cau-cmp-poly-Cauchy}}
+%PolyGC can not be used for the high-order input cages.
+%For initially highly curved shapes, PolyGC may fail to achieve the desired edits when restricted to the same limited number of control points as our method. Therefore, 
+%\tr{For such cases, we compare our approach against GC \cite{Lipman2008} and polynomial Cauchy coordinates \cite{Lin2024PolynomialCC}. Compared to GC in linear cages, the superior fitting capability of high-order cages enables artists to achieve more intuitive and flexible deformations (Fig. \ref{fig:cau-cmp-cages}). 
+%\todo{double check!!!}
+多项式 Cauchy 坐标可用于高阶输入笼。
+具体而言，其做法是在中间笼上应用多项式 Cauchy 坐标，以生成用于包围输入形状的高阶输入笼（图~\ref{fig:cau-cmp-poly-Cauchy}）。
+随后再通过数值方法计算从中间笼到输入笼映射的逆映射，进而得到形状变形。
+%
+本文坐标具有以下优势。
+首先，由于多项式 Cauchy 坐标不具插值性，其高阶输入笼生成方法无法产生任意有效的高阶输入笼。
+%their method cannot compute valid coordinates on arbitrarily shaped curved input cages. % due to their non-intuitive geometric constraints on the high-order input cages. %, significantly limiting its applicability to complex geometries.
+%the cage enclosing the shape can be directly manipulated via our coordinates  without
+%Second, they require subsequent post-adjustments to the high-order input cages according to the intermediate cages, whereas we do not need it%our coordinates enable direct manipulation without adjustments (Fig.~\ref{fig:cau-cmp-poly-Cauchy}).
+%Second, %they need post-adjustments to high-order cages based on intermediate cages, while we do not .
+对于含狭窄区域的输入形状（如图~\ref{fig:cau-comparep2p_poly} 中章鱼触爪之间或大象后腿之间区域），其高阶输入笼很难调整到既避免自交又保持双射，从而导致算法失败。
+此外，要让其高阶输入笼精确贴合形状几乎不可能。
+%it is difficult to make their high-order input cages avoid self-intersections, losing bijectivity to cause their algorithm failure.
+%due to the non-interpolating coordinates, the deformation from the intermediate cage to the initial cage can result in self-intersections. Such self-intersections signify a loss of invertibility, ultimately causing their algorithm to fail.}
+%
+%Second, since they use numerical methods for the inverse of the mapping from the intermediate to the input cages, their coordinates have larger errors and long computation time (see Table 1 in~\cite{Lin2024PolynomialCC}) and cannot be used for P2P deformation due to the lack of closed forms. 
+第二，其坐标不具闭式表达，因此计算误差更大且耗时更长（见~\cite{Lin2024PolynomialCC} 的表 1），并且无法用于 P2P 变形。
+
+%\tr{Compared with polynomial Cauchy coordinates, our method offers the advantage that  Furthermore, because they use numerical methods for inverse mapping computation, their resulting coordinates have larger errors and longer computation times (see their Table 1). Finally, due to the lack of an explicit expression for the coordinates, they are unable to implement point-to-point (P2P) deformation within high-order cages.}
+
+
+
+% We select the Cubic MVC~\cite{Li2013} and the  Polynomial Green Coordinate (PolyGC)~\cite{MichelThiery2023} as the competitors.
+% %
+% Since Cubic MVC makes the output cages three-order, we set the order of the output polynomial curves as three for PolyGC and our coordinate in comparison.
+% %
+% Since our coordinate is defined on a high-order cage, 
+% %Different from PolyGC, 
+% we elevate the orders of the input cage's edges to three if the input order is less than three.
+% Specifically, we apply the non-uniform parameterization %\tr{express the straight edge as a cubic polynomial curve} 
+% during this elevation, resulting in a non-uniform distribution of control points (e.g., Figure~\ref{fig:cau-cmp} (c1) and (c2)).
+
+
+% We compare with Cubic MVC in Figures~\ref{fig:cau-cmp-mvc} and~\ref{fig:cau-cmp}.
+% Cubic MVC is built upon the Green identity on the unit disk, which helps diffuse both Dirichlet and Neumann conditions on the unit projection sphere. Cubic MVC extends the capability to interpolate boundary conditions and define the deformation function across the entire space, not just within the cage. Cubic MVC retains the interpolation property, whereas we trade interpolation for conformality. 
+% The results corresponding to our various parameterizations consistently ensure that the local aspects of details are preserved precisely, as shown in Figure~\ref{fig:cau-cmp-mvc}.
+
+
+% %\paragraph{Comparison with polynomial GC}
+% We compare with PolyGC in Figures~\ref{fig:cau-cmp-pgc} and~\ref{fig:cau-cmp}. 
+% %
+% In Figure~\ref{fig:cau-cmp-pgc} and the bottom row of Figures~\ref{fig:cau-cmp}, we construct the rest polygonal cages and higher-order cages that are close to the shape. Both cages have the same number of edges and the same number of control points during deformation. The cage is then deformed to be high-order with the same order. % resulting in the final deformed shape. 
+% Both our coordinate and PolyGC enable smooth editing while ensuring conformal deformation results. Compared to PolyGC, our coordinates produce more intuitive deformations, as our cage remains closer to the shape both in the initial and deformed states.
+% % \tr{We note that when the rest shape is highly curved as in Figure~\ref{fig:cau-cmp-cages}, pGC cannot achieve the desired deformation with the same number of control points as ours.
+% % }
+% In the first and second rows of Figure~\ref{fig:cau-cmp-pgc}, we use the same polygonal cage but with different initial parameterizations on some edges (i.e., the positions of the control points are different). 
+% In this case, our method can be seen as a complement to PolyGC. Applying different high-order parameterizations to straight edges can produce varying deformation results.
+%  %In such cases, applying different higher-order parameterizations to straight edges can produce varying deformation results (see Figure~\ref{fig:cau-cmp-mvc} and the top and middle of Figure~\ref{fig:cau-cmp}). 
+% When the parameterization is concentrated on one side of the segment, that side becomes more sensitive to the shape transformation of the cage boundary, making the deformation closer to the cage's shape (see the top of the pants and the tail of the fish in Figure~\ref{fig:cau-cmp}).

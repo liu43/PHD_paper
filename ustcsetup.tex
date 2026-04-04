@@ -1,0 +1,62 @@
+﻿% !TeX root = ./main.tex
+
+\ustcsetup{
+  title       = {包围几何上的高质量映射研究},
+  title*      = {High-quality Mapping on Enclosed Geometry},
+  author      = {柳士博},
+  author*     = {Liu Shibo},
+  speciality  = {计算数学},
+  speciality* = {Computational Mathematics},
+  supervisor  = {刘利刚 教授, 傅孝明 副教授},
+  supervisor* = {Prof. Ligang Liu, Assoc. Prof. Xiao-Ming Fu},
+  math-font   = xits,
+}
+
+% Packages
+\usepackage{amsthm}
+\usepackage[normalem]{ulem}
+\usepackage{microtype}
+\usepackage{hyphenat}
+\usepackage{balance}
+\usepackage[fleqn,tbtags]{mathtools}
+\usepackage{graphicx}
+\usepackage{bicaption}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{longtable}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{siunitx}
+\usepackage{overpic}
+\usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{cases}
+
+% Bibliography
+\usepackage[sort]{natbib}
+\bibliographystyle{ustcthesis-numerical}
+
+% Figure search path
+\graphicspath{{figures/}}
+
+% Math commands
+\makeatletter
+\newcommand\dif{%
+  \mathop{}\!%
+  \ifustc@math@style@TeX
+    d%
+  \else
+    \mathrm{d}%
+  \fi
+}
+\makeatother
+\newcommand\eu{{\symup{e}}}
+\newcommand\iu{{\symup{i}}}
+
+% Writing helpers
+\DeclareRobustCommand\cs[1]{\texttt{\char`\\#1}}
+\DeclareRobustCommand\env[1]{\texttt{#1}}
+\DeclareRobustCommand\pkg[1]{\textsf{#1}}
+\DeclareRobustCommand\file[1]{\nolinkurl{#1}}
+
+% Keep hyperref at the end
+\usepackage{hyperref}

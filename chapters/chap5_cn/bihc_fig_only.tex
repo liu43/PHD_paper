@@ -1,0 +1,34 @@
+﻿
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{more_compare_mvc}
+    {
+\put(7,-1.5){\small 初始姿态}
+ \put(28,-1.5){\small Cubic MVC}
+ \put(55,-1.5){\small Poly GC}
+ \put(84,-1.5){\small 本文方法}
+    }
+  \end{overpic}
+  \vspace{-0mm}
+  \caption{
+  在使用相同多边形笼的两组案例上，与 Cubic MVC 和 PolyGC 的比较。底行结果使用了 $w=0.5$ 的加权坐标。
+  \tr{每个变形结果左上角的小图使用图~\ref{fig:bihc-cmp-cmvc} 的色条展示了对称 Dirichlet 失真~\cite{Smith2015}。}
+  }
+  \label{fig:bihc-more-cmp}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{compare_our_octopus}
+    {
+ \put(10,-1.5){\small 初始姿态}
+ \put(28,-1.5){\small $w=0$ (CurvedGC)}
+ \put(57,-1.5){\small $w=0.5$}
+ \put(84,-1.5){\small $w=1$}
+    }
+  \end{overpic}
+  \caption{
+   在相同三次笼设置下，与 CurvedGC 的两组比较。\tr{每个变形结果左上角（或左侧角落）的小图使用图~\ref{fig:bihc-cmp-cmvc} 的色条展示了对称 Dirichlet 失真~\cite{Smith2015}。}
+  }
+  \label{fig:bihc-more-curvedcmp}
+\end{figure*}

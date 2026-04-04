@@ -1,0 +1,110 @@
+\chapter{高效鲁棒的包围几何的内外判断}
+
+% ===== Chapter 3 macros =====
+\providecommand{\Bezier}{B\'{e}zier }
+\providecommand{\tr}[1]{#1}
+\providecommand{\tb}[1]{#1}
+\providecommand{\todo}[1]{}
+\providecommand{\argmin}{\mathop{\mathrm{arg\,min}}\limits}
+\providecommand{\argmax}{\mathop{\mathrm{arg\,max}}\limits}
+\providecommand{\res}{\mathop{\mathrm{Res}}}
+\providecommand{\re}{\mathop{\mathrm{Re}}}
+\providecommand{\im}{\mathop{\mathrm{Im}}}
+
+\makeatletter
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{prop}{%
+  \@ifundefined{theorem}{%
+    \newtheorem{prop}{Proposition}[chapter]%
+  }{%
+    \newtheorem{prop}[theorem]{Proposition}%
+  }%
+}{}
+\makeatother
+
+\def \ma {\mathbf{a}}
+\def \me {\mathbf{e}}
+\def \mb {\mathbf{b}}
+\def \mc {\mathbf{c}}
+\def \md {\mathbf{d}}
+\def \mf {\mathbf{f}}
+\def \mg {\mathbf{g}}
+\def \mh {\mathbf{h}}
+\def \mi {\mathbf{i}}
+\def \mj {\mathbf{j}}
+\def \mk {\mathbf{k}}
+\def \ml {\mathbf{l}}
+\def \mm {\mathbf{m}}
+\def \mn {\mathbf{n}}
+\def \mo {\mathbf{o}}
+\def \mp {\mathbf{p}}
+\def \mq {\mathbf{q}}
+\def \mr {\mathbf{r}}
+\def \ms {\mathbf{s}}
+\def \mt {\mathbf{t}}
+\def \muu {\mathbf{u}}
+\def \mv {\mathbf{v}}
+\def \mw {\mathbf{w}}
+\def \mx {\mathbf{x}}
+\def \my {\mathbf{y}}
+\def \mz {\mathbf{z}}
+
+\section{概述}\label{sec:chap3-query-overview}
+对于包围几何而言，内外判断是支撑后续映射、编辑与数值计算的基础几何谓词。无论包围边界被用作控制域边界、积分边界还是区域组织工具，都需要先回答一个基本问题：给定查询点，它位于包围几何内部还是外部。若这一判断不稳定，区域填充、采样、剖分、查询和后续几何处理都会受到直接影响。因此，如何在复杂边界上同时实现高效性与鲁棒性，是包围几何处理中一个基础而关键的问题。典型的非水密 CAD 导出结果与包含查询示意见图~\ref{fig:chap3-cad-nonwatertight} 和图~\ref{fig:chap3-containment-query}。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.96\linewidth,percent]{figures/chap3_cad.png}
+	\end{overpic}
+	\caption{CAD 软件导出的包围几何常因建模容差、离散化或导出误差出现缝隙，从而不再严格水密。}
+	\label{fig:chap3-cad-nonwatertight}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.96\linewidth,percent]{figures/chap3_contain_query.pdf}
+		{
+			\put(70,12){\small 内部}
+			\put(78,42){\small 外部}
+		}
+	\end{overpic}
+	\caption{内外判断用于确定查询点相对于包围边界位于内部还是外部。左图为破碎的包围区域；右图为包含查询判定的结果。图中标出了内部区域与外部区域。}
+	\label{fig:chap3-containment-query}
+\end{figure}
+
+本章关注的包围几何主要是二维平面上由有理参数曲线构成的曲边边界，这类表示广泛存在于 CAD、矢量图编辑和基于边界表示的几何建模中。与分段线性边界相比，有理参数曲线能够更准确地表达圆弧、自由曲线以及复杂工业轮廓，但也使内外判断变得更困难：查询算法既要保持对原始边界的几何精度，又要能够处理边界中的缝隙、非流形连接和脏几何等情况。
+本章当前讨论仍聚焦于二维曲边包围边界上的内外判断；如何将类似思想推广到三维包围曲面或更一般的参数曲面情形，是后续值得进一步研究的发展方向，如图~\ref{fig:chap3-3dgwn} 所示。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.46\linewidth,percent]{figures/chap3_3dGWN.pdf}
+	\end{overpic}
+	\caption{本章当前主要讨论二维曲边包围边界上的内外判断；面向三维包围曲面或更一般参数曲面的广义环绕数/缠绕数构造，是后续可进一步拓展的发展方向。}
+	\label{fig:chap3-3dgwn}
+\end{figure}
+
+现有包含查询方法通常依赖射线法、细分或局部线性近似。对于多边形或规则的分段 \Bezier 曲线，这些方法往往足够有效；但当边界由有理参数曲线构成，尤其是模型存在非水密、非流形或几何脏数据时，这些策略很难同时兼顾几何精度、鲁棒性与计算效率。已有工作利用广义环绕数处理有理参数曲线上的鲁棒查询~\cite{Spainhour2024RobustCQ}，但由于缺乏闭式表达，其计算代价会随着曲线形状和查询点位置变化而明显波动。
+这类方法的困难主要体现在近似误差与数值不稳定两个方面，如图~\ref{fig:chap3-numerical} 所示。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.96\linewidth,percent]{figures/chap3_numerical.pdf}
+		{
+			\put(14,0){\small \textbf{(a)}}
+			\put(70,0){\small \textbf{(b)}}
+		}
+	\end{overpic}
+	\caption{内外判断中的两类典型问题。(a) 采用线性近似时，未被准确近似覆盖的点可能发生错误判断。(b) 采用数值计算时，求值过程可能出现数值不稳定，从而影响判断结果。}
+	\label{fig:chap3-numerical}
+\end{figure}
+
+围绕这一问题，本章从“包围几何的内外判断”这一主线出发，采用广义环绕数作为统一判据，研究由有理参数曲线组成的二维包围边界上的高效鲁棒查询方法。本章在第2章已给出广义环绕数一般定义的基础上，进一步将有理参数曲线的广义环绕数转化为多项式 \Bezier 曲线上的有理多项式积分，再借助留数定理给出简洁的闭式表达；随后讨论查询点位于曲线上的边界情形，并进一步推导广义环绕数导数。由此得到的方法既可用于复杂曲边包围几何的高效、稳定内外判断，也为曲线方向分析与相关几何处理任务提供了统一的计算基础。
+
+接下来，\S~\ref{sec:qry-method} 节给出有理曲线广义环绕数的闭式推导，\S~\ref{sec:qry-results} 节展示其在不同曲线与数据集上的内外判断和效率评估结果。
+
+\input{chapters/chap4_cn/query_method}
+\input{chapters/chap4_cn/query_results}
+
+\section{本章小结}\label{sec:chap3-query-conclusion}
+本章围绕包围几何的高效鲁棒内外判断问题，研究了由有理参数曲线构成的二维曲边边界上的广义环绕数闭式计算方法。在第2章给出广义环绕数一般定义的基础上，本章进一步将有理参数曲线上的内外判断转化为参数积分问题，并将有理 \Bezier 曲线的广义环绕数统一写为有理多项式积分。基于留数定理，本章给出了闭式广义环绕数的解析表达，进一步讨论了查询点位于边界上的特殊情形及其导数计算。实验结果表明，本章方法能够在复杂曲边、非水密和脏几何场景下实现稳定而高效的内外判断，并在不同曲线形状与查询点位置下保持较好的计算一致性，为后续以包围几何为计算域的映射、编辑和查询任务提供了可靠的区域判定基础。

@@ -1,0 +1,323 @@
+\section{高阶柯西坐标} \label{sec:cau-method}
+本章先在第~\ref{sec:cau-revisit} 节回顾 Cauchy 坐标，再在第~\ref{sec:cau-High-order-Cauchy} 节介绍笼上的 高阶Cauchy 坐标，最后在第~\ref{sec:cau-closed-form} 节推导这些坐标及其导数的闭式表达。
+%
+更多讨论见第~\ref{sec:cau-connection} 与第~\ref{sec:cau-details} 节。
+
+\subsection{ Cauchy 坐标}\label{sec:cau-revisit}
+作为复分析中的基础结论，Cauchy 积分公式指出：定义在平面区域 \(\Omega\) 上、且边界 $\partial \Omega$ 为简单闭曲线的全纯函数，可由其在 $\partial \Omega$ 上的取值完全决定。
+%
+将连续函数 \(f\) 的边界值代入 Cauchy 积分公式右侧，可得到一个全纯函数 \(u\)：
+\begin{equation}\label{equ:cau-Cauchy-integral}
+    u(z)=\frac{1}{2\pi i}\int_{\partial \Omega}\frac{f(\zeta)}{\zeta-z} d\zeta,\ \ z \in \Omega,
+\end{equation}
+其中 $z$ 为复数，且 \(i=\sqrt{-1}\)。
+这种从 \(f\) 到 \(u\) 的变换称为\emph{Cauchy 变换} \cite{Bell2015cauchytransform}。
+文献中的两类 Cauchy 坐标~\cite{Weber2009,Lin2024PolynomialCC} 均来源于该变换。
+
+\paragraph{笼（Cage）}
+给定有界区域 $\Omega$，其边界 $\partial \Omega$（即\emph{笼}）是一个无自交闭合曲线，由顶点集 $V = \{\mv_j\}^n_{j=1}$ 和边集 $E = \{\me_j\}^n_{j=1}$ 组成（按逆时针定向），见图~\ref{fig:cau-notations}。
+%
+在复平面上，每个顶点 $\mv_j$ 记作复数 \(z_j=\mv_{j,x}+\mv_{j,y} i\)。
+%
+Cauchy 坐标~\cite{Weber2009} 与多项式 Cauchy 坐标~\cite{Lin2024PolynomialCC} 都定义在具有直边的初始笼上，即对边 $\me_j = \overline{\mv_{j-1}\mv_j}$，有 \( z_{\me_j}(t) = (1-t) z_{j-1} + t z_j,\ t\in[0,1]\)。
+二者的区别在于变形后笼边的表示：
+\begin{itemize}
+    \item 对 Cauchy 坐标，新的 $\me_j$ 为线段，即 $f^\text{new}(z_{\me_j}(t)) = (1-t) p^\text{new}_{j-1}+t p^\text{new}_{j}$，其中 $p^\text{new}_{j}$ 为顶点 $\mv_j$ 的新位置。
+    \item 对多项式 Cauchy 坐标，新的 $\me_j$ 为次数 $n_j \geq 1$ 的多项式曲线，即 $f^\text{new}(z_{\me_j}(t)) = \sum_{k=0}^{n_j} B^{n_j}_k(t) p^\text{new}_{\me_j,k}$，其中 $B^{n_j}_k (t)$ 为 Bernstein 多项式，$p^\text{new}_{\me_j,k} \in \mathbb{C}$ 为控制点。
+\end{itemize}
+由于多项式情形包含线性情形（$n_j = 1$），下文仅讨论多项式 Cauchy 坐标。
+
+\paragraph{Cauchy 坐标推导}
+将变形笼的新位置代入式~\eqref{equ:cau-Cauchy-integral}，可得
+\begin{equation}\label{equ:cau-discretization}
+\begin{split}
+    u(z) &:=\frac{1}{2\pi i} \sum_{j=1}^n \int_{\me_j}\frac{f^\text{new}(\zeta)}{\zeta-z}d\zeta \\
+     &=\frac{1}{2 \pi i}\sum_{j=1}^n \sum_{k=0}^{n_j} \left(\int_{\me_j}\frac{B^{n_j}_k (t)}{\zeta-z}d\zeta\right) p^\text{new}_{\me_j,k}, \ \ z \in \Omega.
+\end{split}
+\end{equation}
+用户通过编辑控制点 $p^\text{new}_{\me_j,k}$ 可直观地完成形变。
+此外，在式~\eqref{equ:cau-discretization} 中，与控制点 $p^\text{new}_{\me_j,k}$ 对应的全部积分项（$\frac{1}{2 \pi i}\left(\int_{\me_j}\frac{B^{n_j}_k (t)}{\zeta-z}d\zeta\right)$）共同构成其 Cauchy 坐标~\cite{Lin2024PolynomialCC}。
+由于 $B^{n_j}_k (t) = 
+\begin{pmatrix}
+n_j \\
+k \\
+\end{pmatrix}
+t^k (1-t)^{n_j-k}$，
+只需评估不同 $k$ 下的积分 $\left(\int_{\me_j}\frac{t^k}{\zeta-z}d\zeta\right)$ 即可得到坐标。
+
+\begin{figure}[t]
+  \centering
+   \vspace{-2mm}
+  \begin{overpic}[width=0.99\linewidth]{chap4_notation}
+    {
+ \put(31,9){\small $\me_j$}
+ \put(40,19){\small $\zeta$}
+ \put(13,13.5){\small $\Omega$}
+ \put(23,23.5){\small $z$}
+ \put(50,24){\small $u$}
+ \put(80,23.5){\small $u(z)$}
+ \put(91,7){\small $f^{\text{new}}(\me_j)$}
+    }
+  \end{overpic}
+  \vspace{-5mm}
+  \caption{
+  高阶笼变形示意。原始曲线 $\me_j$ 变形为 $f^{\text{new}(\me_j)}$，笼内任意点 $z$ 变形为 $u(z)$。
+  }
+  \label{fig:cau-notations}
+\end{figure}
+
+\subsection{高阶笼上的二维 Cauchy 坐标及其导数}\label{sec:cau-High-order-Cauchy}
+
+\paragraph{更强的变形交互性}
+由 Cauchy 积分公式可得
+\begin{equation}
+    u(z)-z=\frac{1}{2\pi i}\int_{\partial \Omega}\frac{f(\zeta)-\zeta}{\zeta-z} d\zeta,\ \ z \in \Omega,
+\end{equation}
+其中 \(f(\zeta)-\zeta\) 表示笼边界点 $\zeta$ 的位移（通常非全纯），而 \(u(z)-z\) 为内部点 \(z\) 的形变位移。
+由于 \(u(z)-z\) 是全纯函数，依据最大模原理，其最大位移出现在 \(\partial \Omega\) 上。
+因此，对同一边界位移场而言，离笼越近的区域形变位移越大，边界附近交互性更强。
+这也是为何在交互编辑中，通常希望笼尽可能贴近形状，而非采用远离形状的大包围边界。
+高阶笼相比线性笼具有更强逼近能力，因此本文将 Cauchy 坐标推广到高阶输入笼。
+
+\paragraph{边界上的全纯性}
+Cauchy 坐标与多项式 Cauchy 坐标都能在 \(\Omega\) 内生成全纯函数 $u$。
+若全纯函数导数不为 0，则其为保角映射，因此可得到保角形变。
+但 $u$ 在 \(\partial \Omega\) 上一般并非全纯，这会导致边界附近不够光滑（见 文献\cite{Lin2024PolynomialCC} 图 4）。
+若输入二维形状仅由直边构成，则可由初始线性笼紧密逼近；这时，多项式 Cauchy 坐标可通过将直边变形为 \Bezier 曲线来获得更平滑结果，其依据是以下定理：
+\begin{theorem}[文献\cite{Bell2015cauchytransform}的定理 3.3 ]\label{pro:cau-holomorphic}
+设 \(\partial \Omega\) 光滑，且 \(u\) 是定义在 \(\Omega\) 上的全纯函数，并可延拓为 \(\Omega\cup \partial \Omega\) 上的连续函数。若 \(u\) 的边界值在 \(\partial\Omega\) 的某条开弧 \(\Gamma\) 上光滑，则 \(u\) 的各阶导数都可由 \(\Omega\) 连续延拓到 \(\Omega \cup \Gamma\)。
+\end{theorem}
+
+然而，对于曲边形状若仍使用线性输入笼，边界非全纯问题依旧存在（图~\ref{fig:cau-cmp-smoothness}）。
+幸运的是，定理~\ref{pro:cau-holomorphic} 也表明：若变形前后某条边都光滑，则 $u$ 在该边界处可保证全纯。
+这也推动本文将 Cauchy 坐标推广到高阶输入笼，使其能用光滑边更紧密包围输入形状。
+假设 \(\partial \Omega\) 为分段光滑边界，可由定理~\ref{pro:cau-holomorphic} 直接推出：
+ \begin{lemma}\label{pro:cau-lemma_holo}
+ 全纯函数 \(u\) 在 \(\partial \Omega\) 上全纯，当且仅当 \(f\) 将边界的光滑段映射到光滑段，且 \(f\) 在非光滑顶点处为相似变换。
+ \end{lemma}
+
+\paragraph{推导}
+现在将 Cauchy 坐标扩展到由多项式曲线组成的高阶初始笼 $\partial \Omega$。
+输入边 $\me_j$ 表示为次数 $m_j \geq 1$ 的 \Bezier 曲线：$z_{\me_j}(t) = \sum^{m_j}_{k=0} B_k^{m_j}(t) p^\text{old}_{\me_j,k} , \forall t \in [0, 1]$，其中 $p^\text{old}_{\me_j,k} \in \mathbb{C}$ 为控制点。
+不失一般性，仍假设 $\me_j$ 的变形曲线为 $f^\text{new}(z_{\me_j}(t)) = \sum_{k=0}^{n_j} B^{n_j}_k(t) p^\text{new}_{\me_j,k}$。
+则有
+\begin{equation}\label{equ:cau-discrete-curved}
+\begin{split}
+    u(z) &=\frac{1}{2\pi i} \sum_{j=1}^n \int_{\me_j}\frac{f^\text{new}(\zeta)}{\zeta-z}d\zeta \\
+    &= \frac{1}{2\pi i} \sum_{j=1}^n \int^1_{0} \frac{\sum_{k=0}^{n_j} p^\text{new}_{\me_j,k} B^{n_j}_k(t) z'_{\me_j}(t)}{z_{\me_j}(t) - z} dt \\
+     &= \frac{1}{2\pi i} \sum_{j=1}^n \sum_{k=0}^{n_j} \left(\int^1_{0} \frac{ B^{n_j}_k(t) z'_{\me_j}(t)}{z_{\me_j}(t) - z} dt \right) p^\text{new}_{\me_j,k}, \ \ z \in \Omega.
+\end{split}
+\end{equation}
+将式~\eqref{equ:cau-discrete-curved} 括号内积分记为 $\alpha_{\me_j,k}(z)$。
+与控制点 $p^\text{new}_{\me_j,k}$ 相关的所有积分共同组成其 Cauchy 坐标。
+
+\begin{equation}\label{equ:cau-derivative-curved}
+     \frac{d^l \alpha_{\me_j,k}(z)}{ dz^l } = l! \int^1_{0} \frac{ B^{n_j}_k(t) z'_{\me_j}(t)}{(z_{\me_j}(t) - z)^{l+1}} dt.
+\end{equation}
+该式使坐标导数可直接计算。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{chap4_smooth_poly}
+    {
+ \put(16,-2){\small \textbf{(a1)}}
+ \put(40,-2){\small \textbf{(a2)}}
+ \put(67,-2){\small \textbf{(b1)}}
+ \put(89,-2){\small \textbf{(b2)}}
+    }
+  \end{overpic}
+  \vspace{3mm}
+  \caption{
+  多项式 Cauchy 坐标将线性笼（a1，边上非端点控制点以实点表示）映射到三次笼时，边界附近会出现不光滑（a2）。
+我们的方法使用的三次输入笼可紧密包围形状（b1），并得到光滑形变（b2）。
+  }
+  \label{fig:cau-cmp-smoothness}
+\end{figure}
+
+\subsection{解析解}\label{sec:cau-closed-form}
+式~\eqref{equ:cau-discrete-curved}（坐标）和式~\eqref{equ:cau-derivative-curved}（坐标导数）中的被积函数均为有理多项式。
+下面给出该类积分的解析解计算方法，这是本章方法的核心贡献。
+
+\paragraph{表示方式}
+将分母记为 $h(t), t\in[0,1]$，其次数为 $l$。
+分子写为次数 $r$ 的多项式：$g(t) = \sum^r_{k=0} a_k t^k$，其中 $a_k$ 为系数。
+由于 $\int^1_{0} g(t) / h(t) dt = \sum^r_{k=0} a_k \int^1_{0} t^k / h(t) dt$，只需计算 $\int^1_{0} t^k / h(t) dt, \forall k \geq 0$。
+
+\paragraph{定理}
+\begin{theorem}\label{pro:cau-general}
+多项式 $h(t)$ 有 $m\leq l$ 个互异根 $\{\zeta_j\}^m_{j=1}$（$\zeta_j$ 为复数）。
+则
+$$\int_0^1 \frac{t^k}{ h(t)}dt=\sum_{j=1}^{m}\res(S_k(\zeta),\zeta_j), \zeta \in \mathbb{C}, $$
+其中 $S_k(\zeta)=s_k(\zeta)/h(\zeta)$，且
+$$s_k(\zeta)=\zeta^k(\log(1-\frac{1}{\zeta})+\sum_{j=1}^k\frac{1}{j \zeta^j}).$$
+\end{theorem}
+
+\begin{figure}[!t]
+  \centering
+  \begin{overpic}[width=0.5\linewidth]{chap4_cauchy_complex}
+    {
+ \put(63,19){\small $\zeta_i$}
+ \put(52,70){\small $\zeta_j$}
+ \put(65,54){\small $l_1$}
+ \put(50,40){\small $l_2$}
+ \put(27,36){\small $0$}
+ \put(85,36){\small $1$}
+ \put(85,58){\small $\gamma_2$}
+ \put(27,58){\small $\gamma_1$}
+ \put(84,80){\small $\Gamma$}
+    }
+  \end{overpic}
+  \vspace{0mm}
+  \caption{复平面上的积分路径。}
+  \label{fig:cau-inte_path}
+\end{figure}
+
+\begin{proof}
+下面考虑函数 \(S_k(\zeta)\) 沿积分路径（见图~\ref{fig:cau-inte_path}）的积分。
+该路径由 \(\gamma_1,l_1,\gamma_2,l_2,\Gamma\) 组成，其中 \(\gamma_1,\gamma_2\) 分别是以 0 与 1 为圆心、半径为 \(\epsilon\) 的小圆，\(l_1,l_2\) 分别是线段 \([0,1]\) 的上、下侧，\(\Gamma\) 是半径为 \(R\) 的大圆（本证明令 \(R \to \infty\)）。
+
+\(S_k(\zeta)\) 在该积分路径上全纯。
+事实上，\(\log\left(1 - \frac{1}{\zeta}\right) = \log(1-\zeta) - \log(-\zeta)\)。
+当 \(\zeta\) 沿任意绕过线段 \([0,1]\) 的简单闭曲线转一圈时，$\log\left(1 - \frac{1}{\zeta}\right)$ 仍保持单值全纯分支。
+%
+对 $S_k$ 在路径包围区域应用\emph{留数定理}，有
+    \begin{equation}\label{equ:cau-residue_theorem}
+        \begin{aligned}
+ \int_{\gamma_1+l_1+\gamma_2+l_2+\Gamma} S_k(\zeta) \, d\zeta
+            = 2\pi i \sum_{j=1}^{m} \res(S_k(\zeta), \zeta_j).
+        \end{aligned}
+    \end{equation}
+当 $\zeta\in l_1$ 时，$\log(1-\zeta)-\log(-\zeta)=\log(1-t)+2 \pi i-\log(-t)$；
+当 $\zeta\in l_2$ 时，$\log(1-\zeta)-\log(-\zeta)=\log(1-t)-\log(-t)$，其中 $t$ 为 $\zeta$ 的实部。
+于是
+\begin{equation}\label{equ:cau-l1l2}
+\begin{aligned}
+    &\int\limits_{l_1+l_2} S_k(\zeta) \, d\zeta=\int_{0}^1 \left(S_k(t) +\frac{2\pi i t^k}{h(t)}\right)\, dt+\int_1^0 S_k(t) \, dt\\
+    &=2\pi i \int_{0}^{1} \frac{ t^k}{h(t)} \, dt.
+    \end{aligned}
+\end{equation}
+ 当 \( \zeta \in \Gamma \) 时，根据泰勒展开，\( s_k \) 可写为
+    \begin{equation}
+        s_k(\zeta)=\zeta^k(\sum_{j=1}^{\infty}\frac{-1}{j \zeta^j}+\sum_{j=1}^k\frac{1}{j \zeta^j})=\sum_{j=1}^\infty\frac{-1}{(k+j) \zeta^{j}}.
+    \end{equation}
+    由于 $h(\zeta)$ 次数至少为 1，有 $\lim_{R\to \infty}\zeta S_k(\zeta)=0$，从而
+    \begin{equation}\label{equ:cau-Gamma}
+        \lim\limits_{R\to \infty}\int_{\Gamma} S_k(\zeta) \, d\zeta=0.
+    \end{equation}
+    当 $\zeta \in \gamma_1$ 时，有
+    \begin{equation}
+    \begin{aligned}
+       \lim\limits_{\epsilon\to 0} &\int_{\gamma_1} S_k(\zeta) \, d\zeta=\lim\limits_{\epsilon\to 0}\int_{\gamma_1} \frac{\zeta^k \log(-\zeta)}{h(\zeta)}\, d\zeta.\\
+       &\leq \frac{\epsilon^k (-\log(\epsilon)+2 \pi)}{h(0)}2 \pi \epsilon \to 0.
+       \end{aligned}
+    \end{equation}
+    对 $\zeta \in \gamma_2$ 同理，因此
+    \begin{equation}\label{equ:cau-gamma12}
+       \lim\limits_{\epsilon\to 0} \int_{\gamma_1+\gamma_2} S_k(\zeta) \, d\zeta=0.
+    \end{equation}
+
+    将~\eqref{equ:cau-l1l2}、\eqref{equ:cau-Gamma}、\eqref{equ:cau-gamma12} 代入~\eqref{equ:cau-residue_theorem}，即可得到
+    \begin{equation}
+        \int_0^1 \frac{t^k}{ h(t)}dx=\sum_{j=1}^{m}\res(S_k(\zeta),\zeta_j).
+    \end{equation}
+\end{proof}
+
+\paragraph{说明}
+在上述证明中，$\log(1-\zeta) - \log(0-\zeta)$ 将积分区间限定为 \([0,1]\)，额外项 $\sum \frac{1}{j \zeta^j}$ 用于保证 \(S_k\) 在无穷远点的留数为 0。
+该定理也可扩展到区间 \([a,b]\) 的积分，只需把 $s_k(\zeta)$ 中对数项改写为 \(\log(b-\zeta)-\log(a-\zeta)\)，并保持附加项为该对数项泰勒展开前 $k$ 项的相反数。
+
+\paragraph{一般根}
+在最一般情形下，\( \zeta_j \) 是 \( S_k(\zeta) \) 的单极点。记 $h^{j,1}(\zeta)=h(\zeta)/(\zeta-\zeta_j)$，则
+\begin{equation}\label{equ:cau-gene_expression}
+\begin{aligned}
+    &\res(S_k(\zeta),\zeta_j)=\lim_{\zeta\to \zeta_j}(\zeta-\zeta_j)S_k(\zeta)=\frac{s_k(\zeta_j)}{h^{j,1}(\zeta_j)}.
+    \end{aligned}
+\end{equation}
+
+\paragraph{重根}
+在计算 \(\alpha_{\me_j,k}(z)\) 时，少量点会出现多重极点。
+例如，当输入边 $\me_j$ 为二次曲线时，多重极点意味着 \(z\) 与 $\me_j$ 的焦点重合。
+此时记 \( \zeta_j \) 为 $l_j$ 阶极点，且 $h^{j,l_j}(\zeta)=h(\zeta)/(\zeta-\zeta_j)^{l_j}$，有
+\begin{equation}\label{equ:cau-repeated_expression}
+\begin{aligned}
+&\res(S_k(\zeta),\zeta_j)
+    =\lim_{\zeta\to \zeta_j}\frac{1}{(l_j-1)!}\frac{d^{l_j-1}}{d\zeta^{l_j-1}}\{\frac{s_k(\zeta)}{h^{j,l_j}(\zeta)}\}.
+    \end{aligned}
+\end{equation}
+对给定 $l_j$，按标准求导规则即可计算。
+在实际计算中，尚未遇到计算 \(\alpha_{\me_j,k}(z)\) 时 $l_j>1$ 的情形。
+
+\subsection{扩展}\label{sec:cau-connection}
+\paragraph{多项式 Green 坐标}
+文献\cite{MichelThiery2023} 提出了闭式多项式 Green 坐标，可将直边输入笼变形为曲边输出笼；但其不能处理高阶输入笼。
+在此基础上，我们利用上述定理将 Green 坐标扩展到高阶笼。
+根据文献~\cite{MichelThiery2023} 的式 (12)，高阶笼 Green 坐标计算可归结为如下积分：
+定理~\ref{pro:cau-general} 可直接用于该积分。
+
+\paragraph{有理多项式笼}
+我们还可将坐标扩展到由有理多项式曲线构成的初始高阶笼 $\partial \Omega$（图~\ref{fig:cau-rational}）。
+令 $z_{\me_j}(t) = \frac{z_{w,\me_j}(t)}{w(t)}, \forall t \in [0, 1]$，其中 \(z_{w,\me_j}(t)=\sum_{k=0}^{m_j}w_{\me_j,k}p_{\me_j,k}^{\text{old}}B_k^{n_j}(t)\)，\(w(t)=\sum_{k=0}^{m_j}w_{\me_j,k}B_k^{n_j}(t)\)。
+随后将 $f^\text{new}(z_{\me_j}(t))$ 写为与其共享权重、控制点为新控制点 \(p^\text{new}_{\me_j,k}\) 的有理曲线，可得
+\begin{equation}
+    \alpha_{\me_j,k}(z)=\int_0^1 \frac{z_{w,\me_j}'(t)w(t)-w'(t)z_{w,\me_j}(t)}{(z_{w,\me_j}(t)-zw(t))w(t)^2}dt.
+\end{equation}
+定理~\ref{pro:cau-general} 同样可用于该积分。
+当 \(w(t)\) 与 \(z_{\me_j}^{w}(t)-zw(t)\) 的根重合时，需要额外处理：实践中以误差阈值 \(\epsilon=10^{-10}\) 合并根后重新评估其重数。
+
+\subsection{实现细节}\label{sec:cau-details}
+算法~\ref{alg:cau-encoding} 给出了本章 Cauchy 坐标的计算伪代码。
+
+\paragraph{计算 \(\{\zeta_j\}\)}
+为应用定理~\ref{pro:cau-general} 计算高阶笼 Cauchy 坐标，需要先求解 $h(t)=0$ 的根 $\{\zeta_j\}$。
+对最常用的二次和三次曲线，可使用闭式求根公式。
+对四次以上多项式，则需数值求根。
+
+\paragraph{递推计算}\label{sec:cau-encoding}
+以下以迭代方式计算 \(\res(S_{k}(\zeta),\zeta_j)\)。为简洁起见，仅给出 \(\zeta_j\) 为单极点的情形（多极点类似）。
+由
+    $s_{k+1}(\zeta)=\zeta s_k(\zeta)+\frac{1}{k+1},\ k\geq 0,$
+在实践中使用如下递推：
+\begin{equation}\label{equ:cau-recur}
+\begin{aligned}
+&\res(S_{0}(\zeta),\zeta_j)=\frac{s_0(\zeta_j)}{h^{j,1}(\zeta_j)},\\
+    &\res(S_{k+1}(\zeta),\zeta_j)=\zeta_j \res(S_k(\zeta),\zeta_j)+\frac{1}{k+1}\frac{1}{h^{j,1}(\zeta_j)}.
+    \end{aligned}
+\end{equation}
+
+\begin{algorithm}[t]
+  \caption{计算初始位置点 $z$ 的 Cauchy 坐标}\label{alg:cau-encoding}
+  \SetKwInput{KwInput}{输入}
+  \SetKwInput{KwOutput}{输出}
+  \SetKwFunction{FMain}{Main}
+  \SetKwFunction{FD}{D}
+
+  \KwInput{初始笼内部一点 $z$，以及由次数 $m_j$ 多项式 $z_{\me_j}(t)$ 表示的初始边 $\me_j$。}
+  \KwOutput{点 $z$ 关于变形边控制点 \(p_r^{\text{new}}\) 的坐标 $\alpha_{\me_j,r}(z)$。}
+
+  计算 $z_{\me_j}(t)-z=0$ 的根 $\{\zeta_j\}_{j=1}^l$\;
+  将 \(B_k^{n_j}(t)z_{\me_j}'(t)\) 转换为 \(\sum_{k=0}^{m_j+n_j-1} c_k t^k\)\;
+  $k \gets 0; \alpha_{\me_j,r}(z) \gets 0$\;
+  \For{$k \leq m_j+n_j-1$}{
+  $temp \gets 0$\;
+      \For{每个 \(\zeta_j\) 属于 \(\{\zeta_j\}\)}{
+      \If{\(\zeta_j\) 为单极点}{用 \eqref{equ:cau-recur} 计算 \(\res(S_{k}(\zeta),\zeta_j)\)。}
+      \Else{用 \eqref{equ:cau-repeated_expression} 计算 \(\res(S_{k}(\zeta),\zeta_j)\)。}
+      $temp \gets temp+\res(S_k(\zeta),\zeta_j))$;
+      }
+      \(\alpha_{\me_j,r}(z) \gets \alpha_{\me_j,r}(z) + c_k temp; \, k \gets k+1 \)\;
+  }
+\end{algorithm}
+
+\paragraph{数值稳定性}
+在使用~\eqref{equ:cau-recur} 计算时，只需显式计算 $1/h^{j,1}(\zeta_j)$ 与 $s_0(\zeta_j)$。
+当 \(\zeta_j\) 是单根时，$1/h^{j,1}(\zeta_j)$ 定义良好。
+函数 \( s_0(\zeta) \) 可写为：
+{\small
+\[
+\log(1-\frac{1}{\zeta}) = \frac{1}{2} \log\left(1+\frac{ 1 - 2 \operatorname{Re}(\zeta)}{\|\zeta\|^2}\right) + i \text{atan2}\left(\operatorname{Im}(\zeta), \|\zeta\|^2 - \operatorname{Re}(\zeta)\right).
+\]
+}
+当 \( z \notin \partial \Omega \) 时该表达是良定义的：
+(1) 对数函数 \( \log(\cdot) \) 仅在 \( \|\zeta\|^2 = 0 \) 或 \( 1 - 2 \text{Re}(\zeta) \leq -\|\zeta\|^2 \) 时失效，这等价于 \( \zeta = 0 \) 或 \( \zeta = 1 \)（即 \( z \) 在 $\me_j$ 两端点上）；
+(2) 反正切函数在 \( \zeta \neq 0 \) 或 \( \zeta \neq 1 \) 时同样定义良好。
+本文对坐标进行数值误差检验，在所有样例中最大误差未超过 $10^{-11}$。

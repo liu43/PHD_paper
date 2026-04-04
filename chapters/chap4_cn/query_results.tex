@@ -1,0 +1,140 @@
+\section{实验与评估}\label{sec:qry-results}
+本章方法采用 C++ 实现。所有实验在一台配备 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存的台式机上完成。算法中唯一由用户控制的参数是容差 \(\epsilon_1\)，用于定义查询点 \(\mq\) 与边界曲线距离多近时可被视为位于曲线上。所有实验统一设定 $\epsilon_1=10^{-16}$（图~\ref{fig:qry-gallery}）。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{chap4_diff_order}
+    {
+    \put(20,-3){\small 总时间: 0.16s vs. 1.10s}
+    \put(62,-3){\small 总时间: 1.25s vs. 1.85s}
+    }
+  \end{overpic}
+  \vspace{1mm}
+  \caption{
+ 左：两条二次有理曲线（含四分之一椭圆与负权重的四分之三椭圆）的 GWN。
+ 右：五次有理曲线的 GWN。
+图下文字给出了我们的方法与 文献\cite{Spainhour2024RobustCQ} 的总计算时间。
+  }
+  \vspace{-3mm}
+  \label{fig:qry-diff-order}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{chap4_round}
+    {
+    }
+  \end{overpic}
+  \vspace{1mm}
+  \caption{
+  不同情形下的取整 GWN。
+  }
+  \vspace{-3mm}
+  \label{fig:qry-round}
+\end{figure}
+
+
+\begin{figure*}[t]
+  \centering 
+  \begin{overpic}[width=0.96\linewidth]{chap4_gallery}
+    {
+    }
+  \end{overpic}
+  \vspace{1mm}
+  \caption{
+  各类复杂模型的 GWN 可视化结果，颜色映射见右下角色条。
+  }
+  \label{fig:qry-gallery}
+\end{figure*}
+
+\tr{
+\paragraph{数值稳定性}
+我们对 \eqref{equ:qry-final-expression} 采用如下计算形式：
+\begin{equation}\label{equ:qry-actual_expression}
+    \im(\log(1-\frac{1}{\omega_k}))=\text{atan2}(\im(\omega_k),\|\omega_k\|^2-\re(\omega_k)).
+\end{equation}
+仅当 \(\|\omega_k\|^2-\re(\omega_k)=0\) 时，\(\arctan(\cdot)\) 不适定；这等价于 \(\omega_k=0\) 或 \(\omega_k=1\)（即 \(\mq\) 位于 \(\gamma\) 的端点）。命题~\ref{pro:qry-boundary} 说明此时该值可置为 0。
+}
+
+\tr{
+将式~\eqref{equ:qry-final-expression} 用于计算时，唯一误差来源是求根过程。为消除该误差，一种简单有效的做法是先估计未知整数项 \(K\)，再用 \eqref{equ:qry-expression_Int} 进行计算。具体如算法~\ref{alg:qry-encoding} 的编码流程所示：将 \((w_\Gamma-w_L)\) 四舍五入到最近整数后再加回 \(w_L\)，即可得到与 \(w_L\) 同精度级别的 \(w_\Gamma\)。
+}
+
+\tr{
+仅存在一种例外情况：当 \(\omega_k\) 的实部位于 $(0,1)$ 且求根误差导致 \(\im(\omega_k)\) 符号翻转时，命题~\ref{pro:qry-near_boundary} 表明查询点极接近曲线，此时解析计算可能给出错误的内外判定。
+为增强数值鲁棒性，当遇到虚部低于阈值 \(\epsilon_2=10^{-12}\) 的根时，可执行牛顿细化，直到 \(\im(\omega_k)\) 的变化小于 \(\epsilon_3=10^{-18}\)（见算法~\ref{alg:qry-encoding2}）。
+}
+
+\paragraph{不同次数}
+三次 \Bezier 曲线是 PostScript 与 SVG 格式所要求的最高次数，通常已足够表达设计细节。
+不过，在配合数值求根算法文献~\cite{Skowron2012} 时，本章方法同样适用于更高次数曲线。
+如图~\ref{fig:qry-diff-order} 所示，我们对五次有理曲线计算 GWN，在保持精确评估的同时，速度仍快于 文献\cite{Spainhour2024RobustCQ}。
+此外，即使是具有负权重、不满足凸包性质的有理曲线（文献\cite{Spainhour2024RobustCQ} 无法处理），本章闭式表达仍然有效。
+整体速度主要取决于不同次数下求根过程的效率。
+
+\paragraph{取整环绕数}
+GWN 的小数部分可被视作包含查询置信度的一种度量。
+如图~\ref{fig:qry-round} 所示，将每个 GWN 值四舍五入到最近整数后，可形成一个环绕数字段。基于该字段的取整过程会产生三种边界近似，并在局部消除相交或断开曲线对包含判定的影响。
+
+\paragraph{大规模评估}
+\tr{我们在 OpenClipArt 数据集~\cite{hu2019TriWild}（含 17,944 个真实 SVG）上进行了大规模定量评估。虽然较少见，但数据集中有些曲线会出现“实际多项式次数”与“控制点数量”不匹配的情况，可能源于低次 \Bezier 曲线的升阶。在算法中，这体现为多项式 \(c(t)\) 的首项系数接近 0。实践中，当首项系数绝对值小于阈值 \(\epsilon_4=10^{-12}\) 时，算法切换到低一阶求根公式，并显式将一个根设为 0。}
+
+\tr{为更本质地评测求根子程序的精度与稳定性，我们同时使用式~\eqref{equ:qry-final-expression} 和式~\eqref{equ:qry-expression_Int} 进行计算。
+由于本章方法与 文献\cite{Spainhour2024RobustCQ} 都使用了多次 \text{atan2} 运算，而我们额外使用了求根公式，因此将“式~\eqref{equ:qry-final-expression} 与 文献\cite{Spainhour2024RobustCQ} 结果差异”视为求根过程引入误差的度量。}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{chap4_dataset}
+    {
+%    	 \put(18,1){\small 曲线数目}
+%    	\put(72,1){\small 曲线数目}
+%    	\put(2,37){\small 平均时间比值}
+%    	\put(55,37){\small 最大误差}
+    }
+  \end{overpic}
+  \vspace{0mm}
+  \caption{
+我们进行了大规模矢量图评测。
+  左图给出我们的方法（使用式~\eqref{equ:qry-expression_Int}）与 文献\cite{Spainhour2024RobustCQ} 的时间比。
+  右图给出我们的方法结果（蓝：式~\eqref{equ:qry-expression_Int}；紫：式~\eqref{equ:qry-final-expression}）相对于文献 \cite{Spainhour2024RobustCQ} 的绝对差值。
+在所有图形上，我们都取得更短计算时间，但随着曲线数量增加，领先幅度会缩小。
+  求根过程会在少量接近“升阶退化”曲线上引入误差，本实验中最大误差为 \(2.1\times 10^{-3}\)。
+  }
+  \label{fig:qry-dataset}
+\end{figure}
+
+
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=0.98\linewidth]{chap4_compare_result_simp}
+    {
+    \put(8,-2){\small 原始形状}
+    \put(32,-2){\small GWN 数值}
+    \put(52,-2){\small 自适应细分\cite{Spainhour2024RobustCQ}}
+\put(79,-2){\small 我们的方法}
+  \put(98,1){\small \rotatebox{90}{单点运行时间($\mu s$)}}
+  \put(55,20.7){\small 总时间: 3.32s}
+  \put(79,20.7){\small 总时间: 1.66s}
+  \put(55,1){\small 总时间: 1.22s}
+  \put(79,1){\small 总时间: 0.77s}
+    }
+  \end{overpic}
+  \vspace{3mm}
+  \caption{
+  在两个模型上与自适应细分方法文献~\cite{Spainhour2024RobustCQ} 的比较，GWN 值使用图~\ref{fig:qry-gallery} 的色条可视化。
+  对于曲线包围盒外部区域，两种方法采用相同计算策略。
+  }
+  \vspace{-1mm}
+  \label{fig:qry-cmp}
+\end{figure*}
+
+\tr{
+在每个图形的包围盒内部，随机采样 10,000 个点，记录平均计算时间以及我们的方法结果与 文献\cite{Spainhour2024RobustCQ} 结果的最大差值，如图~\ref{fig:qry-dataset} 所示。式 \eqref{equ:qry-final-expression} 出现较大数值误差的少量案例，通常源于首项系数仅略大于 \(\epsilon_4\) 的曲线。
+}
+
+\paragraph{与 文献\cite{Spainhour2024RobustCQ} 的比较}
+我们在每个示例的单位正方形内均匀采样 100 万个点，并与 文献\cite{Spainhour2024RobustCQ} 比较总计算时间。
+当采样点位于曲线包围盒外时，我们采用与对方相同的计算方式。
+在查询点位于曲线包围盒内部时，对于二次与三次曲线，我们方法可达到约 $7$倍 的速度优势；而在更高次曲线上该优势会减弱。
+对于更复杂模型（见图~\ref{fig:qry-dataset} 与图~\ref{fig:qry-cmp}），随着模型中曲线尺寸变小，我们的性能领先也会下降。这是因为对多数点而言，两种方法的评估过程差异不大。
+\tr{例如在图~\ref{fig:qry-cmp} 的两个案例中，仅有 2.4\% 和 1.9\% 的计算发生在曲线包围盒内，而绝大多数评估发生在包围盒外。}

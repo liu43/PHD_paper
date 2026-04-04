@@ -1,0 +1,380 @@
+\section{有理曲线的广义环绕数} \label{sec:qry-method}
+%and transform the winding number of NURBS curves into that of \Bezier curves 
+第2章已经给出了广义环绕数的一般定义、可加性和平移不变性。本节不再重复这些基础内容，而是直接面向本章的问题设置，先在第~\ref{sec:qry-winding} 节将一般定义改写为有理曲线的参数积分形式，再在第~\ref{sec:qry-general} 节给出闭式广义环绕数的一般表达，并在第~\ref{sec:qry-forboundary} 节化简曲线上查询点的闭式结果，最后在第~\ref{sec:qry-derivative} 节讨论导数的计算。
+
+\subsection{参数积分形式}\label{sec:qry-winding}
+第2章已经给出广义环绕数的定义、曲线集合上的可加性以及平移不变性。对于本章的闭式求值问题，只需进一步把这些一般性质落实到有理参数曲线的具体表达上。由可加性可知，若二维 CAD 模型的边界由有向曲线集合 $\Gamma = \bigcup \gamma_k$ 组成，则查询点 $\mq$ 处的总广义环绕数满足
+\begin{equation}
+w_{\Gamma}(\mq) = \sum_k w_{\gamma_k}(\mq).
+\end{equation}
+因此只需先讨论单条有理曲线的情形，再对各条曲线结果求和即可。另一方面，由平移不变性，不失一般性地可将查询点平移到原点，以简化后续推导。
+
+\paragraph{有理参数曲线的广义环绕数}
+给定参数曲线 $\gamma = (\alpha(t),\beta(t))\in \mathbb{R}^2, t \in [0,1]$，其广义环绕数可写成如下参数积分形式：
+\begin{equation}\label{equ:qry-para_winding}
+    w_\gamma(\mq):=\frac{1}{2 \pi}\int_0^1 \frac{\alpha(t) \beta'(t) - \alpha'(t) \beta(t)}{\alpha^2(t)+\beta^2(t)} dt.
+\end{equation}
+%
+由于非均匀有理 B 样条（NURBS）曲线总可通过节点插入转化为一组有理 \Bezier 曲线，本文重点计算有理 \Bezier 曲线的广义环绕数。
+%
+若 $\gamma$ 是一条 $n$ 次有理 \Bezier 曲线，控制点为 ${\mp}_k$、权重为 $\lambda_k$（其中 $k \in \left \{0,\dots,n\right\}$），则其表达为：
+\begin{equation}
+    \gamma = \frac{\sum_{k=1}^n \lambda_k \mp_k B_k^n(t)}{\sum_{k=1}^n \lambda_k B_k^n(t)}:=\frac{(x(t),y(t))}{\lambda(t)},
+\end{equation}
+其中 $\lambda(t)=\sum_{k=1}^n \lambda_k B_k^n(t)$，$x(t)=\sum_{k=1}^n \lambda_k \mp_{k.x} B_k^n(t)$，$y(t)=\sum_{k=1}^n \lambda_k \mp_{k.y} B_k^n(t)$。
+将 $\alpha(t)=x(t)/\lambda(t)$ 与 $\beta(t)=y(t)/\lambda(t)$ 代入 \eqref{equ:qry-para_winding}，得到：
+\begin{equation}\label{equ:qry-rational_result}
+    w_{\gamma }(\mq):=\frac{1}{2 \pi}\int_0^1 \frac{x(t)y'(t)-x'(t)y(t)}{x^2(t)+y^2(t)} dt.
+\end{equation}
+式~\eqref{equ:qry-rational_result} 也可视为控制点为 $\{\lambda_k \mp_k\}$ 的 \Bezier 曲线的广义环绕数。
+因此，有理 \Bezier 曲线的广义环绕数被转化为多项式 \Bezier 曲线的广义环绕数。
+这并不意外。
+若在三维空间中用齐次坐标表示有理曲线，$\{\lambda_k \mathbf{p}_k\}$ 正是控制点投影到二维平面的结果。
+因此这两条曲线在二维中的 GWN 自然一致。
+
+
+\subsection{\Bezier 曲线广义环绕数的闭式表达}\label{sec:qry-general}
+\paragraph{\Bezier 曲线的广义环绕数}
+对于一条 $n$ 次 \Bezier 曲线 $\gamma(t)=(x(t),y(t))$，下面考虑式~\eqref{equ:qry-rational_result} 中的有理多项式积分，其中分子记为 $f(t):=x(t)y'(t)-y(t)x'(t)$，分母记为 $h(t):=x^2(t)+y^2(t)$。
+分子 $f(t)$ 是次数 $2n-2$ 的多项式（$(2n-1)$ 次项系数自然为 0）。分母 $h(t)$ 是次数 $2n$ 的多项式，且由于其本质是平方范数，总为正值。因此它可分解为成对共轭根对应的一次因子乘积：
+\begin{equation}
+    h(t)=x^2(t)+y^2(t)=A \prod_{k=1}^n (t-\omega_k)(t-\omega_k^*),
+\end{equation}
+其中 $A$ 表示 $h(t)$ 的 $2n$ 次项系数，$\omega_k$ 为第 $k$ 个复根，$\omega_k^*$ 为其共轭复根。
+
+尽管任意有理多项式积分都存在闭式表达，但在给定多项式系数后，解析解系数通常要通过求解线性方程组获得。
+该过程计算代价高且易出现数值不稳定。
+因此，本文给出一个简洁且高效的闭式表达，\tr{核心基于留数定理}。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.6\linewidth]{chap4_query_complex}
+    {
+    \put(45,38){\scriptsize 0}
+    \put(39,46){\small \(\gamma_1\)}
+    \put(33,59){\small \(\omega_k\)}
+    \put(32,22){\small \(\omega_k^*\)}
+    \put(66,38){\scriptsize 1}
+    \put(70,46){\small \(\gamma_2\)}
+    \put(57,51){\small \(l_1\)}
+    \put(55,30){\small \(l_2\)}
+ \put(18,64){\small \(\Gamma\)}
+  \put(88,37){\small \(\re (\omega)\)}
+   \put(47,78){\small \(\im (\omega)\)}
+    }
+  \end{overpic}
+  \vspace{-3mm}
+  \caption{
+积分所采用的复平面路径。
+  }
+  \vspace{-4mm}
+  \label{fig:qry-complex}
+\end{figure}
+
+\tr{将实函数 $G(t)$ 解析延拓到复平面时，某些点 $\omega_k \in \mathbb{C}$ 会成为 $G(t)$ 的孤立奇点。具体地，对一个 $m$ 阶奇点 $\omega_k$，$G(t)$ 的留数定义为：
+\begin{equation}
+    \res(G, \omega_k) \coloneqq \frac{1}{(m-1)!} \lim_{t \to \omega_k} \frac{d^{m-1}}{dt^{m-1}} \left[ (t - \omega_k)^m G(t) \right].
+\end{equation}
+对 GWN 的计算，有如下定理：
+}
+\begin{theorem}\label{pro:qry-general}
+记 $G(t)=\frac{f(t)}{h(t)}\log(1-\frac{1}{t})$，则有
+\begin{equation}\label{equ:qry-closed_form_expr}
+\int_0^1 \frac{f(t)}{ h(t)}dt=\sum_{k=1}^{n}\res(G(t),\omega_k)+\res(G(t),\omega_k^*).
+\end{equation}
+\end{theorem}
+\begin{proof}
+在线段 \([0,1]\) 外部，$G(\omega)$ 可分解为单值全纯分支。
+当 \(\omega\) 沿任一位于线段 \([0,1]\) 外的简单闭曲线绕行一圈时，\(\log(1-\omega)\) 与 \(\log(-\omega)\) 的辐角都增加 \(2\pi\)。又因 \(\log(1-\frac{1}{\omega})=\log(1-\omega)-\log(-\omega)\)，函数 $G(\omega)$ 的值保持不变。
+
+本文定义区域 $D$：其内部由大圆轮廓 \(\Gamma = \{ \omega : |\omega| = R \}\) 限定，并去除两个小圆 \(\gamma_1 = \{ \omega : |\omega| = \epsilon \}\) 与 \(\gamma_2 = \{ \omega : |\omega - 1| = \epsilon \}\) 的内部，\tr{其中 \(R\) 和 \(\epsilon\) 为正实数}，如图~\ref{fig:qry-complex} 所示。此处假设 \(\mq\) 不在 \Bezier 曲线段上，即 \([0,1]\) 内不存在 \(w_k\)。存在 \(w_k\) 的情形将在第~\ref{sec:qry-forboundary} 节详细讨论。
+
+%
+对区域 $D$ 上的函数 $G(\omega)$ 应用留数定理，得到：
+    \begin{equation}\label{equ:qry-residue_theorem}
+        \begin{aligned}
+            &\int_{\Gamma} G(\omega) \, d\omega + \int_{\gamma_1+l_1+\gamma_2+l_2} G(\omega) \, d\omega\\
+            &= 2\pi i \sum_{k=1}^{n} \res(G(\omega), \omega_k)+\res(G(\omega^*), \omega_k^*),
+        \end{aligned}
+    \end{equation}
+其中 \(l_1\) 表示 \([0,1]\) 上侧，\(l_2\) 表示 \([0,1]\) 下侧。
+记 \(\omega\) 的实部为 \(t\)。当 \(\omega\in l_1\) 时，\(\log(1-\omega)-\log(-\omega)=\log(1-t)+2\pi i-\log(-t)\)；
+当 \(\omega\in l_2\) 时，\(\log(1-\omega)-\log(-\omega)=\log(1-t)-\log(-t)\)。注意其余项在 \(l_1\) 与 \(l_2\) 上均全纯。因此有：
+\begin{equation}\label{equ:qry-l1l2}
+\begin{aligned}
+    &\int\limits_{l_1+l_2} G(\omega) \, d\omega=\int\limits_{l_1} G(t) +\frac{2\pi i f(t)}{h(t)}\, dt+\int\limits_{l_2} G(t) \, dt\\
+    &=2\pi i \int_{0}^{1} \frac{ f(t)}{h(t)} \, dt.
+    \end{aligned}
+\end{equation}
+ 
+    当 \(\omega \in \Gamma\) 时，由于 $h(\omega)$ 的次数为 $2n$、$f(\omega)$ 的次数为 $2n-2$，有 $\lim_{R\to \infty}\omega G(\omega)=0$，从而
+    \begin{equation}\label{equ:qry-Gamma}
+        \lim\limits_{R\to \infty}\int_{\Gamma} G(\omega) \, d\omega=0.
+    \end{equation}   
+    
+    当 $\omega \in \gamma_1$ 时，有：
+    \begin{equation}
+    \begin{aligned}
+       \lim\limits_{\epsilon\to 0} &\int_{\gamma_1} G(\omega) \, d\omega=\lim\limits_{\epsilon\to 0}\int_{\gamma_1} \frac{f(\omega) \log(-\omega)}{\prod_{k=1}^n(\omega-\omega_k)(\omega-\omega_k^*)}\, d\omega.\\
+       &\leq \frac{f(\epsilon) (-\log(\epsilon)+2 \pi)}{\prod_{k=1}^n |\omega_k|^2}2 \pi \epsilon \to 0.
+       \end{aligned}
+    \end{equation}
+    对 $\omega \in \gamma_2$ 的证明几乎相同，因此有：
+    \begin{equation}\label{equ:qry-gamma12}
+       \lim\limits_{\epsilon\to 0} \int_{\gamma_1+\gamma_2} G(\omega) \, d\omega=0.
+    \end{equation}
+    
+    将~\eqref{equ:qry-l1l2}、\eqref{equ:qry-Gamma} 和~\eqref{equ:qry-gamma12} 代入~\eqref{equ:qry-residue_theorem}，即可得到 \eqref{equ:qry-closed_form_expr}。
+\end{proof}
+
+\paragraph{\{$\omega_k$\} 的计算}
+\tr{
+$\omega_1,\omega_1^*,\dots,\omega_n,\omega_n^*$ 是多项式 $x(t)^2+y(t)^2=(x(t)+y(t)i)(x(t)-y(t)i)$ 的 $2n$ 个根。
+}
+因此，$\{\omega_k\}_{k=1}^n$ 即为 $n$ 次复系数多项式 $x(t)+y(t)i$ 的 $n$ 个根：
+\tr{
+\begin{equation}\label{equ:qry-root-decompose}
+c(t) :=x(t)+y(t) i= a_n t^n + \cdots + a_0 = a_n \prod_{i=1}^n (t - w_i).
+\end{equation}
+}
+对于次数小于 5 的多项式可采用解析求根公式；更高次数不存在统一解析公式，本文采用数值方法求根。
+
+\paragraph{一般根} 
+在最一般情形下，\(w_k\) 与 \(w_k^*\) 都是 \(G(t)\) 的单极点，且 \(\text{Res}(G(t), w_k)\) 与 \(\text{Res}(G(t), w_k^*)\) 互为复共轭。于是，若记 $h^k(t)=\tr{A}\prod_{j=1,j\neq k}^{n}(t-\omega_j)(t-\omega_j^*)$，则有：
+\begin{equation}\label{equ:qry-gene_expression}
+\begin{aligned}
+    &\sum_{k=1}^{n}\left(\res(G(t),\omega_k)+\res(G(t),\omega_k^*) \right)\\
+    &=\sum_{k=1}^{n}2\re\left(\res(G(t),\omega_k)\right)=\sum_{k=1}^{n}2\re\left(\lim_{t\to \omega_k}(t-\omega_k)G(t)\right)\\
+    &=\sum_{k=1}^{n}\im\frac{f(\omega_k)\log(1-\frac{1}{\omega_k})}{\im(\omega_k)h^k(\omega_k)}.
+    \end{aligned}
+\end{equation}
+\tr{注意到
+\begin{equation}\label{equ:qry-f}
+\begin{aligned}
+f=(x+ yi)(y'+x'i)-(xx'+yy')i,
+\end{aligned}
+\end{equation}
+且 \(h'=2(xx'+yy')\)，可得
+\begin{equation}
+    f(\omega_k)=-i h'(\omega_k)/2=\im(\omega_k)h^k(\omega_k).
+\end{equation}
+从而得到最终表达式：
+\begin{equation}\label{equ:qry-final-expression}
+\begin{aligned}
+    w_{\gamma }(\mq)=\frac{1}{2 \pi}\sum_{k=1}^n \im\left(\log\left(1-\frac{1}{\omega_k}\right)\right).
+\end{aligned}
+\end{equation}
+}
+
+\begin{wrapfigure}{r}{0.24\textwidth}
+  \vspace{-0.8\baselineskip}
+  \centering
+  \includegraphics[width=0.22\textwidth]{chap4_chatu_angles}
+  \vspace{-1.2\baselineskip}
+\end{wrapfigure}
+式 \eqref{equ:qry-final-expression} 十分简洁，其中每一项都可几何解释为复平面中向量 $(0-\omega_k)$ 与 $(1-\omega_k)$ 的夹角。
+此外，\eqref{equ:qry-final-expression} 还可改写为另一种表达，这也是 文献\cite{Spainhour2024RobustCQ} 的核心动机。
+根据 Vieta 定理，有：
+\begin{equation}
+\frac{c(1)}{c(0)} = \frac{a_n \prod_{i=1}^n (1 - \omega_i)}{a_0} = \frac{\prod_{i=1}^n (1 - \omega_i)}{\prod_{i=1}^n (-\omega_i)}.
+\end{equation}
+因此，式 \eqref{equ:qry-final-expression} 可改写为
+\begin{equation}\label{equ:qry-expression_Int}
+    w_{\gamma }(\mq)=\frac{1}{2 \pi}\operatorname{Im} \left(\log\left( \frac{c(1)}{c(0)}\right) \right) + K,
+\end{equation}
+其中 $K \in \mathbb{Z}$ 是由对数多值性引入的整数补偿项。
+事实上，\(K\) 正是闭合图形的整数环绕数，而 \(\frac{1}{2\pi}\operatorname{Im}\log(\frac{c(1)}{c(0)})\) 是“闭合补线”对应的环绕数（见图~\ref{fig:qry-new_expression}）。
+
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{chap4_new_expression}
+    {
+ \put(28.5,13){ =}
+ \put(59.5,13){ +}
+    }
+  \end{overpic}
+  \vspace{-2mm}
+  \caption{
+  \tr{GWN 数值可表示为：闭合补线的环绕数（中）加上未知整数项（右）。}
+  }
+  \vspace{-2mm}
+  \label{fig:qry-new_expression}
+\end{figure}
+
+\eqref{equ:qry-gene_expression} 的计算不可行当且仅当：
+(1) 存在 $j\neq k$ 使得 \(\omega_k=\omega_j\) 或 \(\omega_k=\omega_j^*\)；
+(2) \(\text{Im}(\omega_k)=0\)（对应边界情形）。
+下面将分别讨论这两种特殊情况，\tr{并说明式 \eqref{equ:qry-final-expression} 仍然成立}。
+
+\paragraph{特殊根}
+在实际区域内极少数点处会出现重根，即 \(\omega_k=\omega_j\) 或 \(\omega_k=\omega_j^*\)。
+例如当 $n=2$ 时，每条 \Bezier 曲线都是某抛物线的一部分。
+条件 \(\omega_1=\omega_2\) 表示查询点位于该抛物线焦点。
+更高次时，若多项式曲线满足某些代数条件，也会在类似焦点的特定位置出现重根。
+虽然本文在实践中尚未遇到该情况，但仍给出其计算形式。
+\(\omega_k\) 与 \(\omega_k^*\) 均为 $m$ 阶极点，且有：
+\begin{equation}\label{equ:qry-repeated_expression}
+\begin{aligned}
+    &\res(G(t),\omega_k)+\res(G(t),\omega_k^*)\\
+    &=2 \re \left(\frac{1}{(m-1)!}\lim_{t\to \omega_k}\frac{d^{m-1}}{dt^{m-1}}\{(t-\omega_k)^m G(t)\} \right)\\
+    &\tr{=m \im\left(\log\left(1-\frac{1}{w_k}\right)\right)},
+    \end{aligned}
+\end{equation}
+\tr{其中最后一个等式由代入 \eqref{equ:qry-f} 并进行初等化简得到。\eqref{equ:qry-repeated_expression} 说明在特殊根情形下，\eqref{equ:qry-final-expression} 仍然有效。}
+
+\subsection{边界上的 GWN}\label{sec:qry-forboundary}
+\paragraph{实根}
+若查询点 $\mq$ 位于 \Bezier 曲线上，这里不区分其位于曲线实际段还是位于延拓的多项式曲线上。此时 \(w_k\) 为实数，并且是多项式 \(h(t)\) 的重根。
+可以发现，根的具体重数\tr{不影响表达式~\eqref{equ:qry-closed_form_expr} 与计算式~\eqref{equ:qry-final-expression} 的有效性}。
+\begin{theorem}\label{pro:qry-boundary}
+若 \(w_k\) 为实数，则有：
+\[\res(G(t),\omega_k)=0.\]
+\end{theorem}
+\begin{proof}
+一般地，设 \(\omega_k\) 是 \(h(t)\) 的 \((2m)\) 阶根，且 $h(t)=(t-w_k)^{2m}h_e(t)$。由于 \(\omega_k\) 为实数，有
+\begin{equation}\label{equ:qry-factorization}
+    x(t)=(t-\omega_k)^m x_e(t),y(t)=(t-\omega_k)^m y_e(t),
+\end{equation}
+\tr{其中 \(h_e(t),x_e(t),y_e(t)\) 为因式分解后的多项式。}由式 \eqref{equ:qry-factorization} 可得
+ \begin{equation}
+      f(t) = (t-\omega_k)^{2m} (x_e(t)y'_e(t)-y_e(t) x'_e(t)).
+ \end{equation}
+ 由留数公式，得到：
+\begin{equation}
+\begin{aligned}
+    &\res(G(t),\omega_k)=\lim_{t\to \omega_k}\frac{d^{2m-1}}{dt^{2m-1}}\{(t-\omega_k)^{2m} G(t)\} \\
+    &=\lim_{t\to \omega_k}\frac{d^{2m-1}}{dt^{2m-1}}\{\frac{f(t)\log(1-\frac{1}{t})}{h_e(t)}\} =0.
+ \end{aligned}
+\end{equation}
+\end{proof}
+
+
+\paragraph{另一种理解}
+定理~\ref{pro:qry-boundary} 的有效性也可从更直观角度理解。当 \(w_k\) 为实数时，可化简为：
+\begin{equation}\label{equ:qry-alte_understanding}
+    \frac{f(t)}{h(t)}=\frac{x_e(t)y'_e(t)-y_e(t)x'_e(t)}{x_e(t)^2+y_e(t)^2}.
+\end{equation}
+式~\eqref{equ:qry-alte_understanding} 可视为一条低次 \Bezier 曲线 $\{x_e(t),y_e(t)\}$ 的 GWN，相当于根 \(w_k\) 不存在。
+
+这一观察与对边界点 GWN 的理解一致。在线段情形中，GWN 从一侧逼近为 \(+\tfrac{1}{2}\)，从另一侧逼近为 \(-\tfrac{1}{2}\)，因此线段上的点环绕数应为 0~\cite{Jacobson2013RobustIS}。
+受此启发，若点位于曲线上，计算环绕数时将曲线划分为三段（若点是端点则为两段）：点附近无穷小邻域对应的曲线段，以及其余部分。无穷小邻域内曲线局部近似线段，对环绕数贡献为 0；因此仅需计算其余两段 \Bezier 曲线的环绕数，因为目标点不位于这两段上，可用常规环绕数计算处理，如图~\ref{fig:qry-boundary} 所示。
+
+\paragraph{边界点判定}
+为实现严格几何一致性，文献~\cite{Spainhour2024RobustCQ} 已给出有理曲线端点处 GWN 的计算方法。在此基础上，本文进一步给出曲线上任意点 GWN 的通用计算方法。
+仍有一个关键问题：判定给定点是否在有理曲线上。该问题以及点到曲线最短距离问题，通常都可转化为多项式方程求根。
+这类问题可用数值方法~\cite{Mortenson1985GeometricM} 或基于控制多边形的裁剪算法~\cite{Ma2003PointIA} 解决；而借助距离函数 \(h(t)\)，无需额外操作。
+\begin{theorem}\label{pro:qry-near_boundary}
+可得如下结论：
+\begin{enumerate}
+    \item 当且仅当 $\im(\omega_k)=0$ 时，$\mq$ 位于边界上。
+    \item 若 \(\omega_k = a + b i\) 且 \(|b| \ll 1\)，则说明点 \(\mq\) 靠近 \(\gamma(a)\)。此外，当 \(b>0\) 时 \(\mq\) 位于 \(\gamma(a)\) 左侧；当 \(b<0\) 时位于其右侧。
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+结论 (1) 易验证，故仅证明 (2)。回顾 \eqref{equ:qry-root-decompose} 中 \(\omega_k\) 的计算，将 \(t=a+bi\) 代入方程 \(x(t)+y(t)i=0\)，得到：
+\begin{equation}
+    x(a)+y(a)i+b( x'(a)i-y'(a))+b^2(X)=0,
+\end{equation}
+其中 \(X\) 包含若干未展开项。
+由于 \(b \ll 1\)，可忽略项 \(b^2(X)\)，从而得到：
+\begin{equation}\label{equ:qry-app_imag}
+x(a) \approx b y'(a), \quad y(a) \approx -b x'(a).
+\end{equation}
+注意 \((x'(a),y'(a))\) 是曲线在 \(\gamma(a)\) 处的有限长度切向量，\((x(a),y(a))\) 是从点 \(q\) 指向 \(\gamma(a)\) 的位移向量，因此 (2) 得证。
+\end{proof}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{chap4_boundary}
+    {
+ \put(8,-3){\small \textbf{(a)}}
+ \put(39,-3){\small \textbf{(b)}}
+ \put(76,-3){\small \textbf{(c)}}
+    }
+  \end{overpic}
+  \vspace{1mm}
+  \caption{
+  (a) 边界点处 GWN 计算（上）仅考虑该点两侧两段曲线（下）。(b) 在整个区域采样点的 GWN。 (c) 在曲线上采样点的 GWN。
+  }
+  \label{fig:qry-boundary}
+\end{figure}
+
+\subsection{GWN 的导数}\label{sec:qry-derivative}
+进一步还可以计算 GWN 的导数。记：
+\begin{equation}
+    \frac{\partial w_{\Gamma}(\mq)}{\partial \mq}=\frac{1}{2 \pi} \left(\int_0^1\frac{f_1(t)}{h(t)^2}\,dt,\int_0^1\frac{f_2(t)}{h(t)^2}\,dt\right)
+\end{equation}
+其中 $f_1 =-2 x' x y +y' (x ^2-y ^2)$，$f_2 =2y' x y +x' (x ^2-y ^2)$。与定理~\ref{pro:qry-general} 类似，可推得：
+\begin{equation}
+    \int_0^1\frac{f_l(t)}{h(t)^2}\,dt=\sum_{k=1}^n2\re\left(\res(\frac{f_l(t)}{h(t)^2}\log(1-\frac{1}{t}),\omega_k)\right),\  l=1,2.
+\end{equation}
+
+在 文献\cite{Scrivener2024WindingNF} 中，环绕数总变分被用于度量艺术家草图的方向并构建分割框架，如图~\ref{fig:qry-reorientation} 所示。其方法将曲线离散为分段线段后再计算总变分与 GWN 导数。相比之下，本文方法可更直接地计算这些导数，同时提升效率与精度。
+
+导数计算流程与 GWN 计算类似（见算法~\ref{alg:qry-encoding}），核心步骤是在不同根处评估分子多项式。
+
+
+\begin{algorithm}[t]
+  \caption{WindingNumber\Bezier：计算任意 \Bezier 曲线的广义环绕数}\label{alg:qry-encoding}
+  \SetKwInput{KwInput}{输入}
+  \SetKwInput{KwOutput}{输出}
+  \SetKwFunction{FMain}{Main}
+  \SetKwFunction{FD}{D}
+  
+  \KwInput{\(\Gamma\)：\Bezier 曲线 $\Gamma$\\
+          \quad\quad\quad  \(q\)：查询点}
+  \KwOutput{$w_\Gamma$：点 $q$ 处的环绕数值}
+  % Algorithm
+  \tr{
+  计算 \(x(t)\) 与 \(y(t)\) 的系数 $\{x_k\}_{k=0}^{n}$ 与 $\{y_k\}_{k=0}^{n}$\;
+  $\{\omega_k\}_{k=1}^n \gets$  CalculateRoots$( \{x_k+i y_k\}_{k=0}^n)$\;
+ \For{$k \gets 1$ \KwTo $n$}{
+    $R[k] \gets \im\left( \log(1-\frac{1}{\omega_k}) \right) \ \text{\bf if} \ |\im(\omega_k)| \geq \epsilon_1 \ \text{\bf else} \ 0$\;
+ } 
+ }
+ \tr{
+ \(w_L\gets\frac{1}{2 \pi}\im \left(\log(\frac{x(1)+y(1) i}{x(0)+y(0)i})\right)\);
+  \(w_\Gamma\gets\frac{1}{2 \pi}\sum_{k=1}^{n} R[k]\);
+ }
+
+ \tr{
+ $w_\Gamma\gets\text{ROUND}\left[w_\Gamma-w_L\right]+w_L.$
+ }
+\end{algorithm}
+
+\begin{algorithm}[t]
+  \caption{CalculateRoots：计算复系数多项式的根}\label{alg:qry-encoding2}
+  \SetKwInput{KwInput}{输入}
+  \SetKwInput{KwOutput}{输出}
+  \SetKwFunction{FMain}{Main}
+  \SetKwFunction{FD}{D}
+  
+  \KwInput{\(\{x_k+i y_k\}_{k=0}^n\)：多项式 $c$ 的系数
+        }
+  \KwOutput{\(\{\omega_k\}_{k=1}^n\)：多项式的根}
+  % Algorithm
+  \tr{
+ $\{\omega_k\} \gets \text{analytical\_solution} \ \text{\bf if} \ n \leq 4 \ \text{\bf else} \ \text{numerical\_solution}$\;
+ \For{$k \gets 1$ \KwTo $n$}{
+    \While{$\im(\omega_k)<\epsilon_2$ and $|\Delta\omega_k|<\epsilon_3$}{
+    $\Delta\omega_k\gets c(\omega_k)/c'(\omega_k)$\;
+    \(\omega_k\gets \omega_k-\Delta\omega_k\)\;
+    }
+ } 
+ }
+\end{algorithm}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{chap4_reoritation}
+    {
+    }
+  \end{overpic}
+  \vspace{1mm}
+  \caption{
+  左：艺术家原始草图的 GWN 结果，图中两笔均按逆时针绘制，体现了笔画方向被忽略的情况。
+  右：重定向后草图的 GWN 结果。
+  }
+  \label{fig:qry-reorientation}
+\end{figure}

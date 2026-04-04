@@ -1,0 +1,93 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: verify_ch5.aux
+Reallocating 'name_of_file' (item size: 1) to 21 items.
+The style file: ustcthesis-numerical.bst
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+A level-1 auxiliary file: chapters/innovations.aux
+Reallocating 'name_of_file' (item size: 1) to 22 items.
+A level-1 auxiliary file: chapters/abstract.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap1.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap2.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap3.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap4.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap5.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: chapters/Chap6.aux
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+Reallocating 'name_of_file' (item size: 1) to 30 items.
+A level-1 auxiliary file: chapters/acknowledgements.aux
+Reallocating 'name_of_file' (item size: 1) to 26 items.
+A level-1 auxiliary file: chapters/achievements.aux
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 150 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 9000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'glb_str_end' (item size: 4) to 20 items.
+Reallocating 'glb_str_ptr' (item size: 4) to 20 items.
+Reallocating 'global_strs' (item size: 1) to 4000000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Database file #1: bib/ustc.bib
+Database file #2: bib/chap2_refs.bib
+Warning--string name "cagd" is undefined
+--line 106 of file bib/chap2_refs.bib
+Warning--string name "tvcg" is undefined
+--line 115 of file bib/chap2_refs.bib
+Database file #3: bib/chap4_refs.bib
+Database file #4: bib/chap5_refs.bib
+Warning--empty booktitle in Mortenson1985GeometricM
+Warning--empty booktitle in Brebbia1978TheBE
+You've used 59 entries,
+            6859 wiz_defined-function locations,
+            1639 strings with 20264 characters,
+and the built_in function-call counts, 2114889 in all, are:
+= -- 236810
+> -- 56110
+< -- 176995
++ -- 19215
+- -- 5526
+* -- 10893
+:= -- 75470
+add.period$ -- 177
+call.type$ -- 59
+change.case$ -- 105
+chr.to.int$ -- 127628
+cite$ -- 61
+duplicate$ -- 341731
+empty$ -- 3535
+format.name$ -- 1729
+if$ -- 465825
+int.to.chr$ -- 827
+int.to.str$ -- 60
+missing$ -- 0
+newline$ -- 319
+num.names$ -- 177
+pop$ -- 35451
+preamble$ -- 1
+purify$ -- 494
+quote$ -- 0
+skip$ -- 116212
+stack$ -- 0
+substring$ -- 274773
+swap$ -- 155187
+text.length$ -- 1213
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 648
+warning$ -- 2
+while$ -- 6840
+width$ -- 0
+write$ -- 816
+(There were 4 warnings)

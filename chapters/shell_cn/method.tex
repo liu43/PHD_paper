@@ -1,0 +1,407 @@
+﻿\section{高阶壳} \label{sec:method}
+\subsection{定义}
+\paragraph{组成}
+高阶壳结构 $\cS$ 由一组三角棱柱 $\{\cP_i\}$ 构成。
+每个三角棱柱 $\cP$ 由三张 $n$ 阶 B\'{e}zier 三角面（上层 $\mt_\text{top}$、中层 $\mt_\text{middle}$、下层 $\mt_\text{bottom}$）以及三张由双线性曲面 $\{B_{j}\}^3_{j=1}$ 裁剪得到的侧面包围。
+此外，我们为每个棱柱 $\cP$ 关联一张线性三角形 $\mt_{\text{linear}}$，其三个顶点 $\{\mv_{j}\}^3_{j=1}$ 与中层曲面 $\mt_\text{middle}$ 的角点一致，并在这三个顶点上定义三个向量 $\{\md_{j}\}^3_{j=1}$。
+%
+相邻两个棱柱共享一个侧面。
+所有上层（或中层、下层）B\'{e}zier 三角面分别组成壳的上表面（或中表面、下表面）$\mT$（或 $\mM$、$\mB$），它们构成一个无自交、可定向、流形的高阶三角网格。
+%
+这些线性三角形也组成一个线性三角网格 $\mL$。
+%Three vertices of the linear triangle $\mt_{\text{linear}}$ are consistent with the corner vertices of the middle surface $\mt_\text{middle}$.
+%We denote the shell's top, middle, and bottom surfaces as , respectively.
+
+\paragraph{连续向量场构造}
+%\todo{Constructing vector field: We define a continuous vector field within the high-order shell using barycentric coordinates.}
+%\todo{Vector Fields with Linear Interpolation and Shell Space}
+我们使用三个向量 $\{\md_{j}\}^3_{j=1}$ 与 $\mt_{\text{linear}}$ 构造连续向量场 $\cF$。
+$\cF$ 在点 $\mv \in \mt_{\text{linear}}$ 处的向量 $\md$ 定义为：
+\begin{equation}\label{equ:vector-bc}
+    \md(\mv) = u_1 \md_1+u_2 \md_2+ u_3 \md_3,
+\end{equation}
+其中 $(u_1,u_2,u_3)$ 是 $\mv$ 在 $\mt_{\text{linear}}$ 上的重心坐标。
+该构造过程仅依赖 $\mL$ 与顶点向量。
+因此构造得到的向量场在整个空间中连续。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{vector_shell}
+		{
+			%\put(72,-1){\small Ours}
+			\put(24,3){\small $\mathbf{v}_1$}
+			\put(7,16){\small $\mathbf{v}_3$}
+			\put(45,17){\small $\mathbf{v}_2$}
+   %
+                \put(23.5,14){\small $\md_1$}
+			\put(1.5,22){\small $\md_3$}
+			\put(46,23){\small $\md_2$}
+    %
+                \put(59,27){\small $\mt_\text{top}$}
+			\put(59,20.5){\small $\mt_\text{middle}$}
+			\put(59,13){\small $\mt_\text{bottom}$}
+                \put(83,17){\small  $\mt_{\text{linear}}$}
+		}
+	\end{overpic}
+	\vspace{-2.5mm}
+	\caption{
+		左：由 $\mt_{\text{linear}}$ 和 $\{\md_{j}\}^3_{j=1}$ 定义的连续向量场。
+  右：每个三角棱柱 $\cP$ 由三张 $n$ 阶 B\'{e}zier 三角面与三张侧面包围。
+	}
+	\label{fig:Space}
+\end{figure}
+
+\paragraph{条件}
+在我们对高阶壳的定义中，其组成部分需满足以下条件：
+\begin{enumerate}
+    \item \emph{贴合条件（Conformance condition）}：三张 B\'{e}zier 三角面的边精确落在双线性侧面上。
+    \item \emph{对齐条件（Alignment condition）}：构造的向量场与双线性曲面在某一方向上的等参线像对齐。
+    \item \emph{角度条件（Angle condition）}：$\md_j, j=1,2,3$ 与 $\mt_{\text{linear}}$ 法向之间的夹角小于 $\pi/2$。
+\end{enumerate}
+
+% with no discontinuities at any location.
+%shell -> prisms ->  three B\'{e}zier triangles + three trimmed bilinear surfaces + a linear triangle + three vectors defined at the three vertices of the linear triangle.
+%A higher-order shell structure consists of a set of prisms. Each prism is enveloped by three B\'{e}zier triangles (top, middle, and bottom) and three trimmed bilinear patches. For the mid B\'{e}zier triangle,
+
+
+%\tr{We require that the angle between $\mathbf{d}_i$and the normal of $T$ is less than 90 degrees.}
+%A ray is defined starting at a barycentrically interpolated point \( \mathbf{v} \) on $\mt_{\text{linear}}$, where \( \mathbf{v} = u_0 \mathbf{v}_0 + u_1 \mathbf{v}_1 + u_2 \mathbf{v}_2 \), and traveling in the direction of a similarly  barycentrically interpolated displacement \( \mathbf{d} \). If the ray travels a distance that is a multiple of $|\mathbf{d}|$, these rays constitute a space in which the top and bottom faces are two linear triangles, and the three side faces are bilinear Coons patches(Fig.~\ref{fig:Space}).
+% We observe that such a definition of the vector field is commonplace, as exemplified by the well-known Phong projection~\cite{Kobbelt1998InteractiveMM}.
+
+%\tr{Given a triangular mesh, by assigning a direction at each point (excluding singularities), the prisms derived from the aforementioned definition exhibits compatibility between adjacent triangles, meaning the adjacent sides of neighboring triangles are perfectly congruent.}
+
+
+\subsection{构造}\label{sec:construct-from-L}
+我们给出一种构造方法：使用 $\mL$、$\mL$ 顶点向量以及给定厚度 $\epsilon$，构建满足条件的壳 $\cS$。
+我们假设 $\mL$ 及其向量已经满足角度条件。
+该构造方法按顺序生成向量场、双线性侧面以及 B\'{e}zier 三角面。
+%To satisfy those conditions, we construct a prism in order: vector + linear triangle => vector field => bilinear surfaces => three B\'{e}zier triangles.
+
+\paragraph{向量场与双线性侧面的构造}
+在构造向量场之前，我们先将全部向量按同一比例临时放大，直到最短向量长度大于 $2\epsilon$。
+%
+随后采用前述方法定义临时向量场。
+%
+最后，围绕 $\mt_{\text{linear}}$ 的正负向量共同形成三角棱柱，其侧面是双线性的，即得到 $\{B_{j}\}^3_{j=1}$（见图~\ref{fig:Space}）。
+%
+通过该构造可满足对齐条件。
+
+
+
+\paragraph{B\'{e}zier 三角面的构造}
+我们讨论一种 B\'{e}zier 三角面控制点布置策略，使其边落在双线性侧面上。
+%
+具体地，我们先给出三次 B\'{e}zier 三角面的构造方法，再讨论其他阶次。
+
+不失一般性，我们仅介绍 B\'{e}zier 三角面一条边的布置方法。
+该边是一条具有四个控制点的 B\'{e}zier 曲线，记为 $\mp_1$、$\mp_2$、$\mp_3$ 和 $\mp_4$。
+该边要求位于由 $\mv_1$、$\mv_2$、$\md_1$ 和 $\md_2$ 构造的双线性曲面上。
+%
+我们先将 $\mp_1$ 放置在直线 $\mv_1 + t \md_1$ 上，对应参数为 $\hat{t}$。
+然后将 $\mp_4$ 放置为 $\mv_2 + \hat{t} \md_2 + l \md_2$，其中 $l$ 为实数。
+%Then, $\mp_4$ is placed at $\mv_2 + \hat{t} \md_2 + l\frac{\md_2}{\|\md_2\|_2}$, where $l$ is a real number.
+%
+我们提出如下命题来放置 $\mp_2$ 与 $\mp_3$。
+\begin{prop}\label{prop:bezier-curve}
+    %For cubic B\'{e}zier curve, with endpoints defined before, manifest in all non-linear configurations through the following two canonical forms:
+    若 $\mp_2$ 和 $\mp_3$ 满足如下条件，则该 B\'{e}zier 曲线位于双线性曲面上。
+%    \begin{equation}\label{equ:edge-control-1}
+%      \begin{cases}
+%          \mp_2= \frac{2}{3}\mx_1 + \frac{1}{3}\mx_2 + \beta \frac{\md_1}{\|\md_1\|_2}, &\\
+%        \mp_3 = \frac{1}{3}\mx_1 + \frac{2}{3}\mx_2 + \beta \frac{\md_2}{\|\md_2\|_2}+\frac{l}{3}\frac{\md_1}{\|\md_1\|_2}.&
+%      \end{cases}
+%    \end{equation}
+%    \begin{equation}\label{equ:edge-control-2}
+%      \begin{cases}
+%       \mp_2=  \mx_1+ \frac{l}{3} \frac{\md_1}{\|\md_1\|_2} + \beta (\mx_2 - \mx_1),&\\
+%        \mp_3 = \frac{2}{3}\mx_1 +\frac{1}{3}\mx_2 + \frac{2 l}{3} \frac{\md_1}{\|\md_1\|_2} + \beta\left(\mx_2-\mx_1+l(\frac{\md_2}{\|\md_2\|_2} - \frac{\md_1}{\|\md_1\|_2})\right).&
+%      \end{cases}
+%    \end{equation}
+\begin{equation}\label{equ:edge-control-1}
+	\begin{cases}
+		\mp_2= \frac{2}{3}\mx_1 + \frac{1}{3}\mx_2 + \beta \md_1, &\\
+		\mp_3 = \frac{1}{3}\mx_1 + \frac{2}{3}\mx_2 + \beta \md_2+\frac{l}{3}\md_1.&
+	\end{cases}
+\end{equation}
+%\begin{equation}\label{equ:edge-control-2}
+%\t\begin{cases}
+%\t\t\mp_2=  \mx_1+ \frac{l}{3}\md_1 + \beta (\mx_2 - \mx_1),&\\
+%\t\t\mp_3 = \frac{2}{3}\mx_1 +\frac{1}{3}\mx_2 + \frac{2 l}{3} \md_1 + \beta\left(\mx_2-\mx_1+l(\md_2 - \md_1)\right).&
+%\t\end{cases}
+%\end{equation}
+
+其中，$\mx_1 = \mv_1 + \hat{t} \md_1 = \mp_1$，$\mx_2 = \mv_2 + \hat{t} \md_2$，$\beta$ 为实数。 %, \tb{spanning the entire real number domain in theory}
+\end{prop}
+\begin{proof}
+我们将式 (\ref{equ:edge-control-1}) 中的控制点代入，以确定参数 $t$ 下 \Bezier 曲线 $\mr(t)$ 的取值。可得到如下结果：
+
+对于式 (\ref{equ:edge-control-1})，$\mr(t)$ 为：
+\begin{equation}\label{equ::param-curve1}
+\mr(t)=(1-t) \mx_1+t \mx_2+t (3\beta(1-t)+l t)((1-t)\md_1+t\md_2),
+\end{equation}
+这表明 $\mr(t)$ 位于双线性曲面片上。
+
+实际上，(\ref{equ::param-curve1}) 是双线性等参数变换
+$f(t,s)=(1-s)((1-t)\mx_1+t \mx_2)+s((1-t)(\mx_1+\mn_1)+t(\mx_2+\mn_2))$
+作用在曲线 $(t,para_1(t))$ 上的像，其中
+$para_1(t)=0 t^2+\frac{3\beta}{2} 2t(1-t)+l t^2$。
+
+当参数域中采用三次 \Bezier 曲线
+$(t,\beta_1 t(1-t)^2+\beta_2 t^2(1-t)+l t^3)$ 时，有：
+$$\mP_1=\mv_1+l \md_1,\mP_5=\mv_2+l \md_2,$$
+$$\mP_2=\frac{1}{4}(3\mv_1+\mv_2 +3(l+\beta_1) \md_1+l \md_2),$$
+$$\mP_3=\frac{1}{2}(\mv_1+\mv_2+l(\md_1+\md_2)+\beta_1 \md_2+\beta_2 \md_1),$$
+$$\mP_4=\frac{1}{4}(\mv_1+3\mv_2+l \md_1+3(l+\beta_2)\md_2)$$
+\end{proof}
+该 B\'{e}zier 曲线可视为 $l$ 与 $\beta$ 的函数（图~\ref{fig:2forms}）。
+%When $l=0$, the second condition~\eqref{equ:edge-control-2} always leads to a linear curve, which is undesirable in constructing B\'{e}zier triangles.
+%Thus, we use the first condition~\eqref{equ:edge-control-1} in practice.
+\tr{当每条边的 $l$ 给定后，该 B\'{e}zier 三角面仍保留 6 个自由度，可用于几何调节。}
+%If we have determined the value of $l$ for $\mp_4$ of each edge, we still have six degrees of freedom to adjust the geometry of the B\'{e}zier triangle.
+\tr{还存在另一组条件同样可保证 B\'{e}zier 曲线落在双线性曲面上，但在实际实现中我们未采用该形式。更多细节见补充材料。}
+%When constructing Bezier triangles, we ensure that the three edges each satisfy equation (1). Subsequently, the Bezier triangle still has six degrees of freedom for surface fitting.
+
+%\tr{To overcome the first construction challenge, we establish a \tr{\emph{construction condition}} to place the control points of the three B\'{e}zier triangles, enabling the B\'{e}zier triangles to approximate the input surface and the B\'{e}zier triangles' edges to lie on the bilinear surfaces accurately.}
+%\todo{Bezier triangles on the shell space}
+
+%Given points $\mathbf{v}_0, \mathbf{v}_1$ and direction vectors $\mathbf{d}_0, \mathbf{d}_1$, the generated Coons surface is defined. We consider cubic bezier curve on the Coons patch.
+%Without loss of generality, let us consider a Bezier curve defined by four control points: $P_0$, $P_1$, $P_2$, and $P_3$.
+%Here, $P_0$ is set as point $\mathbf{v}_0$, and $P_3$ is defined as $\mathbf{v}_1 + l*\mathbf{d}_1$. The parameter $l$ represents an arbitrary real number, and it allows us not to require that the top and base thickness of the shell be equal.
+
+%\begin{prop}
+%    Cubic Bezier curves, with endpoints defined before, manifest in all non-linear configurations through the following two canonical forms:
+%\begin{enumerate}
+%\t\item $ P_1 = \frac{2}{3}\mathbf{v}_0 + \frac{1}{3}\mathbf{v}_1 + x \mathbf{d}_0, \quad P_2 = \frac{1}{3}\mathbf{v}_0 + \frac{2}{3}\mathbf{v}_1 + x \mathbf{d}_1+\frac{1}{3}l \mathbf{d}_0$
+%\t\item $P_1 =  \mathbf{v}_0+ \frac{1}{3} l \mathbf{d}_0 + x (\mathbf{v}_1 - \mathbf{v}_0), \quad P_2 = \frac{2}{3}\mathbf{v}_0 +\frac{1}{3}\mathbf{v}_1 + \frac{2}{3} l \mathbf{d}_0 + x(\mathbf{v}_1-\mathbf{v}_0+l(\mathbf{d}_1 - \mathbf{d}_0)) $
+%\end{enumerate}
+%Here, \( x \) represents a free variable, with the variation of the Bezier curve as a function of \( x \) (Fig.~\ref{fig:2forms}). When $l=0$,
+% equation (2) always exhibits a linear shape, which is undesirable in the construction of Bezier triangles. Therefore, we only consider the case of equation (1).
+%\end{prop}
+
+%When constructing Bezier triangles, we ensure that the three edges each satisfy equation (1). Subsequently, the Bezier triangle still has six degrees of freedom for surface fitting.
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{2form.pdf}
+		{
+			\put(21,17){\small $l$}
+			\put(84,24){\small $\beta$}
+               % \put(7.5,14.5){\small $\mp_1$}
+		%\t\put(44.5,21){\small $\mp_4$}
+   %
+             %   \put(56,15){\small $\mp_1$}
+		%\t\put(93,22){\small $\mp_4$}
+		}
+	\end{overpic}
+	\vspace{-2.5mm}
+	\caption{
+	%After fixing $l$, the variations of the B\'{e}zier curve with respect to $l$ and $\beta$.
+	B\'{e}zier 曲线随 $l$（左）与 $\beta$（右）变化的形态。
+	}
+	\label{fig:2forms}
+\end{figure}
+
+\paragraph{上/中/下 B\'{e}zier 三角面的构造}
+我们先构造中层 \Bezier 三角面 $\mt_\text{middle}$，再构造上层与下层 \Bezier 三角面。
+%
+\tr{设 $\mt_\text{middle}$ 的一条边由四个控制点定义：$\mp_{\text{mid},1}$、$\mp_{\text{mid},2}$、$\mp_{\text{mid},3}$ 和 $\mp_{\text{mid},4}$。该边要求落在由 $\mv_1$、$\mv_2$、$\md_1$、$\md_2$ 构造的双线性曲面上。}
+我们设 $\mp_{\text{mid},1} = \mv_1$、$\mp_{\text{mid},4} = \mv_2$，即 $\hat{t} = 0$ 且 $l = 0$。
+%
+随后在满足条件~\eqref{equ:edge-control-1} 的前提下，通过优化确定其余控制点，例如使中层 B\'{e}zier 三角面对输入三角网格进行拟合。
+
+在壳构造过程中（第~\ref{sec:construction} 节），中层表面的每个角点有三个厚度参数：(1) 指定厚度 $\epsilon$；(2) 沿向量方向的临时厚度 $\epsilon^{+} \leq \epsilon$；(3) 沿负向量方向的临时厚度 $\epsilon^{-} \leq \epsilon$。
+%
+我们将 $\mv_j, j\in\{1,2\}$ 处的临时厚度记为 $\epsilon_j^{+}$ 和 $\epsilon_j^{-}$。
+%
+我们放置：
+$$\mp_{\text{top},1} = \mv_1 + \epsilon_1^{+} \frac{\md_1}{\|\md_1\|_2}, \,\, \mp_{\text{top},4} = \mv_2 + \epsilon_2^{+} \frac{\md_2}{\|\md_2\|_2},$$ 其中 $\mp_{\text{top},j}, j=1,2,3,4$ 为上层 B\'{e}zier 三角面一条边的控制点。
+类似地，$$\mp_{\text{bot},1} = \mv_1 - \epsilon_1^{-} \frac{\md_1}{\|\md_1\|_2}, \,\,\mp_{\text{bot},4} = \mv_2 - \epsilon_2^{-} \frac{\md_2}{\|\md_2\|_2},$$ 其中 $\mp_{\text{bot},j}, j=1,2,3,4$ 为下层 B\'{e}zier 三角面一条边的控制点。
+%
+我们依据下述命题放置 $\mp_{\text{top},2}$、$\mp_{\text{top},3}$、$\mp_{\text{bot},2}$ 和 $\mp_{\text{bot},3}$。
+%
+% We denote $t^+=\min\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}$ and $l^{+}=\max\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}-\min\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}$.
+% For the sake of convenience in explanation, we assume $t^+=\frac{\epsilon_1^{+}}{\|\md_1\|_2}$ and $l^{+}=\frac{\epsilon_2^{+}}{\|\md_2\|_2}-\frac{\epsilon_1^{+}}{\|\md_1\|_2}$.
+% %
+% First we place $\mp_{\text{top},2}$,$\mp_{\text{top},3}$ as follow:
+% \begin{align*}
+%        & \mp_{\text{top},2} = \mp_{\text{mid},2} + \frac{2 t^{+}}{3} \md_1 + \frac{1 t^{+}}{3} \md_2+\frac{l}{3}\md_1, \\
+%        &\mp_{\text{top},3} = \mp_{\text{mid},3} +  \frac{1 t^{+}}{3} \md_1 + \frac{2 t^{+}}{3} \md_2+\frac{l}{3}\md_1+\frac{l}{3}\md_2.
+%        \end{align*}
+%  Then, we have:
+%  \begin{align*}
+%        & \mr_\text{top}(t) - \mr_\text{middle}(t) = (1+l t)((1-t)t^{+} \md_1 + t t^{+}\md_2), \\
+%        &\mr_\text{middle}(t) - \mr_\text{bottom}(t) = (1-t)\epsilon_1^{-} \frac{\md_1}{\|\md_1\|_2} + t\epsilon_2^{-}\frac{\md_2}{\|\md_2\|_2},
+%     \end{align*}
+%Given the mid Bezier triangle and three vectors, how can we find the upper and lower Bezier triangles that are as equidistant as possible to it? This problem is formally related to the offset of surfaces. In previous studies~\cite{Bastl2008ComputingER}, the offset of a Bezier triangle is not a Bezier triangle. However, in our shell, the situation becomes quite natural. We denote the Bezier curve in equation (1) from Proposition 1 as $\mathbf{p}(t)$ and denote the displacement of its offset curve $\mathbf{r}(t)$ relative to its control points as $\mathbf{r}_i$.
+\begin{prop}\label{prop:mid2topbase}
+    设
+    \begin{align*}
+       & \mp_{\text{top},2} = \mp_{\text{mid},2} + \frac{\epsilon_2^{+}}{3} \frac{\md_1}{\|\md_2\|_2} + \frac{\epsilon_1^{+}}{3}\frac{\md_1+\md_2}{\|\md_1\|_2}, \\
+       &\mp_{\text{top},3} = \mp_{\text{mid},3} + \frac{\epsilon_1^{+}}{3} \frac{\md_2}{\|\md_1\|_2} + \frac{\epsilon_2^{+}}{3}\frac{\md_1+\md_2}{\|\md_2\|_2}, \\
+       & \mp_{\text{bot},2} = \mp_{\text{mid},2} - \frac{\epsilon_2^{-}}{3} \frac{\md_1}{\|\md_2\|_2} - \frac{\epsilon_1^{-}}{3}\frac{\md_1+\md_2}{\|\md_1\|_2} \\
+       & \mp_{\text{bot},3} =\mp_{\text{mid},3} - \frac{\epsilon_1^{-}}{3} \frac{\md_2}{\|\md_1\|_2} - \frac{\epsilon_2^{-}}{3}\frac{\md_1+\md_2}{\|\md_2\|_2}.
+    \end{align*}
+    则有：
+    \begin{align*}
+       & \mr_\text{top}(t) - \mr_\text{middle}(t) = (\frac{\epsilon_1^{+}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{+}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2), \\
+       &\mr_\text{middle}(t) - \mr_\text{bottom}(t) = (\frac{\epsilon_1^{-}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{-}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2),
+    \end{align*}
+    其中 $\mr_\text{top}(t)$、$\mr_\text{middle}(t)$ 与 $\mr_\text{bottom}(t)$ 是由参数 $t \in [0,1]$ 表示边界的 B\'{e}zier 曲线。
+    此外，$\mr_\text{top}(t)$ 与 $\mr_\text{bottom}(t)$ 仍位于该双线性曲面上。
+    %\[ \mathbf{r}(t)-\mathbf{p}(t)=(1-t)\mathbf{d}_0+t\mathbf{d}_1. \
+    %On the Coons surface, $\mathbf{r}_i$ is determined by the following formula:
+%\[ \mathbf{r}_0=\mathbf{d}_0,  \mathbf{r}_1= (2 \mathbf{d}_0+\mathbf{d}_1)/3, \mathbf{r}_2=(\mathbf{d}_0+2 \mathbf{d}_1)/3,\mathbf{r}_3=\mathbf{d}_1. \]
+%And the Bezier curves satisfy an exact distance equation:
+%\[ \mathbf{r}(t)-\mathbf{p}(t)=(1-t)\mathbf{d}_0+t\mathbf{d}_1. \]
+\end{prop}
+\begin{proof}
+由于对称性，我们仅证明上表面情形。
+%
+设
+$\hat{t}=\frac{\epsilon_1^{+}}{\|\md_1\|_2},l=\frac{\epsilon_2^{+}}{\|\md_2\|_2}-\frac{\epsilon_1^{+}}{\|\md_1\|_2}, \mp_{\text{mid},2}=\frac{2}{3}\mv_1+\frac{1}{3}\mv_2+\beta \md_1,\mp_{\text{mid},3}=\frac{1}{3}\mv_1+\frac{2}{3}\mv_2+\beta \md_2$。则有：
+\begin{equation*}
+\mP_{\text{top},1}=\mx_1,\mp_{\text{top},4}=\mx_2+l \md_2.
+\end{equation*}
+以及
+\begin{equation*}
+\mP_{\text{top},2}=\frac{2}{3}\mx_1+\frac{1}{3}\mx_2+\beta_1 \md_1,\mp_{\text{top},3}=\frac{1}{3}\mx_1+\frac{2}{3}\mx_2+\beta_1 \md_1+l \md_1,
+\end{equation*}
+其中 $\beta_1=\beta+\frac{1}{3}(l+2 \hat{t})$。
+根据命题~\ref{prop:bezier-curve}，$\mr_{\text{top}}(t)$ 位于双线性曲面上。
+
+为计算 $\mr_{\text{top}}(t)-\mr_{\text{middle}}(t)$，我们先代入命题~\ref{prop:mid2topbase} 中的控制点并化简，得到：
+$$\mr_\text{top}(t) - \mr_\text{middle}(t) = (\frac{\epsilon_1^{+}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{+}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2).$$
+\end{proof}
+
+\paragraph{其他阶次}
+我们观察到，命题~\ref{prop:bezier-curve} 的式~\eqref{equ:edge-control-1} 可解释为：对形如 $(t,\beta t(1-t)+l t^2)$ 的二次 \Bezier 曲线 $\hat{r}(t)$，通过双线性映射
+$f(t,s)=(1-s)((1-t)\mx_1+t\mx_2)+s((1-t)(\mx_1+\md_1)+t(\mx_2+\md_2))$
+变换后得到的结果。
+为说明方法的可推广性，我们以四次 \Bezier 曲线为例。
+首先在 $f(t,s)$ 的参数域中定义三次 \Bezier 曲线
+$(t,\beta_1 t(1-t)^2+\beta_2 t^2(1-t)+l t^3)$，其中 $\beta_1,\beta_2$ 为实数。
+将 $f(t,s)$ 作用到这些三次 \Bezier 曲线后，可在物理空间中得到一组四次 \Bezier 曲线。
+这些 \Bezier 曲线的控制点遵循命题~\ref{prop:bezier-curve} 后证明中给出的布置策略。
+%This allows us to derive analogous conditions with equation~\eqref{equ:edge-control-1} for \Bezier curves of any order. }
+
+通过将参数域中的 \Bezier 曲线替换为其他阶次，可类似推导不同阶 \Bezier 三角面的控制点布置条件。
+较低阶三角面在我们的高阶壳构造中缺乏足够自由度进行曲面拟合。
+更高阶 \Bezier 三角面可能带来更好的拟合效果，但阶次提升对最终结果影响并不显著，因为结果仍受以下双射条件约束。
+%\tr{For such a shell space, we can utilize triangles of any order to compose the upper and lower surfaces, so that the edges of the triangle lie on the bilinear patch.
+%For instance, the top first-order triangle (Figure 4, left) are uniquely determined by length of the ray.
+%As for the quadratic Bezier triangles, they either exhibit a linear first-order shape or are also uniquely determined by their endpoints.
+%However, cubic Bezier triangles exhibit commendable approximation properties.}
+
+\paragraph{双射条件}
+构造完 \Bezier 三角面后，向量场可解释为：在复杂域中对棱柱有限元~\cite{Ciarlet1991BasicEE} 执行等参数变换所得等参线的表示。
+该复杂域可描述为：先沿 z 轴扩展单位棱柱区域（图~\ref{fig:bijectivity} 左），再用两张曲面裁剪该区域（图~\ref{fig:bijectivity} 中）；这两张曲面是 \Bezier 三角面在等参数变换下的原像。
+曲面每条边都是二次 \Bezier 曲线 $\hat{r}(t)$。
+若等参数变换在该复杂域中是双射的（我们称之为“\emph{双射条件}”），则沿向量场的投影可成为双射。
+
+%To derive the bijective condition, several works can be refered.
+%
+棱柱有限元等参数映射可逆性已有研究~\cite{Knabner2001TheIO}。
+但其充分条件较难应用，也难以直接扩展到本文场景。
+%
+在~\cite{Jiang2020BijectivePI} 中，作者证明：若对应 6 种四面体剖分的 24 个四面体体积均为正，则等参数变换为双射。
+我们可通过构造包围高阶棱柱的线性棱柱将该条件扩展到本文场景，但该充分条件在高阶壳构造中容易被破坏。
+%
+我们为棱柱单元提出了一个新的充分\tr{且必要}条件，并且该条件易于应用到高阶壳中。
+据此有如下命题。
+\begin{prop}\label{prop:bijective}
+    若同时满足以下条件，则棱柱 $\cP$ 上的等参数变换是双射：
+    \begin{enumerate}
+    	\item[(\invariant)] 三条线段 $\mv_i,\mv_i+\md_i$ 不与由 $B_{j}$ 裁剪得到的 $\cP$ 双线性曲面片相交，其中 $B_j$ 为该线段对应的对侧曲面片，\tr{且相邻裁剪双线性曲面片之间不发生相切}。
+    	\item[(\invariant)] 上、中、下三张 \Bezier 三角面法向与向量场之间的夹角均小于 90 度。
+    \end{enumerate}
+\end{prop}
+\begin{proof}
+考虑具有六个顶点 $e_0,e_1,e_2,n_0,n_1,n_2$ 的棱柱有限元。其映射定义为：
+\[
+f(u,v,w) = ue_1 + ve_2 + w\eta_0 + uw\eta_1 + vw\eta_2.
+\]
+我们将 $f$ 的雅可比行列式记为 $J$。
+
+我们先给出该棱柱有限元双射的充分\tr{且必要}条件。
+
+\paragraph{引理}
+下列命题等价：
+\begin{enumerate}
+\item 棱柱有限元映射是双射的。
+\item \tr{不存在 $w\in[0,1]$，使得对三根立柱而言，其对应 $w$ 位置的线与对侧曲面上的对应线平行或相交。}
+\item \tr{相邻曲面片在立柱处不相切，且立柱线段不与对侧曲面片相交。}
+\end{enumerate}
+
+\paragraph{引理证明}
+\tr{依据 ~\cite{Knabner2001TheIO}，(1)(2)(3) 等价。我们先证明 (4) 的必要性。相邻曲面片相切意味着 $\frac{\partial f}{\partial u}$ 与 $\frac{\partial f}{\partial v}$ 与立柱方向 $\frac{\partial f}{\partial w}$ 共面，从而有 $J(p)=0$，与双射条件矛盾。相交情形同理。}
+
+\tr{再证明 (4) 的充分性。设立柱上存在点 $p$ 使 $J(p)=0$。则 $\frac{\partial f}{\partial u}$、$\frac{\partial f}{\partial v}$ 与 $\frac{\partial f}{\partial w}$ 共面。若 $\frac{\partial f}{\partial u}$ 和 $\frac{\partial f}{\partial v}$ 分居 $\frac{\partial f}{\partial w}$ 两侧，则立柱与对侧曲面相交；若二者位于同侧，则相邻曲面片相切。}
+
+现在我们继续证明命题 \ref{prop:bijective}。根据上述引理，已可证明 $f$ 在三根立柱上双射（此处设 $l=0$。若 $l\neq 0$，令 $l=max{l_1,l_2,l_3}$，可归约为 $l=0$ 的情形）。
+
+\tr{我们先证明 $f$ 在裁剪双线性曲面片上双射。一般地，考虑曲面片 $f(u,0,w)$。由于在 $u=0,u=1$ 两根立柱上 $f$ 双射，设存在某个 $t$ 使得 $f$ 在 $f(t,0,w)$ 与 $f(1-t,0,w)$ 之间非双射。$J$ 连续，因此在 $f(t,0,w)$ 或 $f(1-t,0,w)$ 上必有一点 $p$ 使 $J(p)=0$。又因固定 $w$ 时 $J$ 关于参数线性，$p$ 必位于上或下 \Bezier 三角形边界上。于是有 $\frac{\partial f}{\partial u}$ 与 $\frac{\partial f}{\partial v}$ 与 $\frac{\partial f}{\partial w}$ 共面，即该点处 \Bezier 三角形切平面与 $\frac{\partial f}{\partial w}$（即向量场）平行，这与角度条件矛盾。}
+
+\tr{在边界曲面片双射后，可类似证明 $f$ 在整个壳空间双射。使 $J(p)=0$ 的点 $p$ 必在上或下 \Bezier 三角形上，这同样与角度条件矛盾。}
+\end{proof}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{curve_shell.pdf}
+		{
+			%\put(45,19){\small $\frac{\beta}{4}$}
+                \put(17,29){\small 裁剪}
+                \put(61,24){\small $\phi$}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		参数空间中的单位棱柱（左）与裁剪域（中），以及物理空间中的高阶壳 $\cP$（右）。
+  棱柱内部蓝线表示部分等参线。
+	}
+	\label{fig:bijectivity}
+\end{figure}
+
+\subsection{双射投影}
+%\tr{Then, the projection along the vector field defines a bijective map between two surfaces inside the shell if the dot product of the surface normal and the vector is positive at any point on the surfaces.}
+\begin{prop}\label{prop:projection}
+	如果壳的三张 B\'{e}zier 三角面满足命题~\ref{prop:bijective} 中的条件，则沿向量场方向的投影算子可在壳内任意两张曲面之间定义双射，前提是这两张曲面上任意点处“曲面法向与向量”的点积均为正。
+\end{prop}
+\begin{proof}
+由于向量场可视为棱柱 $\tilde{\triangle}$ 上的等参数变换 $\mf$。$\tilde{\triangle}$ 由空间中沿 z 轴扩展单位棱柱 $\hat{\triangle}$ 得到，其中 $\hat{\triangle}=\{u, v \geq 0 | u+v \leq 1\} \times [-1, 1]$，并将 \( \hat{\Lambda} \) 的底面标识为 \( z = -1 \)、中面标识为 \( z = 0 \)、顶面标识为 \( z = 1 \)。
+我们考虑该等参数变换的逆映射。
+由于等参数变换是双射，$\mf^{-1}$ 也是双射。
+特别地，$\mf^{-1}$ 会将 $\cF$ 变换为常向量 \( \mathbf{e}_z = (0, 0, 1) \)。
+因此，投影算子可等价写为 $ Proj(p) = \mf^{-1}(P_{\tilde{\triangle}}(\mf(p))$，其中 \( P_{\tilde{\triangle}} \) 是参考棱柱中沿 \( z \)-轴的投影。
+若与 \( \triangle \) 相交的分片线性网格在映射到参考域 \( \tilde{\triangle} \) 并经 \( P_{\tilde{\triangle}} \) 投影后由正面积三角形构成（且边界映射到边界），则 \( P_{\tilde{\triangle}} \) 为双射。
+在参考域中，投影后面积为正（边界固定）等价于：投影方向与每个面的法向点积为正。
+\end{proof}
+
+
+\begin{figure*}[!t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{pipline}
+    {
+    	\definecolor{mycolor}{rgb}{0.9804, 0.4824, 0.4157}
+    	\put(5.5,29){\small \textcolor{mycolor}{$\text{N}_f$}}
+    	
+    	\definecolor{mycolor2}{rgb}{0.5373, 0.5137, 0.7490}
+    	\put(0.7,29){\small \textcolor{mycolor2}{$E_{\text{angle}}$,}}
+    	
+    	\definecolor{mycolor3}{rgb}{0.1961,0.7216,0.5922}
+    	\put(74.3,29){\small \textcolor{mycolor3}{$E_{\text{quality}}$}}
+    	
+    	\put(68.2,7.2){\small $\text{N}_f$}
+    	\put(68.2,5.4){\small $E_{\text{angle}}$}
+    	\put(68.2,3.7){\small $E_{\text{quality}}$}
+    }
+  \end{overpic}
+  \vspace{-2.5mm}
+  \caption{
+  左图展示轮次与 $E_{\text{angle}}$（式~\eqref{equ:angle}）、$E_{\text{quality}}$（式~\eqref{equ:quality}）以及线性三角形数量 $N_f$ 的关系。
+ 右图展示每一轮中边塌缩、棱柱几何优化、边翻转和棱柱缩放操作的次数。
+ 同时给出了九个渐进的壳结果。
+  %Optimization dynamics: progressive reduction in shell face count, incremental increase in angle energy, and iterative fluctuations in MIPS energy.
+  }
+  \label{fig:pipeline}
+\end{figure*}
+

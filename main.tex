@@ -1,0 +1,38 @@
+% !TeX encoding = UTF-8
+% !TeX program = xelatex
+% !TeX spellcheck = en_US
+
+\documentclass[degree=doctor]{ustcthesis}
+% degree      = doctor | master | bachelor
+% degree-type = academic | professional | engineering
+% language    = chinese | english
+% fontset     = windows | mac | ubuntu | fandol
+
+\input{ustcsetup}
+
+\begin{document}
+
+\maketitle
+\copyrightpage
+
+\frontmatter
+\include{chapters/innovations}
+\include{chapters/abstract}
+\tableofcontents
+
+\mainmatter
+\include{chapters/Chap1}
+\include{chapters/Chap2}
+\include{chapters/Chap3_query}
+\include{chapters/Chap3}
+\include{chapters/Chap5_cauchy}
+\include{chapters/Chap5}
+\include{chapters/Chap6}
+
+\bibliography{bib/ustc}
+
+\backmatter
+\include{chapters/acknowledgements}
+\include{chapters/achievements}
+
+\end{document}

@@ -1,0 +1,521 @@
+\chapter{笼空间中的半解析半数值的高阶双调和坐标}
+
+% ===== Chapter 5 macros =====
+\providecommand{\Bezier}{B\'{e}zier }
+\providecommand{\tr}[1]{#1}
+\providecommand{\tb}[1]{#1}
+\providecommand{\todo}[1]{}
+\providecommand{\argmin}{\mathop{\mathrm{arg\,min}}\limits}
+\providecommand{\argmax}{\mathop{\mathrm{arg\,max}}\limits}
+\providecommand{\res}{\mathop{\mathrm{Res}}}
+\providecommand{\re}{\mathop{\mathrm{Re}}}
+\providecommand{\im}{\mathop{\mathrm{Im}}}
+
+\makeatletter
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{prop}{%
+  \@ifundefined{theorem}{%
+    \newtheorem{prop}{Proposition}[chapter]%
+  }{%
+    \newtheorem{prop}[theorem]{Proposition}%
+  }%
+}{}
+\makeatother
+
+\def \ma {\mathbf{a}}
+\def \mb {\mathbf{b}}
+\def \mc {\mathbf{c}}
+\def \md {\mathbf{d}}
+\def \me {\mathbf{e}}
+\def \mf {\mathbf{f}}
+\def \mg {\mathbf{g}}
+\def \mh {\mathbf{h}}
+\def \mi {\mathbf{i}}
+\def \mj {\mathbf{j}}
+\def \mk {\mathbf{k}}
+\def \ml {\mathbf{l}}
+\def \mm {\mathbf{m}}
+\def \mn {\mathbf{n}}
+\def \mo {\mathbf{o}}
+\def \mp {\mathbf{p}}
+\def \mq {\mathbf{q}}
+\def \mr {\mathbf{r}}
+\def \ms {\mathbf{s}}
+\def \mt {\mathbf{t}}
+\def \muu {\mathbf{u}}
+\def \mv {\mathbf{v}}
+\def \mw {\mathbf{w}}
+\def \mx {\mathbf{x}}
+\def \my {\mathbf{y}}
+\def \mz {\mathbf{z}}
+
+\section{概述}\label{sec:chap5-overview}
+第五章构造的高阶柯西坐标以共形性为主要特征，在保持局部角度关系和获得平滑形变方面具有明显优势。然而，共形性也带来了边界控制上的限制：当用户希望更精确地约束笼边界及其邻域形状时，仅依赖共形坐标往往难以同时兼顾边界贴合与内部扭曲抑制。因此，本章从这一问题出发，转而研究一类能够更强控制边界、同时保持内部扭曲较小的高阶坐标。
+
+作为调和坐标的自然推广，双调和坐标通过引入更丰富的变形空间，在保持较低扭曲的同时提供了更均衡的边界控制能力~\cite{Weber2012,thiery2024biharmonic}。已有工作分别在线性二维多边形笼和三维三角网格笼上给出了双调和坐标的闭式构造~\cite{Weber2012,thiery2024biharmonic}。另一方面，高阶笼以多项式曲线替代分段直线，不仅能更紧密地贴合曲边形状，还能更自然地表达边界的切向拉伸与曲率变化。围绕这一表示，已有工作将均值坐标、Green 坐标与 Cauchy 坐标推广到高阶笼~\cite{Li2013,MichelThiery2023,Lin2024PolynomialCC,liu2024polygc}；但二维高阶笼上的双调和坐标仍缺少相应构造。这也意味着，第五章已经获得的高阶笼几何表达能力与共形变形优势，尚未进一步转化为“边界可控且内部低扭曲”的坐标体系。
+
+本章据此构造笼空间中的半解析半数值的高阶双调和坐标。方法上，本文在高阶边界元框架下，将曲边笼边界、边界条件以及未知场统一表示为 Bernstein 多项式，并结合解析积分与数值求解建立可计算的坐标形式。由此得到的坐标以边界控制与低扭曲为核心目标：一方面，它能够更好地约束边界值及其导数，从而提高曲边笼编辑中的边界可控性；另一方面，它在内部保持较平滑的传播过程，以减轻剪切、拉伸与局部伪影。\S~\ref{sec:bihc-method} 节首先回顾双调和坐标的边界元求解基础，随后给出高阶单元下的边界积分方程重写、代数系统求解与变形控制方法；\S~\ref{sec:bihc-results} 节通过时间、不同目标次数以及与现有坐标方法的对比实验，评估所提出方法在计算效率、边界控制能力与变形质量上的表现。
+
+\input{chapters/chap5_cn/bihc_intro_figs}
+
+\section{高阶双调合坐标}\label{sec:bihc-method}
+本章先在第~\ref{sec:bihc-revisit} 节回顾 BEM 及其在双调和坐标推导中的应用，然后在第~\ref{sec:bihc-HighOrderBEM} 节介绍基于高阶 BEM 的高阶笼闭式坐标，最后在第~\ref{sec:bihc-deformation} 节讨论变形控制。
+
+\subsection{边界元方法}\label{sec:bihc-revisit}
+\paragraph{BEM 概述}
+使用 BEM~\cite{Brebbia1978TheBE} 求解偏微分方程时，通常包含以下步骤：
+\begin{enumerate}
+    \item 将定义域内部的微分方程转换为边界上的积分方程。
+    \item 将边界离散为有限大小的边界单元。
+    \item 将边界积分方程转化为代数方程。
+    \item 求解代数方程，从而得到原偏微分方程的解。
+\end{enumerate}
+下面说明，应用 BEM 可以在二维线性笼~\cite{Weber2012} 和三维线性笼~\cite{thiery2024biharmonic} 上得到闭式双调和坐标。
+
+\paragraph{双调和 Dirichlet 问题}
+双调和坐标由有界域 $\Omega$ 上双调和 Dirichlet 问题的解导出（参见文献~\cite{Weber2012} 式 (4)）：
+\begin{equation}\label{equ:bihc-bihPDE}
+\begin{aligned}
+    &\Delta^2 f(\eta) = 0, \quad \eta \in \Omega, \\
+    &f(\xi) = g_1(\xi), \quad \xi \in \partial \Omega, \\
+    &\frac{\partial f}{\partial \mn_{\xi}}(\xi) = g_2(\xi), \quad \xi \in \partial \Omega,
+\end{aligned}
+\end{equation}
+其中，$f$ 是双调和函数，\(g_1\) 与 \(g_2\) 分别为给定的 Dirichlet 和 Neumann 边界条件，\(\mn_{\xi}\) 是笼边界 \(\partial\Omega\) 在 \(\xi\) 处的法向量。
+
+\paragraph{边界积分方程}
+利用 Green 定理和基本解，可将偏微分方程~\eqref{equ:bihc-bihPDE} 转化为如下边界积分方程：
+\begin{equation}\label{equ:bihc-BIE1}
+\begin{aligned}
+f(\eta) &=
+\int\limits_{\xi \in \partial \Omega}
+f(\xi) \frac{\partial G_1}{\partial \mn_{\xi}}(\xi, \eta)d\xi -
+\int\limits_{\xi \in \partial \Omega}
+G_1(\xi, \eta) \frac{\partial f(\xi)}{\partial \mn_{\xi}}d\xi \\
++ &\int\limits_{\xi \in \partial \Omega}
+\Delta f(\xi) \frac{\partial G_2}{\partial \mn_{\xi}}(\xi, \eta)d\xi -
+\int\limits_{\xi \in \partial \Omega}
+G_2(\xi, \eta) \frac{\partial \Delta f(\xi)}{\partial \mn_{\xi}}d\xi,
+\end{aligned}
+\end{equation}
+
+\begin{equation}\label{equ:bihc-BIE2}
+\begin{aligned}
+\Delta f(\eta) =
+\int\limits_{\xi \in \partial \Omega}
+\Delta f(\xi) \frac{\partial G_1}{\partial \mn_{\xi}}(\xi, \eta)d\xi -
+\int\limits_{\xi \in \partial \Omega}
+G_1(\xi, \eta) \frac{\partial \Delta f(\xi)}{\partial \mn_{\xi}}d\xi,
+\end{aligned}
+\end{equation}
+其中，$G_1$ 和 $G_2$ 分别是二维调和方程与双调和方程的基本解。具体写为：
+$G_1(\xi,\eta)=-\frac{1}{2 \pi}\ln\|\xi-\eta\|$，
+$G_2(\xi,\eta)=-\frac{\|\xi-\eta\|^2}{8 \pi}(\ln\|\xi-\eta\|-1)$。
+%
+在积分方程中，由于~\eqref{equ:bihc-bihPDE} 中已给定 \(f\) 与 \(\partial f/\partial \mn\)，未知函数仅包含 \(\Delta f\) 和 \(\partial \Delta f/\partial \mn\)。
+当在边界上求得 \(\Delta f\) 与 \(\partial \Delta f/\partial \mn\) 的全部未知函数值后，将其代入~\eqref{equ:bihc-BIE1}，即可得到域内任意点的 $f$ 值，即~\eqref{equ:bihc-bihPDE} 的解。
+%
+为在边界上求解 \(\Delta f\) 与 \(\partial \Delta f/\partial \mn\)，需要在~\eqref{equ:bihc-BIE1} 与~\eqref{equ:bihc-BIE2} 中将 \(\eta\) 移到边界上（记作 \(\eta^{\text{b}}\)）。
+
+\paragraph{线性笼上的双调和坐标}
+一般情况下，将积分方程离散化为代数方程，并进一步数值求解。
+%
+离散过程包括两步。
+第一步是将边界划分为有限大小的边界单元。对于二维多边形笼~\cite{Weber2012} 与三维三角网格笼~\cite{thiery2024biharmonic}，边界是分段线性的，因此可自然离散为分段线性单元。
+%
+第二步是在每个边界单元内用插值逼近边界函数。
+在每个单元中，\(f\) 与 \(\partial f/\partial \mn\) 分别用分段线性函数与分段常函数表示。未知量 \(\Delta f\) 与 \(\partial \Delta f/\partial \mn\) 也分别用分段线性函数与分段常函数近似。
+%
+将这些函数表示为边界单元节点处函数值后，即可通过在不同边界点上评估 \(\eta'\) 建立代数方程组。
+%
+在代数方程组求解方面，\citet{Weber2012} 将代数约束~\eqref{equ:bihc-BIE2} 代入~\eqref{equ:bihc-BIE1}，形成线性系统并求解。
+在三维情形中，\citet{thiery2024biharmonic} 同时最小化两类约束，从而得到更平稳的变形结果。高阶边界元设置的整体示意见图~\ref{fig:bihc-schematic}。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap5_diagram.pdf}
+    {
+ \put(17,12){\small $\eta$}
+  \put(29,29){\small $\mc_i$}
+   \put(87,27){\small $\mg_1$}
+    }
+  \end{overpic}
+  \vspace{0mm}
+  \caption{
+  高阶边界元方法示意。曲边边界由一系列三次单元 $\mc_i$ 构成，$\mg_1$ 在其上为三次多项式函数。
+  }
+  \label{fig:bihc-schematic}
+\end{figure}
+
+\subsection{多项式双调和坐标}\label{sec:bihc-HighOrderBEM}
+
+为实现曲边到曲边的变形，本文采用高阶边界元方法~\cite{Fischer1999ApplicationOH,Frijns2000ImprovingTA,gravenkamp2019high}，这需要高阶单元和高阶形函数。
+
+
+\subsubsection{重写边界积分方程}\label{sec:bihc-reformulating-bie}
+\paragraph{高阶单元}
+输入二维笼由 $N_c$ 条多项式曲线组成。
+这些曲线在边界积分方程中彼此独立。
+%
+第 $i$ 个边界单元是一条 $m$ 次多项式曲线，参数化为 \(\mc_i(t): [0, 1] \to \mathbb{R}^2\)。
+该曲线 \(\mc_i(t)\) 可表示为 $m$ 次 \Bezier 曲线：
+\begin{equation}
+    \mc_i(t)=\sum_{j=0}^m \mc_{j}^i B_j^m(t),
+\end{equation}
+其中 \(B_j^m\) 表示 Bernstein 基函数，\(\mc_{j}^i\) 表示对应控制点。
+
+\paragraph{高阶边界条件}
+通常假设 \(\mg_1\) 在单元 \(\mc_i(t)\) 上是 $n$ 次多项式函数：
+\begin{equation}\label{equ:bihc-g}
+\begin{aligned}
+    \mg_1(t)=\sum_{j=0}^n \mg_{1,j}^i B_j^n(t), \,\, \mg_2(t)=s_i\overbrace{\frac{\|\mg_1'(t)\|}{\|\mc_i'(t)\|}}^{\sigma} \overbrace{\frac{\mg_1'(t)^{\perp}}{\|\mg_1'(t)^{\perp}\|}}^{\bar{\mn}}=s_i\frac{\mg_1'(t)^{\perp}}{\|\mc_i'(t)\|},
+    \end{aligned}
+\end{equation}
+其中 \(\mg_{1,j}^i\) 为控制点，且 \((a, b)^\perp = (b, -a)\)。
+这里将缩放因子 \(\sigma\) 乘以单位法向来施加 Neumann 边界条件。若简单将 \(\sigma\) 设为 1，会出现不期望项 \(\|\mg_1'(t)^\perp\|\)。因此采用与 Green 坐标相同的 \(\sigma\) 形式，从而保证与文献~\cite{MichelThiery2023} 相近的边界行为。
+此外引入缩放因子 \(s_i\)，其默认取值为 1。更复杂的关于 \(s_i\) 的 Neumann 边界条件配置见第~\ref{sec:bihc-deformation} 节。
+%
+由于 \(\mg_1(t)\) 意味着变形后笼边是 $n$ 次多项式曲线，因此取 \(n \geq m\) 以保证变形连续性。
+
+\paragraph{高阶形函数}
+本文使用高阶形函数来近似边界上未知函数 \(\Delta f\) 和 \(\partial \Delta f/\partial \mn\)。
+通常，在 \(\mc_i(t)\) 上用 $k$ 次多项式近似 \(\Delta f\)，用 $(k-1)$ 次多项式近似 \(\partial \Delta f/\partial \mn\)：
+\begin{equation}\label{equ:bihc-Df}
+\begin{aligned}
+    \Delta f(t)=\sum_{j=0}^k \mh_{1,j}^i B_j^k(t), \frac{\partial \Delta f}{\partial \mn}(t)=\sum_{j=0}^{k-1} \mh_{2,j}^i B_j^{k-1}(t),
+    \end{aligned}
+\end{equation}
+其中 \(\mh_{1,j}^i\) 与 \(\mh_{2,j}^i\) 为控制点。
+取 \(k \geq n\) 以保证可重现仿射变换。
+
+\paragraph{方程重写}
+注意 $\frac{\partial G}{\partial \mn}=\nabla_1 G(\mc(t),\eta)\cdot \mn_{c(t)}$，且 $\mn_{\mc(t)} d\xi=\mn_{\mc(t)}\|\mc'(t)\|dt=\mc'(t)^{\perp}dt$。
+将 \eqref{equ:bihc-g} 与 \eqref{equ:bihc-Df} 代入 \eqref{equ:bihc-BIE1} 和 \eqref{equ:bihc-BIE2}，得到离散化后的边界积分方程：
+\begin{equation}\label{equ:bihc-dis_Int1}
+\begin{aligned}
+    f(\eta) = \sum_{i=1}^{N_c} &\left(\sum_{j =0}^n \phi_{i,j}(\eta) \mg_{1,j}^i +  \sum_{j =0}^{n-1}\psi_{i,j}(\eta) s_i (\mg_{2,j}^{i})^{\perp} \right.\\
+&+\left. \sum_{j =0}^k \tilde{\phi}_{i,j}(\eta) \mh_{1,j}^i +  \sum_{j =0}^{k-1}\tilde{\psi}_{i,j}(\eta) (\mh_{2,j}^{i})^{\perp}\right),
+\end{aligned}
+\end{equation}
+\begin{equation}\label{equ:bihc-dis_Int2}
+   \Delta f(\eta) = \sum_{i=1}^{N_c} \left(\sum_{j =0}^k  \phi_{i,j}(\eta) \mh_{1,j}^i + \sum_{j =0}^{k-1} \psi_{i,j}(\eta) (\mh_{2,j}^{i})^{\perp}\right),
+\end{equation}
+其中 $\mg_{2,j}^i=n(\mg_{1,j+1}^i-\mg_{1,j}^i)$，且
+\begin{equation}\label{equ:bihc-basis_inte}
+\begin{aligned}
+   & \phi_{i,j}(\eta)=\int\limits_0^1\nabla_1 G_1(\mc_i(t),\eta)\cdot \mc_i'(t)^{\perp}B^n_j(t)\,dt,\\
+   &\psi_{i,j}(\eta)=\int\limits_0^1 G_1(\mc_i(t),\eta) B^n_j(t)\,dt,\\
+   &\tilde{\phi}_{i,j}(\eta)=\int\limits_0^1\nabla_1 G_2(\mc_i(t),\eta)\cdot \mc_i'(t)^{\perp}B^n_j(t)\,dt,\\
+   &\tilde{\psi}_{i,j}(\eta)=\int\limits_0^1 G_2(\mc_i(t),\eta) \|\mc_i'(t)\|^2 B^n_j(t)\,dt,
+ \end{aligned}
+\end{equation}
+其中 $\nabla_1 G_1(\xi, \eta) = \frac{\xi - \eta}{2\pi \|\xi - \eta\|^2}$，$\nabla_1 G_2(\xi, \eta) = \frac{(\xi - \eta)(2 \log(\|\xi-\eta\|)-1)}{8\pi}$。
+%
+\paragraph{积分及其导数的解析计算}
+与 \(\phi_{i,j}\) 和 \(\psi_{i,j}\) 相关的项，正是多项式 Green 坐标中的项，已由文献~\cite{MichelThiery2023} 针对多边形笼、由文献~\cite{liu2024polygc} 针对高阶笼给出。
+这里先给出 \(\tilde{\phi}_{i,j}\) 与 \(\tilde{\psi}_{i,j}\) 的计算方法，再推导它们的导数。
+
+对于 \(\tilde{\phi}_{i,j}\)，注意
+\(\nabla_1 G_2(\mc_i(t),\eta) \cdot \mc_i'(t)^{\perp} = (-\eta \cdot \mc_i'(t)^{\perp})(2 \log(\| c(t) - \eta\|) - 1)\)。
+\(\tilde{\phi}_{i,j}\) 中的积分项可写为“多项式函数与对数项”的乘积。为简洁起见，可先关注以下项：
+\begin{equation}\label{equ:bihc-cal_termsingle}
+\begin{aligned}
+    &\int_0^1 t^j \log(\|\mc_i(t) - \eta \|)\, dt \\
+    &= \frac{\log(\|\mc^i_{m} - \eta\|)}{j+1} + \frac{1}{j+1}\int_0^1 \frac{t^{j+1}(c(t)-\eta)\cdot c'(t)}{\|c(t)-\eta\|^2}\, dt,
+\end{aligned}
+\end{equation}
+其中 \(j = 0, \dots, n\)。问题被转化为计算
+$F_{h,2}^{c,\eta}=\int_0^1\frac{t^h}{\|c(t)-\eta \|^2}\,dt,\ h=j+1,\dots,j+2m$。
+类似地，\(\tilde{\psi}_{i,j}\) 中积分项也可写为多项式与对数项乘积，其计算方式与 \(\tilde{\phi}_{i,j}\) 相同，但多项式次数更高，此时 \(j = 0, \dots, 4m + n - 2\)。
+
+导数与积分具有相似形式。对 \(\tilde{\phi}_{i,j}'\) 来说，非平凡项仅涉及 \eqref{equ:bihc-cal_termsingle} 的导数。
+实际上，对 \eqref{equ:bihc-basis_inte} 中四类积分求导时，非平凡项仅包含：
+$
+F_{h,4}^{c,\eta} := \int_0^1 \frac{t^h}{\|c(t) - \eta \|^4} \, dt.
+$
+
+因此，只需计算 \(F_{h,2}^{c,\eta}\) 与 \(F_{h,4}^{c,\eta}\)。\citet{liu2024polygc} 给出了如下引理：
+\begin{lemma}
+对于 \(p(t) = \prod_{i=1}^{n} (t - \omega_i)^{n_i}\)，有
+\[
+\int_0^1 \frac{t^h}{p(t)} dt = \sum_{i=1}^{n} \text{Res}\left(\frac{w^m \left( \log\left(1 - \frac{1}{w}\right) + \sum_{k=1}^h \frac{1}{k w^k} \right)}{p(w)}, \omega_i\right).
+\]
+\end{lemma}
+将该引理用于计算 \(F_{h,2}^{c,\eta}\) 与 \(F_{h,4}^{c,\eta}\)，即令
+$p(t)=\|c(t) - \eta \|^2$ 与 $p(t)=\|c(t) - \eta \|^4$。
+这涉及求解方程 \(\|c(t)-\eta\|^2=0\)。当 \(c(t)\) 的次数小于 5 时，该方程有解析解。
+
+\subsubsection{边界积分方程求解}
+\paragraph{奇异积分}
+为得到代数方程组，本文在边界上采样 \(\eta^{\text{b}}\)。
+%
+此时，上述积分求值涉及奇异积分计算。关于该问题，在边界元方法中已有大量研究~\cite{Fischer1999ApplicationOH}。本文遵循文献~\cite{Weber2012} 的建议：当 \(\eta\) 趋近边界时，这些积分的极限存在。
+\tr{在本问题中，上述解析方法无法直接计算该极限，因为每一项 \(F_{h,2}^{c,\eta}\) 都趋于无穷大。本文在补充推导中单独给出该极限的显式表达。另一种实用策略是将点 \(\eta^{\text{b}}\) 略微向笼内部偏移，再直接计算积分。实验表明，这一做法同样可得到准确结果。}
+
+\paragraph{矩阵约束}
+将边界上的 \(\eta^{\text{b}}\) 代入 \eqref{equ:bihc-dis_Int1} 与 \eqref{equ:bihc-dis_Int2}，可得如下矩阵约束：
+
+\begin{equation}\label{equ:bihc-matrix1}
+    M_nG_1=\Phi_nG_1+\Psi_n G_2+\bar{\Phi}_k H_1+\bar{\Psi}_k H_2,
+\end{equation}
+\begin{equation}\label{equ:bihc-matrix2}
+    M_k H_1=\Phi_k H_1+\Psi_k H_2.
+\end{equation}
+其中，\(G_1\)（或 \(G_2\)）是由 \(\mg_{1,j}^i\)（或 \(s_i (\mg_{2,j}^{i})^{\perp}\)）组成的 \(N_c\cdot n\) 维列向量；
+\(H_1\)（或 \(H_2\)）是由 \(\mh_{1,j}^i\)（或 \((\mh_{2,j}^{i})^{\perp}\)）组成的 \(N_c\cdot k\) 维列向量。
+注意，由于连续性，相邻边共享公共的 \(\mg_{1,0}^i\) 与 \(\mh_{1,0}^i\)（或 \(\mg_{1,n}^i\) 与 \(\mh_{1,k}^i\)）。
+式~\eqref{equ:bihc-matrix1} 和 \eqref{equ:bihc-matrix2} 中矩阵的第 \(l\) 行，对应于在第 \(l\) 个采样点处对 \eqref{equ:bihc-dis_Int1} 与 \eqref{equ:bihc-dis_Int2} 的计算。
+\(M_n\) 与 \(M_k\) 收集了位于对应边界单元上的 \(\eta^{\text{b}}\) 处，$n$ 次与 $k$ 次 Bernstein 基函数系数。
+\(\Phi_n\) 按照 \(G_1\) 的顺序收集 \eqref{equ:bihc-dis_Int1} 中的 \(\phi_{i,j}(\eta^{\text{b}})\)。
+\(\Psi_n,\bar{\Phi}_k,\bar{\Psi}_k,\Phi_k\) 和 \(\Psi_k\) 定义方式相同。
+
+
+\paragraph{近似代数方程}
+求解代数方程组有两种方式：一种严格施加拉普拉斯约束，另一种较宽松地施加该约束。
+为简化说明，这里只讨论 \(k=n\) 的情形；\(k>n\) 的情况同理。
+此时，方程组中的 8 个矩阵可简化为 5 个。由此可得到本文正则化双调和坐标的表达：
+\begin{equation}\label{equ:bihc-final_BHC}
+    \begin{aligned}
+f(\eta) &= \big[ \phi(\eta) + (\bar{\phi}(\eta) C_L + \bar{\psi}(\eta) C_D)(M_n - \Phi_n) \big] G_1 \\
+&\quad + \big[ \psi(\eta) - (\bar{\phi}(\eta)) C_L + \bar{\psi}(\eta) C_D)\Psi_n \big] G_2  \\
+&:=\alpha(\eta)G_1+\beta(\eta)G_2
+\end{aligned}
+\end{equation}
+其中，\(\phi(\eta)\) 表示在 \(\eta\) 处由 \(\phi_{i,j}\) 取值组成的行向量；\(\bar{\phi}(\eta)\)、\(\bar{\psi}(\eta)\) 和 \(\psi(\eta)\) 同理。
+\(\alpha(\eta)\) 与 \(\beta(\eta)\) 共同构成本文双调和坐标。
+在~\cite{Weber2012} 提出的第一种方法（记作 $\text{BiHC}_1$）中，仅优化 \eqref{equ:bihc-dis_Int1}，同时严格满足 \eqref{equ:bihc-dis_Int2}。
+相应矩阵为：\(C_L = (\bar{\Phi}_n + \bar{\Psi}_n A)^{-1}\)、\(C_D = A (\bar{\Phi}_n + \bar{\Psi}_n A)^{-1}\)，其中 \(A = \Psi_n^{-1} (M_n - \Phi_n)\)。
+%
+在文献~\cite{thiery2024biharmonic} 的第二种方法（记作 $\text{BiHC}_{1,2}$）中，同时优化 \eqref{equ:bihc-dis_Int1} 与 \eqref{equ:bihc-dis_Int2}。
+对应矩阵通过下式确定：
+\[
+\begin{pmatrix}
+C_L \\
+C_D
+\end{pmatrix} = \left( E^T E + F^T F \right)^{-1} E^T,
+\]
+其中 \(E = (\bar{\Phi}_n; \bar{\Psi}_n)\)，\(F = (\Phi_n - M_n; \Psi_n)\)。
+实验表明，当变形幅度较小时，$\text{BiHC}_{1}$ 与 $\text{BiHC}_{1,2}$ 结果接近；而在更具挑战性的变形下，$\text{BiHC}_{1,2}$ 的变形结果优于 $\text{BiHC}_{1}$（见图~\ref{fig:bihc-linear-solving}）。这一观察与文献~\cite{thiery2024biharmonic} 的结论一致：联合优化拉普拉斯与 Dirichlet 约束可提供更多自由度。
+
+
+\subsection{变形控制}\label{sec:bihc-deformation}
+
+\paragraph{提高精度}
+为提高数值解精度，可采用三种方法：
+\begin{enumerate}
+    \item 增加边界单元数量，以扩展离散近似空间。
+    \item 增大 \(k\) 的次数。与方法 (1) 类似，这会得到更大的近似空间和更多自由度。
+    \item 增加采样点 \(\eta^\text{b}\) 数量，形成超定方程组，使积分方程在最小二乘意义下于更多点成立，从而使变形结果更光滑。
+\end{enumerate}
+实验表明，方法 (1) 与方法 (2) 结果相近。
+在实践中，本文将每条笼边细分为 4 个单元，并在每个单元参数域上均匀采样 \(2n\) 个点构建方程组。
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{figures/chap5_diff_solver.pdf}
+    {
+    \put(7,-3.5){\small 初始姿态}
+    \put(40,-3.5){\small $\text{BiHC}_{1}$}
+ \put(78,-3.5){\small $\text{BiHC}_{1,2}$}
+    }
+  \end{overpic}
+ \vspace{2mm}
+  \caption{
+  两种代数方程求解方法的比较。当仅对裤子右侧进行变形时，$\text{BiHC}_{1}$ 在左腿区域引入了扰动，而 $\text{BiHC}_{1,2}$ 保持了无扰动变形。
+  }
+  \label{fig:bihc-linear-solving}
+\end{figure}
+
+
+\paragraph{变形能量}
+在~\eqref{equ:bihc-g} 中，不同的 \(s_j\) 选择对应不同的 Neumann 边界条件\tr{ \(g_2\)。其中 \(g_2\) 表示双调和函数在边界上的导数，刻画了映射在边界附近的拉伸行为。}
+\tr{
+令 \(s_j=1\) 时，得到与文献~\cite{MichelThiery2023} 相同的边界条件。不同于其公式，这类边界条件可在双调和函数空间中被精确满足。可以观察到，该选择在边界附近呈现与 Green 坐标相似的保角行为，并在多组样例中取得了良好结果。}
+然而，对于偏离保角较大的笼变形，这种边界附近的局部保角性可能导致笼内部产生更大的剪切。
+在这种情况下，需要考虑笼的全局变形。
+按照文献~\cite{Weber2012} 与文献~\cite{thiery2024biharmonic} 的做法，本文给出两种根据边界位置自动推导边界导数的方法。
+由于 \(s_i<0\) 在变形时可能导致边界附近退化与折叠，因此约束 \(s_i>0\)。
+本文在 \(\partial\Omega\) 上采样点约束 $C=\{q_k\}$，以离散两种不同的变形能量：
+\begin{enumerate}
+\item 尽可能调和（As-Harmonic-As-Possible, AHAP）能量：$\sum_k \|\Delta f(q_k)\|^2$。该能量通过~\eqref{equ:bihc-dis_Int2} 计算。
+\item 尽可能仿射（As-Affine-As-Possible, AAAP）能量：$\sum_k \|f'(q_k)\|^2$。该能量通过~\eqref{equ:bihc-final_BHC} 计算。其评估需要积分 \(\phi(\eta),\psi(\eta),\bar{\phi}(\eta),\bar{\phi}(\eta)\) 的导数，而这部分计算已在第~\ref{sec:bihc-reformulating-bie} 节给出。
+\end{enumerate}
+实验表明，单位法向导数，以及通过 AHAP 与 AAAP 能量得到的法向导数，能够逐步增强内部保角性。三种方法都可产生可用变形，具体取决于应用场景。不同缩放因子下的变形差异见图~\ref{fig:bihc-scaling}。
+
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{figures/chap5_scale.pdf}
+    {
+    \put(6,-3.5){\small 初始姿态}
+    \put(35,-3.5){\small 单位}
+    \put(58,-3.5){\small AHAP}
+ \put(85,-3.5){\small AAAP}
+    }
+  \end{overpic}
+ \vspace{2mm}
+  \caption{
+  不同缩放因子的变形比较，包括单位缩放和通过最小化变形能量优化得到的缩放。
+  }
+  \label{fig:bihc-scaling}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap5_diff_order_pangxie.pdf}
+    {
+    \put(2,-3.5){\small \textbf{(a)} 初始姿态}
+     \put(26,-3.5){\small \textbf{(b)} $\omega=0$}
+      \put(55,-3.5){\small \textbf{(c)} $\omega=1$}
+ \put(80,-3.5){\small \textbf{(d)} $\omega=0.5$}
+    }
+  \end{overpic}
+ \vspace{5mm}
+  \caption{
+  加权坐标结果 (d)，其表示为 Green 坐标 (b) 与双调和坐标 (c) 的线性组合。
+  }
+  \label{fig:bihc-weights}
+\end{figure}
+
+\paragraph{不同权重}
+在笼变形本身非保角时，仅用双调和坐标无法得到严格保角变形，因为“保角性”和“插值性”本质上相互冲突。
+不过，双调和坐标可以让用户在这两者之间进行平衡并按需侧重。
+%
+在~\eqref{equ:bihc-final_BHC} 中，可将双调和坐标拆分为两部分：\(\{\alpha_c,\beta_c\}\) 与 \(\{\alpha_{\text{i}},\beta_{\text{i}}\}\)，定义如下：
+\begin{equation*}
+    \begin{split}
+    &\alpha_c(\eta)=\phi(\eta),\\
+    &\beta_c(\eta)=\psi(\eta),\\
+     &\alpha_{\text{i}}(\eta)=(\bar{\phi}(\eta) C_L + \bar{\psi}(\eta) C_D)(M_n - \Phi_n),\\
+     &\beta_{\text{i}}(\eta)=- (\bar{\phi}(\eta)) C_L + \bar{\psi}(\eta) C_D)\Psi_n.
+    \end{split}
+\end{equation*}
+其中 \(\{\alpha_c,\beta_c\}\) 对应 Green 坐标并提供保角变形，\(\{\alpha_{\text{i}},\beta_{\text{i}}\}\) 是一个双调和函数项，用于把保角变形后的边界拉回到笼边界。
+%
+本文定义新坐标 \(\{\alpha_c + w \alpha_{\text{i}},\beta_c+w\beta_{\text{i}}\}\)，用户可调节 \(w\) 以控制变形。
+当 \(w=0\) 时，变形是保角的；当 \(w=1\) 时，结果完全插值边界。
+通常取中间值 \(w\) 可得到更直观且更满意的变形效果（见图~\ref{fig:bihc-weights}）。
+
+
+\begin{algorithm}[t]
+  \caption{PolyBiharmonicCoordinates：计算多项式双调和坐标（\(\text{BiHC}_1\)）}\label{alg:bihc-encoding}
+  \SetKwInput{KwInput}{输入}
+  \SetKwInput{KwOutput}{输出}
+  \SetKwFunction{FMain}{Main}
+  \SetKwFunction{FD}{D}
+  \KwInput{\(c\)：由 $N_c$ 条 $n$ 次多项式曲线构成的笼\\
+          \quad\quad\quad  \(\eta\)：笼内部一点}
+  \KwOutput{$\alpha(\eta)$ 与 $\beta(\eta)$：点 $\eta$ 处的双调和坐标}
+  % Algorithm
+  \tb{//构建矩阵\;}
+  \tr{
+  $\{\eta^b\}\gets$ 每条曲线上采样 $n$ 个点\;
+  \For{每个 $\eta^b$}{
+  计算积分 $\phi_{i,j}(\eta^b),\psi_{i,j}(\eta^b),\tilde{\phi}_{i,j}(\eta^b),\tilde{\psi}_{i,j}(\eta^b)$\;
+  组装系统矩阵：$M_n,\Phi_n,\Psi_n,\bar{\Phi}_n,\bar{\Psi}_n$\;
+  }
+  $A=\Phi_n^{-1}(M_n-\Phi_n),C_L=(\bar{\Phi}_n+\bar{\Psi}_nA)^{-1},C_D=AC_L$\;
+  }
+  \tb{//计算坐标\;}
+    \tr{
+  计算积分：$\phi_{i,j}(\eta),\psi_{i,j}(\eta),\tilde{\phi}_{i,j}(\eta),\tilde{\psi}_{i,j}(\eta)$\;
+  组装列向量：$\phi(\eta),\psi(\eta),\bar{\phi}(\eta),\bar{\psi}(\eta)$\;
+  $\alpha(\eta)=\phi(\eta) + (\bar{\phi}(\eta) C_L + \bar{\psi}(\eta) C_D)(M_n - \Phi_n)$\;
+  $\beta(\eta)=\psi(\eta) - (\bar{\phi}(\eta)) C_L + \bar{\psi}(\eta) C_D)\Psi_n$\;
+  }
+\end{algorithm}
+
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap5_gallery.pdf}
+    {
+    }
+  \end{overpic}
+  \vspace{0mm}
+  \caption{
+将我们的方法应用于更多多项式曲线笼示例。
+  }
+  \label{fig:bihc-more-examples}
+\end{figure*}
+
+
+\section{实验与评估}\label{sec:bihc-results}
+\tr{
+本文方法采用 C++ 实现，使用 Eigen~\cite{eigenweb} 求解线性系统。全部实验在一台配备 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存的台式机上完成。
+}
+
+\paragraph{时间与内存}
+\tr{本文展示的所有基于笼变形算法均可实时运行。
+预处理时间分为两部分：(1) 构建笼并求解矩阵约束；(2) 计算图像上各点的坐标。
+图~\ref{fig:bihc-order} 中的变形是最简单案例，初始笼由 4 条二次 \Bezier 曲线组成。对于其中三组变形，步骤 (1) 分别耗时 8 ms、20 ms 和 36 ms；对 8000 个点的步骤 (2) 分别耗时 44 ms、64 ms 和 90 ms。
+相比之下，图~\ref{fig:bihc-teaser} 中的章鱼案例接近最复杂场景，笼由 22 条三次 \Bezier 曲线组成。步骤 (1) 耗时 1.02 s，其中 96.6\% 时间用于 Eigen 库中的 6 次矩阵运算；步骤 (2) 对 8800 个点耗时 0.40 s。在本文所有案例中，预处理总内存占用均未超过 150 MB。}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap5_diff_order.pdf}
+    {
+    }
+  \end{overpic}
+  \vspace{-2mm}
+  \caption{
+输入二次笼（左上）被变形为不同次数的笼：二次（右上）、三次（左下）和四次（右下）。
+  }
+  \label{fig:bihc-order}
+\end{figure}
+
+
+\paragraph{不同目标次数}
+在设置边界条件 \eqref{equ:bihc-g} 时，选择不同的 \(n\) 值，对应将笼变形为不同次数，如图~\ref{fig:bihc-more-examples} 和图~\ref{fig:bihc-order} 所示；这对初始笼是线性还是高阶均成立。
+尽管本文允许变形后笼具有任意高次数，但需注意：次数越高，积分计算 \eqref{equ:bihc-basis_inte} 越复杂，求解坐标 \eqref{equ:bihc-final_BHC} 所需矩阵约束也越大，从而带来更高预计算时间。
+
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap5_more_compare_mvc.pdf}
+    {
+\put(7,-1.5){\small 初始姿态}
+ \put(28,-1.5){\small Cubic MVC}
+ \put(55,-1.5){\small Poly GC}
+\put(84,-1.5){\small 我们的方法}
+    }
+  \end{overpic}
+  \vspace{2mm}
+  \caption{
+  在使用相同多边形笼的两组案例上，与 Cubic MVC 和 PolyGC 的比较。底行结果使用了 $w=0.5$ 的加权坐标。
+  \tr{每个变形结果左上角的小图使用图~\ref{fig:bihc-cmp-cmvc} 的色条展示了对称 Dirichlet 失真~\cite{Smith2015}。}
+  }
+  \label{fig:bihc-more-cmp}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \begin{overpic}[width=1.0\linewidth]{figures/chap5_compare_our_octopus.pdf}
+    {
+ \put(10,-1.5){\small 初始姿态}
+ \put(28,-1.5){\small $w=0$ (CurvedGC)}
+ \put(57,-1.5){\small $w=0.5$}
+ \put(84,-1.5){\small $w=1$}
+    }
+  \end{overpic}
+ \vspace{1mm}
+  \caption{
+   在相同三次笼设置下，与 CurvedGC 的两组比较。\tr{每个变形结果左上角（或左侧角落）的小图使用图~\ref{fig:bihc-cmp-cmvc} 的色条展示了对称 Dirichlet 失真~\cite{Smith2015}。}
+  }
+  \label{fig:bihc-more-curvedcmp}
+\end{figure*}
+
+\paragraph{对比}
+当初始笼为线性时，本文选择 Cubic MVC~\cite{Li2013} 与 Polynomial Green Coordinate（PolyGC）~\cite{MichelThiery2023} 作为对比方法；当初始笼为高阶时，本文选择文献~\cite{liu2024polygc} 与文献~\cite{Lin2024PolynomialCC} 进行对比。
+
+与本文坐标一样，Cubic MVC 同时插值边界上的函数值与导数。但该坐标与常规均值坐标一样会产生伪影，尤其在非凸形状上表现较差（见图~\ref{fig:bihc-cmp-cmvc}）。此外，本文坐标继承了调和坐标的优势，即最小化所谓 Hessian 能量~\cite{Stein2018NaturalBC}，并具有调和拉普拉斯，从而产生更低失真的变形（见图~\ref{fig:bihc-more-cmp}）。同时，Cubic MVC 不支持高阶笼。
+
+文献\cite{Lin2024PolynomialCC} 通过将多项式 Cauchy 坐标与其逆映射结合，实现了曲边笼之间的变形。然而，其方法需要用户额外指定一个中间线性笼，且逆映射计算依赖数值积分，不具解析表达。
+\tr{此外，他们的高阶笼需要后验调整，无法像本文方法那样紧密贴合变形后形状。
+这些原因和差异使本文无法与其进行公平对比。}
+
+本文坐标在表达形式和变形结果上与 PolyGC 和 CurvedGC 更为接近。
+PolyGC 与 CurvedGC 用插值性换取保角性；而本文坐标提供了在保角性与插值性之间灵活折中的方式。
+如图~\ref{fig:bihc-weights} 与图~\ref{fig:bihc-more-curvedcmp} 所示，本文对所有点的坐标施加了简单线性加权。还可以采用更复杂的加权策略，例如以距离函数作为权重，从而允许用户指定笼内区域优先满足保角性或插值性。
+
+\section{本章小结}
+在本章中，针对第五章高阶柯西坐标在共形性与边界控制之间难以兼顾的问题，我们构造了适用于曲边笼的半解析半数值高阶双调合坐标。首先，我们回顾了双调和边值问题及其边界元求解基础；随后，在高阶边界元框架下，将曲边笼边界、边界条件与未知场统一表示为 Bernstein 多项式，建立了高阶单元上的积分计算、矩阵约束与坐标求解方法；进一步地，我们讨论了精度提升、变形能量以及不同权重下的边界控制策略。最后，通过时间与内存、不同目标次数以及与现有坐标方法的对比实验，验证了本文方法能够在增强边界可控性的同时保持较小的内部扭曲，并在保角性与插值性之间提供灵活的折中。

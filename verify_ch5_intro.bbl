@@ -1,0 +1,381 @@
+\begin{thebibliography}{59}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{#1}
+\expandafter\ifx\csname urlstyle\endcsname\relax\else
+  \urlstyle{same}\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \DeclareUrlCommand\doi{\urlstyle{rm}}
+  \def\eprint#1#2{#2}
+\else
+  \def\doi#1{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+  \let\eprint\href
+\fi
+
+\bibitem[Jiang et~al.(2020)Jiang, Schneider, Zorin, and
+  Panozzo]{Jiang2020BijectivePI}
+Jiang Z, Schneider T, Zorin D, et~al.
+\newblock Bijective projection in a shell\allowbreak[J].
+\newblock ACM Trans. Graph., 2020, 39: 1-18.
+
+\bibitem[Bell(2015)]{Bell2015cauchytransform}
+Bell S.
+\newblock The cauchy transform, potential theory and conformal mapping, 2nd
+  edition\allowbreak[M].
+\newblock 2015: 1-207.
+
+\bibitem[Weber et~al.(2009)Weber, Ben-Chen, and Craig~Gotsman]{Weber2009}
+Weber O, Ben-Chen M, Craig~Gotsman e~a.
+\newblock Complex barycentric coordinates with application to planar shape
+  deformation\allowbreak[J].
+\newblock Comput. Graph. Forum, 2009, 28\allowbreak (5): 587-597.
+
+\bibitem[Lin et~al.(2024)Lin and Chen]{Lin2024PolynomialCC}
+Lin Z, Chen R.
+\newblock Polynomial cauchy coordinates for curved
+  cages\allowbreak[C]//\allowbreak
+ACM SIGGRAPH Conference and Exhibition on Computer Graphics and Interactive
+  Techniques in Asia.
+\newblock 2024.
+
+\bibitem[Weber et~al.(2012)Weber, Poranne, and Gotsman]{Weber2012}
+Weber O, Poranne R, Gotsman C.
+\newblock Biharmonic coordinates\allowbreak[J].
+\newblock Comput. Graph. Forum, 2012, 31\allowbreak (5): 2409-2422.
+
+\bibitem[Thiery et~al.(2024)Thiery, Michel, and Chen]{thiery2024biharmonic}
+Thiery J~M, Michel {\'E}, Chen J.
+\newblock Biharmonic coordinates and their derivatives for triangular 3D
+  cages\allowbreak[J].
+\newblock ACM Trans. Graph., 2024, 43\allowbreak (4).
+
+\bibitem[Hu et~al.(2019)Hu, Schneider, Gao, Zhou, Jacobson, Zorin, and
+  Panozzo]{hu2019TriWild}
+Hu Y, Schneider T, Gao X, et~al.
+\newblock TriWild: robust triangulation with curve constraints\allowbreak[J].
+\newblock ACM Trans. Graph., 2019, 38\allowbreak (4).
+
+\bibitem[Cheng et~al.(2019)Cheng, Fu, Zhang, and Chai]{cheng2019practical}
+Cheng X~X, Fu X~M, Zhang C, et~al.
+\newblock Practical error-bounded remeshing by adaptive
+  refinement\allowbreak[J].
+\newblock Computers \& Graphics, 2019, 82: 163-173.
+
+\bibitem[Hu et~al.(2020)Hu, Schneider, Wang, Zorin, and Panozzo]{hu2020fast}
+Hu Y, Schneider T, Wang B, et~al.
+\newblock Fast tetrahedral meshing in the wild\allowbreak[J].
+\newblock ACM Transactions on Graphics (TOG), 2020, 39\allowbreak (4): 117-1.
+
+\bibitem[Chen et~al.(2004)Chen, Tong, Wang, Lin, Guo, and Shum]{chen2004shell}
+Chen Y, Tong X, Wang J, et~al.
+\newblock Shell texture functions\allowbreak[J].
+\newblock ACM Transactions on Graphics (TOG), 2004, 23\allowbreak (3): 343-353.
+
+\bibitem[Hormann et~al.(2007)Hormann, L{\'e}vy, and Sheffer]{hormann2007mesh}
+Hormann K, L{\'e}vy B, Sheffer A.
+\newblock Mesh parameterization: theory and practice\allowbreak[Z].
+\newblock 2007.
+
+\bibitem[Jin et~al.(2019)Jin, Song, Wang, Huang, Song, and He]{jin2019shell}
+Jin Y, Song D, Wang T, et~al.
+\newblock A shell space constrained approach for curve design on surface
+  meshes\allowbreak[J].
+\newblock Computer-Aided Design, 2019, 113: 24-34.
+
+\bibitem[Lengyel et~al.(2001)Lengyel, Praun, Finkelstein, and
+  Hoppe]{lengyel2001real}
+Lengyel J, Praun E, Finkelstein A, et~al.
+\newblock Real-time fur over arbitrary surfaces\allowbreak[C]//\allowbreak
+Proceedings of the 2001 symposium on Interactive 3D graphics.
+\newblock 2001: 227-232.
+
+\bibitem[Peng et~al.(2004)Peng, Kristjansson, and Zorin]{peng2004interactive}
+Peng J, Kristjansson D, Zorin D.
+\newblock Interactive modeling of topologically complex geometric
+  detail\allowbreak[M]//\allowbreak
+ACM SIGGRAPH 2004 Papers.
+\newblock 2004: 635-643.
+
+\bibitem[Porumbescu et~al.(2005)Porumbescu, Budge, Feng, and
+  Joy]{porumbescu2005shell}
+Porumbescu S~D, Budge B, Feng L, et~al.
+\newblock Shell maps\allowbreak[J].
+\newblock ACM Transactions on Graphics (TOG), 2005, 24\allowbreak (3): 626-633.
+
+\bibitem[Wang et~al.(2003)Wang, Wang, Tong, Lin, Hu, Guo, and
+  Shum]{wang2003view}
+Wang L, Wang X, Tong X, et~al.
+\newblock View-dependent displacement mapping\allowbreak[J].
+\newblock ACM Transactions on graphics (TOG), 2003, 22\allowbreak (3): 334-339.
+
+\bibitem[Wang et~al.(2004)Wang, Tong, Lin, Hu, Guo, and
+  Shum]{wang2004generalized}
+Wang X, Tong X, Lin S, et~al.
+\newblock Generalized displacement maps\allowbreak[C]//\allowbreak
+Eurographics Symposium on Rendering (EGSR).
+\newblock 2004: 227-233.
+
+\bibitem[Aubry et~al.(2017)Aubry, Dey, Mestreau, and
+  Karamete]{aubry2017boundary}
+Aubry R, Dey S, Mestreau E, et~al.
+\newblock Boundary layer mesh generation on arbitrary geometries\allowbreak[J].
+\newblock International Journal for Numerical Methods in Engineering, 2017,
+  112\allowbreak (2): 157-173.
+
+\bibitem[Garimella et~al.(2000)Garimella and Shephard]{garimella2000boundary}
+Garimella R~V, Shephard M~S.
+\newblock Boundary layer mesh generation for viscous flow
+  simulations\allowbreak[J].
+\newblock International Journal for Numerical Methods in Engineering, 2000,
+  49\allowbreak (1-2): 193-218.
+
+\bibitem[Calderon et~al.(2017)Calderon and Boubekeur]{calderon2017bounding}
+Calderon S, Boubekeur T.
+\newblock Bounding proxies for shape approximation.\allowbreak[J].
+\newblock ACM Trans. Graph., 2017, 36\allowbreak (4): 57-1.
+
+\bibitem[Thiery et~al.(2012)Thiery, Tierny, and Boubekeur]{thiery2012cager}
+Thiery J~M, Tierny J, Boubekeur T.
+\newblock CageR: cage-based reverse engineering of animated 3D
+  shapes\allowbreak[C]//\allowbreak
+Computer Graphics Forum: Vol.~31.
+\newblock Wiley Online Library, 2012: 2303-2316.
+
+\bibitem[Liu et~al.(2024)Liu, Ji, Guo, Liu, and Fu]{liu2024curveshell}
+Liu S, Ji Y, Guo J~P, et~al.
+\newblock Smooth bijective projection in a high-order shell\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (4): 1-13.
+
+\bibitem[Guo et~al.(2024)Guo, Zhang, Ye, and Fu]{Guo2024RobustCage}
+Guo J~P, Zhang W~X, Ye C, et~al.
+\newblock Robust coarse cage construction with small approximation errors:
+  Vol.~30\allowbreak[Z].
+\newblock 2024: 4234-4245.
+
+\bibitem[Edelstein et~al.(2025)Edelstein, Liu, and
+  Ben-Chen]{Edelstein2025CageNet}
+Edelstein M, Liu H~T~D, Ben-Chen M.
+\newblock CageNet: a meta-framework for learning on wild
+  meshes\allowbreak[C]//\allowbreak
+ACM SIGGRAPH Conference Papers.
+\newblock 2025.
+
+\bibitem[Floater(2003)]{Floater2003}
+Floater M~S.
+\newblock Mean value coordinates: Vol.~20\allowbreak[Z].
+\newblock 2003: 19-27.
+
+\bibitem[Hormann et~al.(2006)Hormann and Floater]{Hormann2006}
+Hormann K, Floater M~S.
+\newblock Mean value coordinates for arbitrary planar polygons\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2006, 25\allowbreak (4): 1424-1441.
+
+\bibitem[Ju et~al.(2005)Ju, Schaefer, and Warren]{Ju2005}
+Ju T, Schaefer S, Warren J.
+\newblock Mean value coordinates for closed triangular meshes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2005, 24\allowbreak (3): 561-566.
+
+\bibitem[Joshi et~al.(2007)Joshi, Meyer, DeRose, Green, and Sanocki]{Joshi2007}
+Joshi P, Meyer M, DeRose T, et~al.
+\newblock Harmonic coordinates for character articulation\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2007, 26\allowbreak (3): 71.
+
+\bibitem[Lipman et~al.(2007)Lipman, Kopf, Cohen-Or, and Levin]{Lipman2007}
+Lipman Y, Kopf J, Cohen-Or D, et~al.
+\newblock GPU-assisted positive mean value coordinates for mesh
+  deformations\allowbreak[C]//\allowbreak
+Symposium on Geometry Processing.
+\newblock 2007.
+
+\bibitem[Lipman et~al.(2008)Lipman, Levin, and Cohen-Or]{Lipman2008}
+Lipman Y, Levin D, Cohen-Or D.
+\newblock Green coordinates\allowbreak[J].
+\newblock ACM Trans. Graph., 2008, 27\allowbreak (3): 1-10.
+
+\bibitem[Ciarlet(1991)]{Ciarlet1991BasicEE}
+Ciarlet P~G.
+\newblock Basic error estimates for elliptic problems\allowbreak[J].
+\newblock Handbook of Numerical Analysis, 1991, 2: 17-351.
+
+\bibitem[Knabner et~al.(2001)Knabner and Summ]{Knabner2001TheIO}
+Knabner P, Summ G.
+\newblock The invertibility of the isoparametric mapping for pyramidal and
+  prismatic finite elements\allowbreak[J].
+\newblock Numerische Mathematik, 2001, 88: 661-681.
+
+\bibitem[Neri et~al.(2010)Neri and Tirronen]{Neri2010advance}
+Neri F, Tirronen V.
+\newblock Recent advances in differential evolution: a survey and experimental
+  analysis\allowbreak[J].
+\newblock Artif. Intell. Rev., 2010, 33: 61-106.
+
+\bibitem[Das et~al.(2011)Das and Suganthan]{Das2011Differential}
+Das S, Suganthan P~N.
+\newblock Differential evolution: a survey of the
+  state-of-the-art\allowbreak[J].
+\newblock IEEE Transactions on Evolutionary Computation, 2011, 15\allowbreak
+  (1): 4-31.
+
+\bibitem[Zhang et~al.(2022)Zhang, Wang, Guo, Chai, Liu, and
+  Fu]{Zhang2022ConstrainedRU}
+Zhang W~X, Wang Q, Guo J, et~al.
+\newblock Constrained remeshing using evolutionary vertex
+  optimization\allowbreak[J].
+\newblock Comput. Graph. Forum, 2022, 41.
+
+\bibitem[Crane et~al.(2012)Crane, Weischedel, and
+  Wardetzky]{Crane2012GeodesicsIH}
+Crane K, Weischedel C, Wardetzky M.
+\newblock Geodesics in heat: a new approach to computing distance based on heat
+  flow: abs/1204.6216\allowbreak[A].
+\newblock arXiv (2012).
+
+\bibitem[Mitchell et~al.(1987)Mitchell, Mount, and
+  Papadimitriou]{mitchell1987discrete}
+Mitchell J~S, Mount D~M, Papadimitriou C~H.
+\newblock The discrete geodesic problem\allowbreak[J].
+\newblock SIAM Journal on Computing, 1987, 16\allowbreak (4): 647-668.
+
+\bibitem[Maggiordomo et~al.(2023)Maggiordomo, Uralsky, Moreton, and
+  Tarini]{Maggiordomo2023TheIB}
+Maggiordomo A, Uralsky Y, Moreton H~P, et~al.
+\newblock The inverse barycentric displacement problem\allowbreak[J].
+\newblock The Visual Computer, 2023.
+
+\bibitem[Khanteimouri et~al.(2023)Khanteimouri and
+  Campen]{Khanteimouri20233Dbezier}
+Khanteimouri P, Campen M.
+\newblock 3D B\'{e}zier guarding: boundary-conforming curved tetrahedral
+  meshing\allowbreak[J].
+\newblock ACM Trans. Graph., 2023, 42.
+
+\bibitem[Kobbelt et~al.(1998)Kobbelt, Campagna, Vorsatz, and
+  Seidel]{Kobbelt1998InteractiveMM}
+Kobbelt L, Campagna S, Vorsatz J, et~al.
+\newblock Interactive multi-resolution modeling on arbitrary
+  meshes\allowbreak[J].
+\newblock Proceedings of the 25th annual conference on Computer graphics and
+  interactive techniques, 1998.
+
+\bibitem[Kn\"{o}ppel et~al.(2013)Kn\"{o}ppel, Crane, Pinkall, and
+  Schr\"{o}der]{Knoppel:2013:GOD}
+Kn\"{o}ppel F, Crane K, Pinkall U, et~al.
+\newblock Globally optimal direction fields\allowbreak[J].
+\newblock ACM Trans. Graph., 2013, 32\allowbreak (4).
+
+\bibitem[Zhou et~al.(2016)Zhou and Jacobson]{Zhou2016Thingi10KAD}
+Zhou Q, Jacobson A.
+\newblock Thingi10K: a dataset of 10,000 3D-printing models:
+  abs/1605.04797\allowbreak[A].
+\newblock arXiv (2016).
+
+\bibitem[Koch et~al.(2018)Koch, Matveev, Jiang, Williams, Artemov, Burnaev,
+  Alexa, Zorin, and Panozzo]{Koch2018ABCAB}
+Koch S, Matveev A, Jiang Z, et~al.
+\newblock ABC: a big CAD model dataset for geometric deep
+  learning\allowbreak[J].
+\newblock 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition
+  (CVPR), 2018: 9593-9603.
+
+\bibitem[Li et~al.(2013)Li, Ju, and Hu]{Li2013}
+Li X~Y, Ju T, Hu S~M.
+\newblock Cubic mean value coordinates\allowbreak[J].
+\newblock ACM Trans. Graph., 2013, 32\allowbreak (4): 126-1.
+
+\bibitem[Michel et~al.(2023)Michel and Thiery]{MichelThiery2023}
+Michel {\'E}, Thiery J~M.
+\newblock Polynomial 2D green coordinates for polygonal
+  cages\allowbreak[C]//\allowbreak
+Special Interest Group on Computer Graphics and Interactive Techniques
+  Conference Proceedings (SIGGRAPH '23).
+\newblock 2023: 1-9.
+
+\bibitem[Spainhour et~al.(2024)Spainhour, Gunderman, and
+  Weiss]{Spainhour2024RobustCQ}
+Spainhour J, Gunderman D, Weiss K.
+\newblock Robust containment queries over collections of rational parametric
+  curves via generalized winding numbers\allowbreak[J].
+\newblock ACM Trans. Graph., 2024, 43: 38:1-38:14.
+
+\bibitem[Jacobson et~al.(2013)Jacobson, Kavan, and
+  Sorkine-Hornung]{Jacobson2013RobustIS}
+Jacobson A, Kavan L, Sorkine-Hornung O.
+\newblock Robust inside-outside segmentation using generalized winding
+  numbers\allowbreak[J].
+\newblock ACM Transactions on Graphics (TOG), 2013, 32: 1-12.
+
+\bibitem[Mortenson(1985)]{Mortenson1985GeometricM}
+Mortenson M~E.
+\newblock Geometric modeling\allowbreak[C]//\allowbreak
+1985.
+
+\bibitem[Ma et~al.(2003)Ma and Hewitt]{Ma2003PointIA}
+Ma Y, Hewitt W~T.
+\newblock Point inversion and projection for NURBS curve and surface: control
+  polygon approach\allowbreak[J].
+\newblock Comput. Aided Geom. Des., 2003, 20: 79-99.
+
+\bibitem[Scrivener et~al.(2024)Scrivener, Coldren, and
+  Chien]{Scrivener2024WindingNF}
+Scrivener D, Coldren E, Chien E.
+\newblock Winding number features for vector sketch colorization\allowbreak[J].
+\newblock Comput. Graph. Forum, 2024, 43: i-x.
+
+\bibitem[Skowron et~al.(2012)Skowron and Gould]{Skowron2012}
+Skowron J, Gould A.
+\newblock General complex polynomial root solver and its further optimization
+  for binary microlenses\allowbreak[A/OL].
+\newblock arXiv (2012).
+\newblock \url{https://arxiv.org/abs/1203.1034}.
+
+\bibitem[Liu et~al.(2024)Liu, Liu, and Fu]{liu2024polygc}
+Liu S, Liu L, Fu X~M.
+\newblock Polynomial 2D green coordinates for high-order
+  cages\allowbreak[A/OL].
+\newblock arXiv (2024).
+\newblock \url{https://arxiv.org/abs/2408.06831}.
+
+\bibitem[Brebbia(1978)]{Brebbia1978TheBE}
+Brebbia C~A.
+\newblock The boundary element method for engineers\allowbreak[C]//\allowbreak
+1978.
+
+\bibitem[Fischer et~al.(1999)Fischer, Tilg, Wach, Modre, Leder, and
+  Nowak]{Fischer1999ApplicationOH}
+Fischer G, Tilg B, Wach P, et~al.
+\newblock Application of high-order boundary elements to the
+  electrocardiographic inverse problem.\allowbreak[J].
+\newblock Computer methods and programs in biomedicine, 1999, 58 2: 119-31.
+
+\bibitem[Frijns et~al.(2000)Frijns, de~Snoo, and
+  Schoonhoven]{Frijns2000ImprovingTA}
+Frijns J~H~M, de~Snoo S~L, Schoonhoven R.
+\newblock Improving the accuracy of the boundary element method by the use of
+  second-order interpolation functions [EEG modeling
+  application]\allowbreak[J].
+\newblock IEEE Transactions on Biomedical Engineering, 2000, 47: 1336-1346.
+
+\bibitem[Gravenkamp et~al.(2019)Gravenkamp, Saputra, and
+  Duczek]{gravenkamp2019high}
+Gravenkamp H, Saputra A~A, Duczek S.
+\newblock High-order shape functions in the scaled boundary finite element
+  method revisited\allowbreak[J].
+\newblock Archives of Computational Methods in Engineering, 2019, 28: 473-494.
+
+\bibitem[Guennebaud et~al.(2010)Guennebaud, Jacob, et~al.]{eigenweb}
+Guennebaud G, Jacob B, et~al.
+\newblock Eigen v3\allowbreak[Z].
+\newblock 2010.
+
+\bibitem[Smith et~al.(2015)Smith and Schaefer]{Smith2015}
+Smith J, Schaefer S.
+\newblock Bijective parameterization with free boundaries\allowbreak[J].
+\newblock ACM Trans. Graph., 2015, 34\allowbreak (4): 70:1-70:9.
+
+\bibitem[Stein et~al.(2018)Stein, Grinspun, Wardetzky, and
+  Jacobson]{Stein2018NaturalBC}
+Stein O, Grinspun E, Wardetzky M, et~al.
+\newblock Natural boundary conditions for smoothing in geometry
+  processing\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2018, 37: 1-13.
+
+\end{thebibliography}

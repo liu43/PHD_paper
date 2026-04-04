@@ -1,0 +1,1390 @@
+\chapter{壳空间内的光滑双射投影}
+
+% 本文件承载壳空间章节正文；当前由 main.tex 作为第4章引入。
+% ===== shell 论文宏定义（从 my.sty 提取并最小化整理） =====
+\providecommand{\Bezier}{B\'{e}zier }
+\providecommand{\tr}[1]{#1}
+\providecommand{\tb}[1]{#1}
+\providecommand{\todo}[1]{}
+\providecommand{\fuxm}[1]{#1}
+\providecommand{\ligang}[1]{#1}
+\providecommand{\del}[1]{#1}
+\providecommand{\note}[1]{#1}
+\providecommand{\rev}[1]{#1}
+\providecommand{\fix}[1]{#1}
+\newcounter{invariant}
+\newcommand{\invariant}{\refstepcounter{invariant}I\theinvariant}
+
+\providecommand{\argmin}{\mathop{\mathrm{arg\,min}}\limits}
+\providecommand{\argmax}{\mathop{\mathrm{arg\,max}}\limits}
+\providecommand{\area}{\mathop{\mathrm{area}}}
+\providecommand{\vol}{\mathop{\mathrm{vol}}}
+\providecommand{\avg}{\mathop{\mathrm{avg}}}
+\providecommand{\dev}{\mathop{\mathrm{dev}}}
+\providecommand{\trace}{\mathop{\mathrm{trace}}}
+\providecommand{\dis}{\mathop{\mathrm{dis}}}
+\providecommand{\Div}{\mathop{\mathrm{Div}}}
+\providecommand{\Min}{\textbf{minimize}}
+
+\makeatletter
+\@ifundefined{prop}{%
+  \@ifundefined{theorem}{%
+    \newtheorem{prop}{Proposition}[chapter]%
+  }{%
+    \newtheorem{prop}[theorem]{Proposition}%
+  }%
+}{}
+\@ifundefined{definition}{\newtheorem{definition}{Definition}[chapter]}{}
+\makeatother
+
+\def \ma {\mathbf{a}}
+\def \me {\mathbf{e}}
+\def \mb {\mathbf{b}}
+\def \ms {\mathbf{s}}
+\def \cS {\mathcal{S}}
+\def \cP {\mathcal{P}}
+\def \mP {\mathbf{P}}
+\def \mp {\mathbf{p}}
+\def \mq {\mathbf{q}}
+\def \mQ {\mathcal{Q}}
+\def \mn {\mathbf{n}}
+\def \mc {\mathbf{c}}
+\def \mC {\mathcal{C}}
+\def \ml {\mathbf{l}}
+\def \mv {\mathbf{v}}
+\def \mI {\mathcal{I}}
+\def \mw {\mathbf{w}}
+\def \mR {\mathcal{R}}
+\def \mbR {\mathbf{R}}
+\def \mr {\mathbf{r}}
+\def \mV {\mathcal{V}}
+\def \cu {\mathbf{u}}
+\def \mU {\mathcal{U}}
+\def \cF {\mathcal{F}}
+\def \mbF {\mathbf{F}}
+\def \mf {\mathbf{f}}
+\def \mJ {\mathbf{J}}
+\def \mB {\mathcal{B}}
+\def \mA {\mathcal{A}}
+\def \mM {\mathcal{M}}
+\def \mh {\mathbf{h}}
+\def \mT {\mathcal{T}}
+\def \mt {\mathbf{t}}
+\def \mH {\mathbf{H}}
+\def \mx {\mathbf{x}}
+\def \my {\mathbf{y}}
+\def \mz {\mathbf{z}}
+\def \mZ {\mathcal{Z}}
+\def \mO {\mathbf{O}}
+\def \mS {\mathcal{S}}
+\def \mG {\mathcal{G}}
+\def \mE {\mathcal{E}}
+\def \mD {\mathcal{D}}
+\def \md {\mathbf{d}}
+\def \mX {\mathbf{X}}
+\def \mg {\mathbf{g}}
+\def \mN {\mathcal{N}}
+\def \mL {\mathcal{L}}
+\def \Len {\textrm{Length}}
+\def \cc {\text{cc}}
+
+\section{概述}\label{sec:chap3-overview}
+壳空间中的双射投影关注在输入曲面周围构造一个可计算、可约束的包围区域，并在该区域内建立稳定的曲面对应关系。
+对于重网格化后的属性回传、布尔运算和位移贴图等任务，颜色、法向、纹理与位移场等属性并不直接在两张彼此接近的曲面之间传递，而是借助壳空间中的投影关系完成传播。
+与直接处理两张离散曲面的对应相比，这种表述更有利于同时兼顾自动性、鲁棒性与双射性。
+文献\cite{Jiang2020BijectivePI} 提出了线性壳及其双射投影框架，使输入网格与壳内重网格之间能够进行稳定的属性传递。
+
+然而，线性壳仍存在两个明显局限。
+第一，线性壳内部由分片常向量场定义的投影在单元边界处不连续，因此当重网格穿过这些边界时，属性传递结果会出现不光滑现象，尤其在高曲率区域更为明显。
+第二，线性壳所提供的壳空间在厚度方向上并不均匀。
+尽管线性壳的上、下表面厚度受目标厚度约束，但壳内不少位置到输入曲面的距离会远小于该目标厚度，从而导致可用于重网格化的空间分布不均匀，并显著限制局部可操作空间。
+
+为改进上述两点，本章研究高阶壳上的光滑双射投影。
+本章采用高阶三角棱柱作为基本单元：每个棱柱由上、中、下三张 \Bezier 三角面以及三张由双线性曲面裁剪得到的侧面围成，并在棱柱内部通过顶点向量的插值定义连续向量场，使沿该向量场的投影更加光滑。
+同时，高阶壳较线性壳具有更高的几何自由度，有望在输入曲面周围形成更均匀的约束空间。
+
+但高阶壳的生成并不直接，主要存在两类挑战。
+其一，需要精确保证三张 \Bezier 三角面的边落在双线性侧面上，同时又保留足够自由度去逼近输入曲面；
+其二，即便完成了上述几何构造，仍需保证沿向量场方向定义的投影有可能在壳内两张曲面之间形成双射，因此必须进一步建立可判定的双射条件。
+
+针对这些挑战，本章提出一种高阶壳构造与投影方法。
+一方面，本章建立 \Bezier 三角面控制点的放置条件，使三角面边界精确贴合双线性侧面，并使中层曲面能够逼近输入曲面；
+另一方面，在完成几何构造后，本章将壳内向量场解释为复杂参数域中等参数线在等参数变换下的像，从而把投影双射性的分析转化为棱柱单元等参数变换的双射性分析。
+在算法层面，本章从一个稠密而有效的线性壳出发，初始化与侧双线性曲面参数线对齐的向量场，再通过边塌缩、几何优化、边翻转和棱柱缩放等局部操作迭代优化壳结构，直到达到指定厚度；每一步都显式检查约束，一旦违反则拒绝该操作。
+
+实验部分表明，该方法能够在 8300 余个模型上稳定生成高阶壳，并支持重网格化属性回传、布尔相关应用与位移贴图等任务。
+与线性壳相比，高阶壳上的双射投影更光滑，壳空间分布也更均匀。
+
+\section{高阶壳} \label{sec:method}
+\subsection{定义}
+\paragraph{组成}
+高阶壳结构 $\cS$ 由一组三角棱柱 $\{\cP_i\}$ 构成。
+每个三角棱柱 $\cP$ 由三张 $n$ 阶 B\'{e}zier 三角面（上层 $\mt_\text{top}$、中层 $\mt_\text{middle}$、下层 $\mt_\text{bottom}$）以及三张由双线性曲面 $\{B_{j}\}^3_{j=1}$ 裁剪得到的侧面包围。
+此外，本文为每个棱柱 $\cP$ 关联一张线性三角形 $\mt_{\text{linear}}$，其三个顶点 $\{\mv_{j}\}^3_{j=1}$ 与中层曲面 $\mt_\text{middle}$ 的角点一致，并在这三个顶点上定义三个向量 $\{\md_{j}\}^3_{j=1}$。
+%
+相邻两个棱柱共享一个侧面。
+所有上层（或中层、下层）B\'{e}zier 三角面分别组成壳的上表面（或中表面、下表面）$\mT$（或 $\mM$、$\mB$），它们构成一个无自交、可定向、流形的高阶三角网格。
+%
+这些线性三角形也组成一个线性三角网格 $\mL$。
+%Three vertices of the linear triangle $\mt_{\text{linear}}$ are consistent with the corner vertices of the middle surface $\mt_\text{middle}$.
+%We denote the shell's top, middle, and bottom surfaces as , respectively.
+
+\paragraph{连续向量场构造}
+%\todo{Constructing vector field: We define a continuous vector field within the high-order shell using barycentric coordinates.}
+%\todo{Vector Fields with Linear Interpolation and Shell Space}
+我们使用三个向量 $\{\md_{j}\}^3_{j=1}$ 与 $\mt_{\text{linear}}$ 构造连续向量场 $\cF$。
+$\cF$ 在点 $\mv \in \mt_{\text{linear}}$ 处的向量 $\md$ 定义为：
+\begin{equation}\label{equ:vector-bc}
+    \md(\mv) = u_1 \md_1+u_2 \md_2+ u_3 \md_3,
+\end{equation}
+其中 $(u_1,u_2,u_3)$ 是 $\mv$ 在 $\mt_{\text{linear}}$ 上的重心坐标。
+该构造过程仅依赖 $\mL$ 与顶点向量。
+因此构造得到的向量场在整个空间中连续。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_vector_shell.pdf}
+		{
+			%\put(72,-1){\small Ours}
+			\put(24,3){\small $\mathbf{v}_1$}
+			\put(7,16){\small $\mathbf{v}_3$}
+			\put(45,17){\small $\mathbf{v}_2$}
+   %
+                \put(23.5,14){\small $\md_1$}
+			\put(1.5,22){\small $\md_3$}
+			\put(46,23){\small $\md_2$}
+    %
+                \put(59,27){\small $\mt_\text{top}$}
+			\put(59,20.5){\small $\mt_\text{middle}$}
+			\put(59,13){\small $\mt_\text{bottom}$}
+                \put(83,17){\small  $\mt_{\text{linear}}$}
+		}
+	\end{overpic}
+	\vspace{-2.5mm}
+	\caption{
+		左：由 $\mt_{\text{linear}}$ 和 $\{\md_{j}\}^3_{j=1}$ 定义的连续向量场。
+  右：每个三角棱柱 $\cP$ 由三张 $n$ 阶 B\'{e}zier 三角面与三张侧面包围。
+	}
+	\label{fig:Space}
+\end{figure}
+
+\paragraph{条件}
+在本文对高阶壳的定义中，其组成部分需满足以下条件：
+\begin{enumerate}
+    \item \emph{贴合条件（Conformance condition）}：三张 B\'{e}zier 三角面的边精确落在双线性侧面上。
+    \item \emph{对齐条件（Alignment condition）}：构造的向量场与双线性曲面在某一方向上的等参线像对齐。
+    \item \emph{角度条件（Angle condition）}：$\md_j, j=1,2,3$ 与 $\mt_{\text{linear}}$ 法向之间的夹角小于 $\pi/2$。
+\end{enumerate}
+
+% with no discontinuities at any location.
+%shell -> prisms ->  three B\'{e}zier triangles + three trimmed bilinear surfaces + a linear triangle + three vectors defined at the three vertices of the linear triangle.
+%A higher-order shell structure consists of a set of prisms. Each prism is enveloped by three B\'{e}zier triangles (top, middle, and bottom) and three trimmed bilinear patches. For the mid B\'{e}zier triangle,
+
+
+%\tr{We require that the angle between $\mathbf{d}_i$and the normal of $T$ is less than 90 degrees.}
+%A ray is defined starting at a barycentrically interpolated point \( \mathbf{v} \) on $\mt_{\text{linear}}$, where \( \mathbf{v} = u_0 \mathbf{v}_0 + u_1 \mathbf{v}_1 + u_2 \mathbf{v}_2 \), and traveling in the direction of a similarly  barycentrically interpolated displacement \( \mathbf{d} \). If the ray travels a distance that is a multiple of $|\mathbf{d}|$, these rays constitute a space in which the top and bottom faces are two linear triangles, and the three side faces are bilinear Coons patches(Fig.~\ref{fig:Space}).
+% We observe that such a definition of the vector field is commonplace, as exemplified by the well-known Phong projection~\cite{Kobbelt1998InteractiveMM}.
+
+%\tr{Given a triangular mesh, by assigning a direction at each point (excluding singularities), the prisms derived from the aforementioned definition exhibits compatibility between adjacent triangles, meaning the adjacent sides of neighboring triangles are perfectly congruent.}
+
+
+\subsection{构造}\label{sec:construct-from-L}
+本文给出一种构造方法：使用 $\mL$、$\mL$ 顶点向量以及给定厚度 $\epsilon$，构建满足条件的壳 $\cS$。
+这里假设 $\mL$ 及其向量已经满足角度条件。
+该构造方法按顺序生成向量场、双线性侧面以及 B\'{e}zier 三角面。
+%To satisfy those conditions, we construct a prism in order: vector + linear triangle => vector field => bilinear surfaces => three B\'{e}zier triangles.
+
+\paragraph{向量场与双线性侧面的构造}
+在构造向量场之前，先将全部向量按同一比例临时放大，直到最短向量长度大于 $2\epsilon$。
+%
+随后采用前述方法定义临时向量场。
+%
+最后，围绕 $\mt_{\text{linear}}$ 的正负向量共同形成三角棱柱，其侧面是双线性的，即得到 $\{B_{j}\}^3_{j=1}$（见图~\ref{fig:Space}）。
+%
+通过该构造可满足对齐条件。
+
+
+
+\paragraph{B\'{e}zier 三角面的构造}
+下面讨论一种 B\'{e}zier 三角面控制点布置策略，使其边落在双线性侧面上。
+%
+具体地，先给出三次 B\'{e}zier 三角面的构造方法，再讨论其他阶次。
+
+不失一般性，这里仅介绍 B\'{e}zier 三角面一条边的布置方法。
+该边是一条具有四个控制点的 B\'{e}zier 曲线，记为 $\mp_1$、$\mp_2$、$\mp_3$ 和 $\mp_4$。
+该边要求位于由 $\mv_1$、$\mv_2$、$\md_1$ 和 $\md_2$ 构造的双线性曲面上。
+%
+先将 $\mp_1$ 放置在直线 $\mv_1 + t \md_1$ 上，对应参数为 $\hat{t}$。
+然后将 $\mp_4$ 放置为 $\mv_2 + \hat{t} \md_2 + l \md_2$，其中 $l$ 为实数。
+%Then, $\mp_4$ is placed at $\mv_2 + \hat{t} \md_2 + l\frac{\md_2}{\|\md_2\|_2}$, where $l$ is a real number.
+%
+下面提出如下命题来放置 $\mp_2$ 与 $\mp_3$。
+\begin{proposition}\label{prop:bezier-curve}
+    %For cubic B\'{e}zier curve, with endpoints defined before, manifest in all non-linear configurations through the following two canonical forms:
+    若 $\mp_2$ 和 $\mp_3$ 满足如下条件，则该 B\'{e}zier 曲线位于双线性曲面上。
+%    \begin{equation}\label{equ:edge-control-1}
+%      \begin{cases}
+%          \mp_2= \frac{2}{3}\mx_1 + \frac{1}{3}\mx_2 + \beta \frac{\md_1}{\|\md_1\|_2}, &\\
+%        \mp_3 = \frac{1}{3}\mx_1 + \frac{2}{3}\mx_2 + \beta \frac{\md_2}{\|\md_2\|_2}+\frac{l}{3}\frac{\md_1}{\|\md_1\|_2}.&
+%      \end{cases}
+%    \end{equation}
+%    \begin{equation}\label{equ:edge-control-2}
+%      \begin{cases}
+%       \mp_2=  \mx_1+ \frac{l}{3} \frac{\md_1}{\|\md_1\|_2} + \beta (\mx_2 - \mx_1),&\\
+%        \mp_3 = \frac{2}{3}\mx_1 +\frac{1}{3}\mx_2 + \frac{2 l}{3} \frac{\md_1}{\|\md_1\|_2} + \beta\left(\mx_2-\mx_1+l(\frac{\md_2}{\|\md_2\|_2} - \frac{\md_1}{\|\md_1\|_2})\right).&
+%      \end{cases}
+%    \end{equation}
+\begin{equation}\label{equ:edge-control-1}
+	\begin{cases}
+		\mp_2= \frac{2}{3}\mx_1 + \frac{1}{3}\mx_2 + \beta \md_1, &\\
+		\mp_3 = \frac{1}{3}\mx_1 + \frac{2}{3}\mx_2 + \beta \md_2+\frac{l}{3}\md_1.&
+	\end{cases}
+\end{equation}
+%\begin{equation}\label{equ:edge-control-2}
+%\t\begin{cases}
+%\t\t\mp_2=  \mx_1+ \frac{l}{3}\md_1 + \beta (\mx_2 - \mx_1),&\\
+%\t\t\mp_3 = \frac{2}{3}\mx_1 +\frac{1}{3}\mx_2 + \frac{2 l}{3} \md_1 + \beta\left(\mx_2-\mx_1+l(\md_2 - \md_1)\right).&
+%\t\end{cases}
+%\end{equation}
+
+其中，$\mx_1 = \mv_1 + \hat{t} \md_1 = \mp_1$，$\mx_2 = \mv_2 + \hat{t} \md_2$，$\beta$ 为实数。 %, \tb{spanning the entire real number domain in theory}
+\end{proposition}
+\begin{proof}
+将式 (\ref{equ:edge-control-1}) 中的控制点代入，以确定参数 $t$ 下 \Bezier 曲线 $\mr(t)$ 的取值。可得到如下结果：
+
+对于式 (\ref{equ:edge-control-1})，$\mr(t)$ 为：
+\begin{equation}\label{equ::param-curve1}
+\mr(t)=(1-t) \mx_1+t \mx_2+t (3\beta(1-t)+l t)((1-t)\md_1+t\md_2),
+\end{equation}
+这表明 $\mr(t)$ 位于双线性曲面片上。
+
+实际上，(\ref{equ::param-curve1}) 是双线性等参数变换
+$f(t,s)=(1-s)((1-t)\mx_1+t \mx_2)+s((1-t)(\mx_1+\mn_1)+t(\mx_2+\mn_2))$
+作用在曲线 $(t,para_1(t))$ 上的像，其中
+$para_1(t)=0 t^2+\frac{3\beta}{2} 2t(1-t)+l t^2$。
+
+当参数域中采用三次 \Bezier 曲线
+$(t,\beta_1 t(1-t)^2+\beta_2 t^2(1-t)+l t^3)$ 时，有：
+$$\mP_1=\mv_1+l \md_1,\mP_5=\mv_2+l \md_2,$$
+$$\mP_2=\frac{1}{4}(3\mv_1+\mv_2 +3(l+\beta_1) \md_1+l \md_2),$$
+$$\mP_3=\frac{1}{2}(\mv_1+\mv_2+l(\md_1+\md_2)+\beta_1 \md_2+\beta_2 \md_1),$$
+$$\mP_4=\frac{1}{4}(\mv_1+3\mv_2+l \md_1+3(l+\beta_2)\md_2)$$
+\end{proof}
+该 B\'{e}zier 曲线可视为 $l$ 与 $\beta$ 的函数（图~\ref{fig:2forms}）。
+%When $l=0$, the second condition~\eqref{equ:edge-control-2} always leads to a linear curve, which is undesirable in constructing B\'{e}zier triangles.
+%Thus, we use the first condition~\eqref{equ:edge-control-1} in practice.
+\tr{当每条边的 $l$ 给定后，该 B\'{e}zier 三角面仍保留 6 个自由度，可用于几何调节。}
+%If we have determined the value of $l$ for $\mp_4$ of each edge, we still have six degrees of freedom to adjust the geometry of the B\'{e}zier triangle.
+\tr{还存在另一组条件同样可保证 B\'{e}zier 曲线落在双线性曲面上，但在实际实现中未采用该形式。更多细节见补充材料。}
+%When constructing Bezier triangles, we ensure that the three edges each satisfy equation (1). Subsequently, the Bezier triangle still has six degrees of freedom for surface fitting.
+
+%\tr{To overcome the first construction challenge, we establish a \tr{\emph{construction condition}} to place the control points of the three B\'{e}zier triangles, enabling the B\'{e}zier triangles to approximate the input surface and the B\'{e}zier triangles' edges to lie on the bilinear surfaces accurately.}
+%\todo{Bezier triangles on the shell space}
+
+%Given points $\mathbf{v}_0, \mathbf{v}_1$ and direction vectors $\mathbf{d}_0, \mathbf{d}_1$, the generated Coons surface is defined. We consider cubic bezier curve on the Coons patch.
+%Without loss of generality, let us consider a Bezier curve defined by four control points: $P_0$, $P_1$, $P_2$, and $P_3$.
+%Here, $P_0$ is set as point $\mathbf{v}_0$, and $P_3$ is defined as $\mathbf{v}_1 + l*\mathbf{d}_1$. The parameter $l$ represents an arbitrary real number, and it allows us not to require that the top and base thickness of the shell be equal.
+
+%\begin{prop}
+%    Cubic Bezier curves, with endpoints defined before, manifest in all non-linear configurations through the following two canonical forms:
+%\begin{enumerate}
+%\t\item $ P_1 = \frac{2}{3}\mathbf{v}_0 + \frac{1}{3}\mathbf{v}_1 + x \mathbf{d}_0, \quad P_2 = \frac{1}{3}\mathbf{v}_0 + \frac{2}{3}\mathbf{v}_1 + x \mathbf{d}_1+\frac{1}{3}l \mathbf{d}_0$
+%\t\item $P_1 =  \mathbf{v}_0+ \frac{1}{3} l \mathbf{d}_0 + x (\mathbf{v}_1 - \mathbf{v}_0), \quad P_2 = \frac{2}{3}\mathbf{v}_0 +\frac{1}{3}\mathbf{v}_1 + \frac{2}{3} l \mathbf{d}_0 + x(\mathbf{v}_1-\mathbf{v}_0+l(\mathbf{d}_1 - \mathbf{d}_0)) $
+%\end{enumerate}
+%Here, \( x \) represents a free variable, with the variation of the Bezier curve as a function of \( x \) (Fig.~\ref{fig:2forms}). When $l=0$,
+% equation (2) always exhibits a linear shape, which is undesirable in the construction of Bezier triangles. Therefore, we only consider the case of equation (1).
+%\end{prop}
+
+%When constructing Bezier triangles, we ensure that the three edges each satisfy equation (1). Subsequently, the Bezier triangle still has six degrees of freedom for surface fitting.
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_2form.pdf}
+		{
+			\put(21,17){\small $l$}
+			\put(84,24){\small $\beta$}
+               % \put(7.5,14.5){\small $\mp_1$}
+		%\t\put(44.5,21){\small $\mp_4$}
+   %
+             %   \put(56,15){\small $\mp_1$}
+		%\t\put(93,22){\small $\mp_4$}
+		}
+	\end{overpic}
+	\vspace{0 mm}
+	\caption{
+	%After fixing $l$, the variations of the B\'{e}zier curve with respect to $l$ and $\beta$.
+	B\'{e}zier 曲线随 $l$（左）与 $\beta$（右）变化的形态。
+	}
+	\label{fig:2forms}
+\end{figure}
+
+\paragraph{上/中/下 B\'{e}zier 三角面的构造}
+先构造中层 \Bezier 三角面 $\mt_\text{middle}$，再构造上层与下层 \Bezier 三角面。
+%
+\tr{设 $\mt_\text{middle}$ 的一条边由四个控制点定义：$\mp_{\text{mid},1}$、$\mp_{\text{mid},2}$、$\mp_{\text{mid},3}$ 和 $\mp_{\text{mid},4}$。该边要求落在由 $\mv_1$、$\mv_2$、$\md_1$、$\md_2$ 构造的双线性曲面上。}
+设 $\mp_{\text{mid},1} = \mv_1$、$\mp_{\text{mid},4} = \mv_2$，即 $\hat{t} = 0$ 且 $l = 0$。
+%
+随后在满足条件~\eqref{equ:edge-control-1} 的前提下，通过优化确定其余控制点，例如使中层 B\'{e}zier 三角面对输入三角网格进行拟合。
+
+在壳构造过程中（第~\ref{sec:construction} 节），中层表面的每个角点有三个厚度参数：(1) 指定厚度 $\epsilon$；(2) 沿向量方向的临时厚度 $\epsilon^{+} \leq \epsilon$；(3) 沿负向量方向的临时厚度 $\epsilon^{-} \leq \epsilon$。
+%
+将 $\mv_j, j\in\{1,2\}$ 处的临时厚度记为 $\epsilon_j^{+}$ 和 $\epsilon_j^{-}$。
+%
+放置为：
+$$\mp_{\text{top},1} = \mv_1 + \epsilon_1^{+} \frac{\md_1}{\|\md_1\|_2}, \,\, \mp_{\text{top},4} = \mv_2 + \epsilon_2^{+} \frac{\md_2}{\|\md_2\|_2},$$ 其中 $\mp_{\text{top},j}, j=1,2,3,4$ 为上层 B\'{e}zier 三角面一条边的控制点。
+类似地，$$\mp_{\text{bot},1} = \mv_1 - \epsilon_1^{-} \frac{\md_1}{\|\md_1\|_2}, \,\,\mp_{\text{bot},4} = \mv_2 - \epsilon_2^{-} \frac{\md_2}{\|\md_2\|_2},$$ 其中 $\mp_{\text{bot},j}, j=1,2,3,4$ 为下层 B\'{e}zier 三角面一条边的控制点。
+%
+依据下述命题放置 $\mp_{\text{top},2}$、$\mp_{\text{top},3}$、$\mp_{\text{bot},2}$ 和 $\mp_{\text{bot},3}$。
+%
+% We denote $t^+=\min\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}$ and $l^{+}=\max\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}-\min\{\frac{\epsilon_1^{+}}{\|\md_1\|_2},\frac{\epsilon_2^{+}}{\|\md_2\|_2}\}$.
+% For the sake of convenience in explanation, we assume $t^+=\frac{\epsilon_1^{+}}{\|\md_1\|_2}$ and $l^{+}=\frac{\epsilon_2^{+}}{\|\md_2\|_2}-\frac{\epsilon_1^{+}}{\|\md_1\|_2}$.
+% %
+% First we place $\mp_{\text{top},2}$,$\mp_{\text{top},3}$ as follow:
+% \begin{align*}
+%        & \mp_{\text{top},2} = \mp_{\text{mid},2} + \frac{2 t^{+}}{3} \md_1 + \frac{1 t^{+}}{3} \md_2+\frac{l}{3}\md_1, \\
+%        &\mp_{\text{top},3} = \mp_{\text{mid},3} +  \frac{1 t^{+}}{3} \md_1 + \frac{2 t^{+}}{3} \md_2+\frac{l}{3}\md_1+\frac{l}{3}\md_2.
+%        \end{align*}
+%  Then, we have:
+%  \begin{align*}
+%        & \mr_\text{top}(t) - \mr_\text{middle}(t) = (1+l t)((1-t)t^{+} \md_1 + t t^{+}\md_2), \\
+%        &\mr_\text{middle}(t) - \mr_\text{bottom}(t) = (1-t)\epsilon_1^{-} \frac{\md_1}{\|\md_1\|_2} + t\epsilon_2^{-}\frac{\md_2}{\|\md_2\|_2},
+%     \end{align*}
+%Given the mid Bezier triangle and three vectors, how can we find the upper and lower Bezier triangles that are as equidistant as possible to it? This problem is formally related to the offset of surfaces. In previous studies~\cite{Bastl2008ComputingER}, the offset of a Bezier triangle is not a Bezier triangle. However, in our shell, the situation becomes quite natural. We denote the Bezier curve in equation (1) from Proposition 1 as $\mathbf{p}(t)$ and denote the displacement of its offset curve $\mathbf{r}(t)$ relative to its control points as $\mathbf{r}_i$.
+\begin{proposition}\label{prop:mid2topbase}
+    设
+    \begin{align*}
+       & \mp_{\text{top},2} = \mp_{\text{mid},2} + \frac{\epsilon_2^{+}}{3} \frac{\md_1}{\|\md_2\|_2} + \frac{\epsilon_1^{+}}{3}\frac{\md_1+\md_2}{\|\md_1\|_2}, \\
+       &\mp_{\text{top},3} = \mp_{\text{mid},3} + \frac{\epsilon_1^{+}}{3} \frac{\md_2}{\|\md_1\|_2} + \frac{\epsilon_2^{+}}{3}\frac{\md_1+\md_2}{\|\md_2\|_2}, \\
+       & \mp_{\text{bot},2} = \mp_{\text{mid},2} - \frac{\epsilon_2^{-}}{3} \frac{\md_1}{\|\md_2\|_2} - \frac{\epsilon_1^{-}}{3}\frac{\md_1+\md_2}{\|\md_1\|_2} \\
+       & \mp_{\text{bot},3} =\mp_{\text{mid},3} - \frac{\epsilon_1^{-}}{3} \frac{\md_2}{\|\md_1\|_2} - \frac{\epsilon_2^{-}}{3}\frac{\md_1+\md_2}{\|\md_2\|_2}.
+    \end{align*}
+    则有：
+    \begin{align*}
+       & \mr_\text{top}(t) - \mr_\text{middle}(t) = (\frac{\epsilon_1^{+}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{+}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2), \\
+       &\mr_\text{middle}(t) - \mr_\text{bottom}(t) = (\frac{\epsilon_1^{-}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{-}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2),
+    \end{align*}
+    其中 $\mr_\text{top}(t)$、$\mr_\text{middle}(t)$ 与 $\mr_\text{bottom}(t)$ 是由参数 $t \in [0,1]$ 表示边界的 B\'{e}zier 曲线。
+    此外，$\mr_\text{top}(t)$ 与 $\mr_\text{bottom}(t)$ 仍位于该双线性曲面上。
+    %\[ \mathbf{r}(t)-\mathbf{p}(t)=(1-t)\mathbf{d}_0+t\mathbf{d}_1. \
+    %On the Coons surface, $\mathbf{r}_i$ is determined by the following formula:
+%\[ \mathbf{r}_0=\mathbf{d}_0,  \mathbf{r}_1= (2 \mathbf{d}_0+\mathbf{d}_1)/3, \mathbf{r}_2=(\mathbf{d}_0+2 \mathbf{d}_1)/3,\mathbf{r}_3=\mathbf{d}_1. \]
+%And the Bezier curves satisfy an exact distance equation:
+%\[ \mathbf{r}(t)-\mathbf{p}(t)=(1-t)\mathbf{d}_0+t\mathbf{d}_1. \]
+\end{proposition}
+\begin{proof}
+由于对称性，下面仅证明上表面情形。
+%
+设
+$\hat{t}=\frac{\epsilon_1^{+}}{\|\md_1\|_2},l=\frac{\epsilon_2^{+}}{\|\md_2\|_2}-\frac{\epsilon_1^{+}}{\|\md_1\|_2}, \mp_{\text{mid},2}=\frac{2}{3}\mv_1+\frac{1}{3}\mv_2+\beta \md_1,\mp_{\text{mid},3}=\frac{1}{3}\mv_1+\frac{2}{3}\mv_2+\beta \md_2$。则有：
+\begin{equation*}
+\mP_{\text{top},1}=\mx_1,\mp_{\text{top},4}=\mx_2+l \md_2.
+\end{equation*}
+以及
+\begin{equation*}
+\mP_{\text{top},2}=\frac{2}{3}\mx_1+\frac{1}{3}\mx_2+\beta_1 \md_1,\mp_{\text{top},3}=\frac{1}{3}\mx_1+\frac{2}{3}\mx_2+\beta_1 \md_1+l \md_1,
+\end{equation*}
+其中 $\beta_1=\beta+\frac{1}{3}(l+2 \hat{t})$。
+根据命题~\ref{prop:bezier-curve}，$\mr_{\text{top}}(t)$ 位于双线性曲面上。
+
+为计算 $\mr_{\text{top}}(t)-\mr_{\text{middle}}(t)$，先代入命题~\ref{prop:mid2topbase} 中的控制点并化简，得到：
+$$\mr_\text{top}(t) - \mr_\text{middle}(t) = (\frac{\epsilon_1^{+}}{\|\md_1\|_2}(1-t)+\frac{\epsilon_2^{+}}{\|\md_2\|_2}t)((1-t)\md_1 + t\md_2).$$
+\end{proof}
+
+\paragraph{其他阶次}
+可以观察到，命题~\ref{prop:bezier-curve} 的式~\eqref{equ:edge-control-1} 可解释为：对形如 $(t,\beta t(1-t)+l t^2)$ 的二次 \Bezier 曲线 $\hat{r}(t)$，通过双线性映射
+$f(t,s)=(1-s)((1-t)\mx_1+t\mx_2)+s((1-t)(\mx_1+\md_1)+t(\mx_2+\md_2))$
+变换后得到的结果。
+为说明方法的可推广性，以下以四次 \Bezier 曲线为例。
+首先在 $f(t,s)$ 的参数域中定义三次 \Bezier 曲线
+$(t,\beta_1 t(1-t)^2+\beta_2 t^2(1-t)+l t^3)$，其中 $\beta_1,\beta_2$ 为实数。
+将 $f(t,s)$ 作用到这些三次 \Bezier 曲线后，可在物理空间中得到一组四次 \Bezier 曲线。
+这些 \Bezier 曲线的控制点遵循命题~\ref{prop:bezier-curve} 后证明中给出的布置策略。
+%This allows us to derive analogous conditions with equation~\eqref{equ:edge-control-1} for \Bezier curves of any order. }
+
+通过将参数域中的 \Bezier 曲线替换为其他阶次，可类似推导不同阶 \Bezier 三角面的控制点布置条件。
+较低阶三角面在本文的高阶壳构造中缺乏足够自由度进行曲面拟合。
+更高阶 \Bezier 三角面可能带来更好的拟合效果，但阶次提升对最终结果影响并不显著，因为结果仍受以下双射条件约束。
+%\tr{For such a shell space, we can utilize triangles of any order to compose the upper and lower surfaces, so that the edges of the triangle lie on the bilinear patch.
+%For instance, the top first-order triangle (Figure 4, left) are uniquely determined by length of the ray.
+%As for the quadratic Bezier triangles, they either exhibit a linear first-order shape or are also uniquely determined by their endpoints.
+%However, cubic Bezier triangles exhibit commendable approximation properties.}
+
+\paragraph{双射条件}
+构造完 \Bezier 三角面后，向量场可解释为：在复杂域中对棱柱有限元~\cite{Ciarlet1991BasicEE} 执行等参数变换所得等参线的表示。
+该复杂域可描述为：先沿 z 轴扩展单位棱柱区域（图~\ref{fig:bijectivity} 左），再用两张曲面裁剪该区域（图~\ref{fig:bijectivity} 中）；这两张曲面是 \Bezier 三角面在等参数变换下的原像。
+曲面每条边都是二次 \Bezier 曲线 $\hat{r}(t)$。
+若等参数变换在该复杂域中是双射的（下文称之为“\emph{双射条件}”），则沿向量场的投影可成为双射。
+
+%To derive the bijective condition, several works can be refered.
+%
+棱柱有限元等参数映射可逆性已有研究~\cite{Knabner2001TheIO}。
+但其充分条件较难应用，也难以直接扩展到本文场景。
+%
+在文献~\cite{Jiang2020BijectivePI} 中，作者证明：若对应 6 种四面体剖分的 24 个四面体体积均为正，则等参数变换为双射。
+可通过构造包围高阶棱柱的线性棱柱将该条件扩展到本文场景，但该充分条件在高阶壳构造中容易被破坏。
+%
+本文为棱柱单元提出了一个新的充分\tr{且必要}条件，并且该条件易于应用到高阶壳中。
+据此有如下命题。
+\begin{proposition}\label{prop:bijective}
+    若同时满足以下条件，则棱柱 $\cP$ 上的等参数变换是双射：
+    \begin{enumerate}
+    	\item[(\invariant)] 三条线段 $\mv_i,\mv_i+\md_i$ 不与由 $B_{j}$ 裁剪得到的 $\cP$ 双线性曲面片相交，其中 $B_j$ 为该线段对应的对侧曲面片，\tr{且相邻裁剪双线性曲面片之间不发生相切}。
+    	\item[(\invariant)] 上、中、下三张 \Bezier 三角面法向与向量场之间的夹角均小于 90 度。
+    \end{enumerate}
+\end{proposition}
+\begin{proof}
+考虑具有六个顶点 $e_0,e_1,e_2,n_0,n_1,n_2$ 的棱柱有限元。其映射定义为：
+\[
+f(u,v,w) = ue_1 + ve_2 + w\eta_0 + uw\eta_1 + vw\eta_2.
+\]
+将 $f$ 的雅可比行列式记为 $J$。
+
+先给出该棱柱有限元双射的充分\tr{且必要}条件。
+
+\paragraph{引理}
+下列命题等价：
+\begin{enumerate}
+\item 棱柱有限元映射是双射的。
+\item \tr{不存在 $w\in[0,1]$，使得对三根立柱而言，其对应 $w$ 位置的线与对侧曲面上的对应线平行或相交。}
+\item \tr{相邻曲面片在立柱处不相切，且立柱线段不与对侧曲面片相交。}
+\end{enumerate}
+
+\paragraph{引理证明}
+\tr{依据 文献~\cite{Knabner2001TheIO}，(1)(2)(3) 等价。先证明 (4) 的必要性。相邻曲面片相切意味着 $\frac{\partial f}{\partial u}$ 与 $\frac{\partial f}{\partial v}$ 与立柱方向 $\frac{\partial f}{\partial w}$ 共面，从而有 $J(p)=0$，与双射条件矛盾。相交情形同理。}
+
+\tr{再证明 (4) 的充分性。设立柱上存在点 $p$ 使 $J(p)=0$。则 $\frac{\partial f}{\partial u}$、$\frac{\partial f}{\partial v}$ 与 $\frac{\partial f}{\partial w}$ 共面。若 $\frac{\partial f}{\partial u}$ 和 $\frac{\partial f}{\partial v}$ 分居 $\frac{\partial f}{\partial w}$ 两侧，则立柱与对侧曲面相交；若二者位于同侧，则相邻曲面片相切。}
+
+现在继续证明命题 \ref{prop:bijective}。根据上述引理，已可证明 $f$ 在三根立柱上双射（此处设 $l=0$。若 $l\neq 0$，令 $l=max\{l_1,l_2,l_3\}$，可归约为 $l=0$ 的情形）。
+
+\tr{先证明 $f$ 在裁剪双线性曲面片上双射。一般地，考虑曲面片 $f(u,0,w)$。由于在 $u=0,u=1$ 两根立柱上 $f$ 双射，设存在某个 $t$ 使得 $f$ 在 $f(t,0,w)$ 与 $f(1-t,0,w)$ 之间非双射。$J$ 连续，因此在 $f(t,0,w)$ 或 $f(1-t,0,w)$ 上必有一点 $p$ 使 $J(p)=0$。又因固定 $w$ 时 $J$ 关于参数线性，$p$ 必位于上或下 \Bezier 三角形边界上。于是有 $\frac{\partial f}{\partial u}$ 与 $\frac{\partial f}{\partial v}$ 与 $\frac{\partial f}{\partial w}$ 共面，即该点处 \Bezier 三角形切平面与 $\frac{\partial f}{\partial w}$（即向量场）平行，这与角度条件矛盾。}
+
+\tr{在边界曲面片双射后，可类似证明 $f$ 在整个壳空间双射。使 $J(p)=0$ 的点 $p$ 必在上或下 \Bezier 三角形上，这同样与角度条件矛盾。}
+\end{proof}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_curve_shell.pdf}
+		{
+			%\put(45,19){\small $\frac{\beta}{4}$}
+                \put(17,29){\small 裁剪}
+                \put(61,24){\small $\phi$}
+		}
+	\end{overpic}
+	\vspace{0mm}
+	\caption{
+		参数空间中的单位棱柱（左）与裁剪域（中），以及物理空间中的高阶壳 $\cP$（右）。
+  棱柱内部蓝线表示部分等参线。
+	}
+	\label{fig:bijectivity}
+\end{figure}
+
+\subsection{双射投影}
+%\tr{Then, the projection along the vector field defines a bijective map between two surfaces inside the shell if the dot product of the surface normal and the vector is positive at any point on the surfaces.}
+\begin{proposition}\label{prop:projection}
+	如果壳的三张 B\'{e}zier 三角面满足命题~\ref{prop:bijective} 中的条件，则沿向量场方向的投影算子可在壳内任意两张曲面之间定义双射，前提是这两张曲面上任意点处“曲面法向与向量”的点积均为正。
+\end{proposition}
+\begin{proof}
+由于向量场可视为棱柱 $\tilde{\triangle}$ 上的等参数变换 $\mf$。$\tilde{\triangle}$ 由空间中沿 z 轴扩展单位棱柱 $\hat{\triangle}$ 得到，其中 $\hat{\triangle}=\{u, v \geq 0 | u+v \leq 1\} \times [-1, 1]$，并将 \( \hat{\Lambda} \) 的底面标识为 \( z = -1 \)、中面标识为 \( z = 0 \)、顶面标识为 \( z = 1 \)。
+考虑该等参数变换的逆映射。
+由于等参数变换是双射，$\mf^{-1}$ 也是双射。
+特别地，$\mf^{-1}$ 会将 $\cF$ 变换为常向量 \( \mathbf{e}_z = (0, 0, 1) \)。
+因此，投影算子可等价写为 $ Proj(p) = \mf^{-1}(P_{\tilde{\triangle}}(\mf(p))$，其中 \( P_{\tilde{\triangle}} \) 是参考棱柱中沿 \( z \)-轴的投影。
+若与 \( \triangle \) 相交的分片线性网格在映射到参考域 \( \tilde{\triangle} \) 并经 \( P_{\tilde{\triangle}} \) 投影后由正面积三角形构成（且边界映射到边界），则 \( P_{\tilde{\triangle}} \) 为双射。
+在参考域中，投影后面积为正（边界固定）等价于：投影方向与每个面的法向点积为正。
+\end{proof}
+
+
+\begin{figure*}[!t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{figures/chap3_pipline.pdf}
+    {
+    	\definecolor{mycolor}{rgb}{0.9804, 0.4824, 0.4157}
+    	\put(5.5,29){\small \textcolor{mycolor}{$\text{N}_f$}}
+    	
+    	\definecolor{mycolor2}{rgb}{0.5373, 0.5137, 0.7490}
+    	\put(0.7,29){\small \textcolor{mycolor2}{$E_{\text{angle}}$,}}
+    	
+    	\definecolor{mycolor3}{rgb}{0.1961,0.7216,0.5922}
+    	\put(74.3,29){\small \textcolor{mycolor3}{$E_{\text{quality}}$}}
+    	
+    	\put(68.2,7.2){\small $\text{N}_f$}
+    	\put(68.2,5.4){\small $E_{\text{angle}}$}
+    	\put(68.2,3.7){\small $E_{\text{quality}}$}
+    }
+  \end{overpic}
+  \vspace{0mm}
+  \caption{
+  左图展示轮次与 $E_{\text{angle}}$（式~\eqref{equ:angle}）、$E_{\text{quality}}$（式~\eqref{equ:quality}）以及线性三角形数量 $N_f$ 的关系。
+ 右图展示每一轮中边塌缩、棱柱几何优化、边翻转和棱柱缩放操作的次数。
+ 同时给出了九个渐进的壳结果。
+  %Optimization dynamics: progressive reduction in shell face count, incremental increase in angle energy, and iterative fluctuations in MIPS energy.
+  }
+  \label{fig:pipeline}
+\end{figure*}
+
+
+
+\section{高阶壳构造} \label{sec:construction}
+\subsection{问题与方法}
+\paragraph{输入与目标}
+输入包括一个无自交、可定向、流形三角网格 $\mI$ 以及指定厚度 $\epsilon$。
+本文的目标是在以下约束下生成有效的高阶壳 $\cS$：
+\begin{enumerate}
+  \item \emph{包围约束}：$\mI$ 被 $\cS$ 的上表面 $\mT$ 包围，且 $\cS$ 的下表面 $\mB$ 被 $\mI$ 包围；
+  \item \emph{角度约束}：在 $\mI$ 上任意点处，$\mI$ 的表面法向与向量 \tr{$\cF$} 的夹角不大于 $\pi/2$；
+  \item \emph{厚度约束}：每个棱柱长度不大于 $\epsilon$。
+\end{enumerate}
+包围约束和角度约束是实现 $\mI$ 与 $\cS$ 内其他网格之间双射属性传递的前提。
+%
+此外还包含三个优化目标：
+\begin{enumerate}
+  \item \emph{角度目标}：\tr{$\cF$ 在 $\mI$ 任意点处的方向尽可能接近 $\mI$ 的表面法向方向；}
+  \item \emph{复杂度目标}：$\cS$ 的棱柱数量尽可能少；
+  \item \emph{质量目标}：每个 B\'{e}zier 三角形具有较高质量指标。
+\end{enumerate}
+角度目标用于尽可能减小沿向量场进行属性传递时产生的偏差。
+复杂度目标用于提高属性传递效率。
+实验表明，质量目标有助于减少棱柱数量和棱柱长度。
+
+%Our algorithm converts a self-intersection free, orientable, manifold triangle mesh \( \mathcal{T} = \{V_{\mathcal{T}}, F_{\mathcal{T}}\} \), where \( V_{\mathcal{T}} \) are the vertex coordinates and \( F_{\mathcal{T}} \) the connectivity of the mesh, into a shell composed of generalized prisms \( S = \{ (B_{S}, M_{S}, T_{S}), F_{S} \} \), where \( B_{S}, M_{S}, T_{S} \) are bottom, middle, and top surfaces of the shell, consisting of bottom, middle, and top Bezier triangles of the prisms, and \( F_{S} \) is the connectivity of the prisms.
+
+%\todo{list the Constraints and objectives}
+
+\paragraph{流程}
+由于约束与目标之间彼此限制且强耦合，同时充分满足约束并达到目标具有挑战性。
+%
+为此，本文采用内点策略以保证约束被满足（图~\ref{fig:pipeline} 和算法~\ref{alg:shell-construct}）。
+%
+具体而言，先初始化一个满足硬约束的壳 $\cS$。
+随后迭代施加局部操作，对壳 $\cS$ 进行优化，直到达到指定厚度。
+在优化过程中，若某个局部操作会导致任一约束被违反，则拒绝该操作。
+使用四类局部操作（图~\ref{fig:local-operation}）：边塌缩、棱柱几何优化、边翻转和棱柱缩放。
+%
+
+%\tr{Interior-point strategy}: To satisfy the hard constraints, we use the interior-point method. We already have a valid initial cage from the first phase. During optimization,a local remeshing operation will be rejected if it causes an invalid cage, i.e., the resulting cage is non-manifold, contains self-intersections, or does not enclose the input mesh.
+%We iteratively apply three types of local operations, i.e., edge collapse, edge fl ip, and vertex relocation, as shown in Alg. 1.
+
+
+\IncMargin{0.5em}
+\begin{algorithm}[t]
+  \caption{壳构造}\label{alg:shell-construct}
+  \newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+  \SetCommentSty{mycommfont}
+  \SetKwInOut{AlgoInput}{输入}
+  \SetKwInOut{AlgoOutput}{输出}
+  \SetKwFunction{RC}{CollapseEdges}
+  \SetKwFunction{OP}{OptimizePrismGeometries}
+  \SetKwFunction{FL}{FlipEdges}
+  \SetKwFunction{ZM}{ZoomPrisms}
+
+  \AlgoInput{ 三角网格 $\mI$ 和指定厚度 $\epsilon$}
+  \AlgoOutput{ 粗高阶壳 $\mS$}
+
+  \Repeat {满足任一终止条件}
+  {
+    \tcc{为降低复杂度，执行边塌缩}
+    $\mS \leftarrow$ \RC($\mS$)\;
+    \tcc{为降低能量，优化棱柱几何}
+    $\mS \leftarrow$ \OP($\mS$)\;
+    \tcc{为降低能量，执行边翻转}
+    $\mS \leftarrow$ \FL($\mS$)\;
+    \tcc{为改变厚度，执行棱柱缩放}
+    $\mS \leftarrow$ \ZM($\mS$)\;
+  }
+\end{algorithm}
+\DecMargin{0.5em}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_local_operation2.pdf}
+		{			
+			\put(18.5,35){\small 塌缩}
+			\put(37,18){\small 缩放}
+			\put(61,20){\small 翻转}
+			\put(69,36){\small 优化}
+		}
+	\end{overpic}
+	\vspace{0 mm}
+	\caption{
+		局部操作示意图。
+	}
+	\label{fig:local-operation}
+\end{figure}
+
+\subsection{算法细节}
+
+\paragraph{变量}
+依据第~\ref{sec:construct-from-L} 节的构造方法，当线性三角网格 $\mL$、向量 $\{\md\}$ 以及定义在顶点上的厚度 $\epsilon^{+}, \epsilon^{-}$ 已确定后，即可构造高阶壳 $\cS$。
+%
+此外，在实际构造上/下 B\'{e}zier 三角面时，对每个顶点都设置 $\epsilon^{+} = \|\md\|_2$。
+%
+因此，在内点策略中需要优化的变量仅包括 $\mL$、向量和厚度 $\epsilon^{-}$。
+
+\paragraph{构造 \Bezier 三角面}
+%All the local operations described below directly change the middle surface, and consequently affect the extruded shell. After every operation, the middle surface is recomputed by intersecting $\mathcal{T}$ with the edges of the prisms in $\mathcal{S}$.
+%\tr{goal?}
+给定线性三角网格 $\mL$ 与向量后，通过曲面拟合构造中层 \Bezier 三角面。
+计算单个中层 \Bezier 三角面 $\mt_\text{middle}$ 的步骤如下：
+\begin{enumerate}
+  \item 在 \(\mt_{\text{linear}}\) 上均匀采样 \( \ms_i, i = 1, \ldots, m \)，并记 $\ms_i$ 的重心坐标为 $\mathbf{u}_i$。
+  \item 将每个样本 $\ms_i$ 沿向量 $\md(\ms_i)$（由~\eqref{equ:vector-bc} 计算）投影到输入网格 \(\mI\) 上，得到目标点 \( \mx_i\)。
+  \item 记从参数域 $\mt_\text{para}$ 到中层 \Bezier 三角面 $\mt_\text{middle}$ 的映射为 $\phi_\text{middle}$。通过求解下式得到 $\phi_\text{middle}$：
+      \begin{equation}\label{equ:fitting}
+		\min_{\{\mp_{\text{mid}}\}} \sum_{i=1}^{m} \left\| \mx_i - \phi_\text{middle}(\mathbf{u}_i) \right\|_2^2 \,\, \text{s.t.} \,\, \eqref{equ:edge-control-1} \text{成立},
+	\end{equation}
+其中 \( \{\mp_{\text{mid}}\}\) 为定义 $\phi_\text{middle}$ 的 $\mt_\text{middle}$ 控制点。
+由于 $\phi_\text{middle}(\mathbf{u}_i)$ 是控制点的线性函数，问题~\eqref{equ:fitting} 是仅含线性等式约束的二次规划，易于求解。
+\end{enumerate}
+%\tr{We generate samples \( \ms_i, i = 1, \ldots, m \) on \(\mt_{\text{linear}}\) and project each sample $\ms_i$ along the vectors to onto \(\mT\) to derive its target point \( \mt_i\). Subsequently, \( s_i \) is mapped onto \(\mM(s_i)\), which is the value of the middle B茅zier map on the barycentric coordinates of \( s_i \) in \(\mt_{\text{linear}}\). Utilizing these mapped points, we solve the following problem:
+%\t\begin{equation}
+%\t\t\min_{\mp_{\text{mid}}} \sum_{i=1}^{m} \left\| s_i - \mM(s_i) \right\|^2 \quad \text{subject to} \quad (\ref{equ:edge-control-1}) \text{ being satisfied},
+%\t\end{equation}
+%\twhere \( \mp_{\text{mid} }\) are the control points of \(\mM\). Given that \(\mM(s_i)\) is a linear function of \( \mp_{\text{mid} }\), this formulation leads to a constrained quadratic optimization problem.
+%}
+%
+确定中层 \Bezier 三角面后，采用第~\ref{sec:construct-from-L} 节方法构造上层和下层 \Bezier 三角面。对上/下 \Bezier 三角面的中心控制点不施加额外约束。为保证空间更均匀，将其相对中层 \Bezier 三角面的位移设置为其余 9 个控制点平均位移。
+
+\paragraph{目标函数}
+将优化目标与约束编码为能量函数：
+\begin{equation}\label{equ:enenrgy}
+	E = E_{\text{angle}} + E_{\text{quality}} + E_\text{constraint}.
+\end{equation}
+其中，使用输入网格 $\mI$ 上向量与法向之间的夹角定义 $E_{\text{angle}}$：
+\begin{equation}\label{equ:angle}
+ E_{\text{angle}} = \frac{1}{N_t} \sum_{\mt_{\text{linear}} \in \mL} \frac{1}{m} \sum_{i=1}^{m} \sin^2 \angle (d(\ms_i), \mn(\mx_i))),
+\end{equation}
+其中 $\ms_i$ 继承用于中层 \Bezier 三角面拟合的采样点，$\mn(\mx_i)$ 表示 $\mx_i$ 处法向，$N_t$ 为线性网格 $\mL$ 的三角形数量。
+%where $\mn(s_i)$ is the normal of the triangle of $\mT$ on which \(t(s_i)\) is located, and $N_t$ indicates the number of triangles in $\mM$.
+%
+使用二维 MIPS 共形能量定义质量指标 $E_{\text{quality}}$：
+\begin{equation}\label{equ:quality}
+\begin{split}
+  E_{\text{MIPS}}(\mathbf{u}) &= \|J(\mathbf{u})\|_F \|J(\mathbf{u})^{-1}\|_F \\
+  E_{\text{quality}} &= \sum_{\mt_\text{middle} \in \mM}  \int_{\mt_\text{para}} E_{\text{MIPS}}^2(\mathbf{u})) d \mathbf{u},
+\end{split}
+\end{equation}
+其中 $J(\mathbf{u})$ 为 $\phi_\text{middle}$ 在 $\mathbf{u}$ 处的雅可比矩阵，$\|\cdot\|_F$ 表示 Frobenius 范数。
+由于 $\phi_\text{middle}$ 是嵌入三维空间中的二维映射，因此在切平面上计算 $J(\mathbf{u})$，其为 $2 \times 2$ 矩阵。
+随后通过数值积分近似计算 $E_{\text{quality}}$。
+关于计算 $J(\mathbf{u})$ 与 $E_\text{quality}$ 的更多细节见补充材料。
+这里仅使用中层 \Bezier 三角面 $\mt_\text{middle} \in \mM$ 评估 $E_{\text{quality}}$，因为按本文的构造方法，上层和下层与中层形态相近。
+%
+%\begin{equation}
+%\tE =\sum_{t \in \mM}A_t E_{\text{mips}}^T + \lambda_t A_t E_{\text{angle}}^T
+%\end{equation}
+$E_\text{constraint}$ 是用于避免违反任意约束的势垒函数。
+\begin{equation}\label{equ:constraint}
+    E_\text{constraint} =
+    \begin{cases}
+        0,      &\text{如果不违反约束;}  \\
+	 	\infty, &\text{否则.}
+    \end{cases}
+\end{equation}
+
+\paragraph{初始化}
+由于文献~\cite{Jiang2020BijectivePI} 可稳健且高效地生成线性壳，因此采用其方法以初始厚度 $\epsilon_\text{init}$ 生成稠密线性壳，再进一步优化到厚度 $\epsilon_\text{opt}$。
+在实验中设 $\epsilon_\text{init} = \epsilon/10$，$\epsilon_\text{opt} = \epsilon/5$。
+%In~\cite{Jiang2020BijectivePI}, they robustly generated linear bijective shells. Their construct of a linear bijective hull can also be interpreted as a curved hull if the pillars extending upward and downward from each point are of equal size. Owing to their method's robustness and efficiency, we employ their generation technique to initially create a thin linear shell as our starting point.
+将优化后线性壳的中层表面初始化为 $\mL$。
+向量初始化为该线性壳中层顶点到上层顶点的向量。
+厚度 $\epsilon^{-}$ 初始化为中层顶点到下层顶点的距离。
+%At each vertex $\mv$ of $\mL$, the vector $\md$ is from the
+%We initialize $\cS$ by elevating each triangle of the optimized linear shell to the desired order $n$ without changing the geometries.
+%\tr{vector field: direction + length?? linear mesh $\mt_\text{linear}$?? positive and negative thickness?}
+这里并不使用第~\ref{sec:construct-from-L} 节方法重新构造上/中/下 B\'{e}zier 三角面，而是直接将优化后线性壳的每个三角面升阶至目标阶数 $n$ 且不改变其几何形状。
+这种初始化满足所有约束。
+
+%The partial derivatives of the energy with respect to the vertex positions \( \mv \) and the normals \( \md \) are:
+%\[
+%\frac{\partial E}{\partial \mv} \approx \frac{\partial E_{\text{mips}}}{\partial \mv},
+% \frac{\partial E}{\partial \md} \approx \frac{\partial E_{\text{angle}}}{\partial \md} .
+%\]
+%
+%Specifically, the derivative of \( E_{\text{mips}} \) with respect to a vertex is:
+%\begin{equation}
+%\t\frac{\partial E_{\text{mips}}(\xi)}{\partial \mv} = \sum_{i=1}^{10} \frac{\partial E_{\text{mips}}(\xi)}{\partial \mp_i} \cdot \frac{\partial \mp_i}{\partial \mv},
+%\end{equation}
+%where \( \mp_i \) are the control points.
+%
+%\begin{equation}
+%\t\frac{\partial E_{\text{angle}}}{\partial \md} = \sum_{s_i \in N(v)} \frac{\partial E_{\text{angle}}(s_i)}{\partial \md},
+%\end{equation}
+%According to Prospotion 1, we yield the following weights:
+%\[
+%\t\frac{\partial p_i}{\partial v}= \{1,2/3, 1/3, 0, 2/3, 0,0, 1/3, 0, 0\}.
+%\]
+%This leads to the final weights for the optimization.
+
+\paragraph{棱柱几何优化}
+在不改变某顶点厚度 $\epsilon^{-}$ 的前提下，优化该顶点向量 $\md$ 与其在 $\mI$ 上的位置 $\mv$，以更新棱柱并降低目标函数值。
+%
+当 $\md$ 和 $\mv$ 变化时，先构造三张 \Bezier 三角面，再评估目标函数。
+%
+因此目标函数对 $\md$ 与 $\mv$ 不可导。
+为此，采用进化算法，即差分进化算法~\cite{Neri2010advance,Das2011Differential}，该算法已在文献~\cite{Zhang2022ConstrainedRU} 的顶点重定位中成功应用。
+%
+该优化逐顶点进行。
+
+\paragraph{边塌缩}
+通过边塌缩降低复杂度。
+%
+当塌缩 $\mL$ 的一条边并生成新顶点后，新顶点厚度 $\epsilon^{-}$ 采用平均值，\tr{随后构造 B\'{e}zier 三角面}，并通过差分进化算法优化新顶点的向量与位置。
+%After we collapse an edge of $\mL$ to generate a new vertex, the thickness $\epsilon^{-}$ of the new vertex is averaged, and the vector and the position of the new vertex are optimized via the differential evolution algorithm.
+%
+如果找不到满足全部约束的解，则拒绝该边塌缩操作。
+否则，无论 $E_{\text{angle}} + E_{\text{quality}}$ 是否增大，都接受该操作。
+%\todo{only consider constraints without angle and quality objectives, using smoothing to reduce angle and quality objectives}
+在一轮塌缩中，中层曲面 $\mM$ 的曲边越短，其在线性网格 $\mL$ 上对应边的塌缩优先级越高。
+
+% \tr{in ascending order of the lengths of the curved edges of $\mM$}
+
+\paragraph{边翻转}
+通过边翻转降低目标函数。 % \tr{following a descending order of the lengths of curved edges of $\mM$}.
+%
+尽管翻转 $\mL$ 的一条边后向量、位置与厚度不变，但网格连接关系会更新。
+因此重新构造新的 \Bezier 三角面以评估目标函数。
+若目标函数降低，则接受该翻转；否则不执行翻转。
+%\todo{order???}
+在一轮翻转中，中层曲面 $\mM$ 的曲边越长，其在线性网格 $\mL$ 上对应边的翻转优先级越高。
+
+
+%\paragraph{Optimization}
+%During shell optimization, we perform local operations (Figure 11) on a valid shell to reduce its complexity and increase the quality. Before applying every operation, we check the validity of the operation to ensure that: (1) the resulting middle surface will be manifold \cite{Dey et al. 1999} and (2) the shell will be valid with respect to $\mathcal{T}$ (to
+%ensure a bijective projection). We forbid any operation that does not pass these checks. We would like to remark that, while there are different choices to guide the shell modification, we experimentally discovered that allowing shell simplification and optimization consistently leads to thicker shells with a richer space of sections.
+%
+%Our local operations (satisfying the definition of $\mathcal{O}$ in Theorem 3.7) are translated from surface remeshing methods \citep{Dunyach et al. 2013} since our shell can be regarded as a triangle mesh (middle surface) extruded through a displacement field $\mathcal{N}$. All the local operations described below directly change the middle surface, and consequently affect the extruded shell. After every operation, the middle surface is recomputed by intersecting $\mathcal{T}$ with the edges of the prisms in $\mathcal{S}$.
+
+%\paragraph{Energy Optimization}
+% \begin{figure}[t]
+% 	\centering
+% 	\begin{overpic}[width=0.99\linewidth]{normal_opt}
+% 		{
+% 			%\put(72,-3){\small Ours}
+% 			%\put(19,0){\scriptsize $N = 24$}
+% 		}
+% 	\end{overpic}
+% 	\vspace{1.5mm}
+% 	\caption{
+% 		We visualize the angles between the input triangle mesh and the vector field in the shell. 
+%   Using locally optimal normals, the vector field forms large angles with the input mesh (middle). After optimizing vertex positions and normals, the angles decrease (right).
+% 	}
+% 	\label{fig:opt-normal}
+% \end{figure}
+
+\paragraph{棱柱缩放}
+%\todo{change the lengths of the vectors, check constraints?}
+逐步放大向量与厚度，直到向量长度和厚度达到给定厚度 $\epsilon$。
+%
+对于顶点 $\mv_i$，计算临时向量 $$\md_{\text{temp},i} = \frac{\rho}{N_i} \sum_{\mv_j \in \Omega(\mv_i)} \md_j$$ 和临时厚度 $$\epsilon^{-}_{\text{temp},i} = \frac{\rho}{N_i} \sum_{\mv_j \in \Omega(\mv_i)} \epsilon^{-}_j,$$ 其中 $\Omega(\mv_i)$ 表示 $\mv_i$ 的一环邻域顶点集合，$N_i$ 为其中元素个数，$\rho > 1$ 为放大比例。
+%
+若 $\md_{\text{temp},i}$ 的长度大于 $\epsilon$，则令 $\md_{\text{temp},i} \leftarrow \epsilon \md_{\text{temp},i}/\|\md_{\text{temp},i}\|_2$。
+类似地，若 $\epsilon^{-}_{\text{temp},i}  > \epsilon$，则令 $\epsilon^{-}_{\text{temp},i}  \leftarrow \epsilon$。
+%
+使用 $\md_{\text{temp},i}$ 和 $\epsilon^{-}_{\text{temp},i} $ 构造三张 \Bezier 三角面。
+若任一约束被违反，则拒绝该放大操作；否则将 $\mv_i$ 的向量（或厚度）更新为 $\md_{\text{temp},i}$（或 $\epsilon^{-}_{\text{temp},i}$）。
+%
+%\todo{order???}
+在一轮缩放中，遍历线性网格 $\mL$ 的全部顶点并逐个执行该操作。
+%
+在实验中设置 $\rho = 1.5$。
+
+
+\paragraph{包围约束检查}
+为保证 $\mS$ 的上下表面包围且不与 $\mI$ 相交，检查上/下 \Bezier 三角面凸包与 $\mI$ 的相交情况。
+%
+若检测到相交，则执行自适应细分以细化对应 \Bezier 三角面。
+在实验中，最大细分次数设为 3。
+%
+若达到最大细分次数后仍存在相交，则返回包围约束被违反；否则认为包围约束未被违反。
+%\todo{convex hull}
+
+\paragraph{法向检查}
+为保证角度约束不被违反，按如下流程检查。
+首先构造包围 $\cP$ 的八面体，以加速角度条件验证。
+%
+该八面体是三角形 $\triangle\mt_1\mt_2\mt_3$ 与 $\triangle\mb_1\mb_2\mb_3$ 的凸包，其中 $\mt_i=\mv_i+t^+ \md_i, \mb_i=\mv_i-t^- \md_i, i=1,2,3$。
+迭代增大 $t^+$ 与 $t^-$，使上、下 \Bezier 三角面均被该凸包包围。 %$\triangle\mt_1\mt_2\mt_3$ and $\triangle\mb_1\mb_2\mb_3$}.
+%
+随后找出 $\mI$ 中位于该八面体内或与之相交的三角形。这些三角形覆盖了棱柱内部可能出现的三角形。
+%
+最后分别检查这些三角形法向与 $\md_i,i=1,2,3$ 的夹角。
+由于 $\cF$ 是对 $\md_i$ 的重心插值，三角形法向与 $\cF$ 的夹角受上述检查角度控制。
+
+\paragraph{终止条件}
+当无法继续执行任何局部操作，或迭代轮数达到上限时终止算法；实验中该上限设为 30。
+
+\subsection{变体}
+\paragraph{奇异点}
+\tr{当两条以上棱线汇聚时会形成奇异点，即 $\mI$ 上不满足约束 (2) 的顶点。与文献~\cite{Jiang2020BijectivePI} 类似，本文扩展定义以允许这些奇异点处厚度为零。由此在存在奇异点时，棱柱结构会退化：一个奇异点时退化为棱锥，两个奇异点时退化为四面体，这两种情形都自然满足条件 (2)。}
+\paragraph{含自交输入}
+\tr{无自交要求是保证任意两张满足命题(~\ref{prop:bijective}) 的网格之间存在双射的必要条件。若放弃该双射性要求，该方法可扩展以处理含自交网格。}
+	
+\tr{若 $\mI$ 存在自交，本文算法可直接调整为生成保持局部单射的壳。此时映射在沉浸意义下仍为双射。为此需修改约束 (1)：将全局相交检测替换为局部三角片重叠检测。}
+%\paragraph{Acceleration}
+%\todo{How to ensure that the constraint will not be violated?}
+%
+%In the process of generating shells in Jiang2020's linear shell method and our proposed shell method, determining which triangles of the input mesh are within the shell and checking their normals is time-consuming, especially when the input mesh has a large number of triangles, due to the extensive intersection checks involved. However, we can initially generate an extremely thin layer of linear shell near the input mesh. During the generation of this linear shell, we can record the angle perturbations between the triangles of the input mesh and the intermediate triangles of the linear shell. In subsequent operations, we no longer consider the input triangular mesh, but instead use the upper and lower surfaces of the linear shell as spatial proxies, and the normals of the intermediate triangles of the shell, with added perturbations, as proxies for the normals of the input triangles. It is important to note that at the initial generation, the perturbation of the normals is set to zero, and the spatial proxy perturbation corresponds to the initial thickness.
+%
+%The selection of the threshold for the perturbation angle needs to balance simplification while not significantly impacting subsequent operations. In our experiments, we have chosen a threshold of 5 degrees. It is important to note that the perturbation of the angle is solely for the purpose of approximation and not for simplification. Therefore, for parts with sharp angles, the resulting perturbed angle can be zero degrees.
+%
+%This approach offers two significant advantages. Firstly, it reduces the number of triangles that need to be checked. Secondly, it alleviates the need to handle extremely large or elongated triangles from the input mesh that would span across multiple shells. Now, these can be disregarded in the processing phase.
+
+%\begin{figure}[t]
+%\t\centering
+%\t\begin{overpic}[width=0.99\linewidth]{Nfaces}
+%\t	{
+%\t		\put(11,-3){\small 0.05}
+%\t		\put(36,-3){\small 0.02}
+%\t		\put(60,-3){\small 0.005}
+%\t		\put(86,-3){\small 0.002}
+%\t	}
+%\t\end{overpic}
+%\t\vspace{1.5mm}
+%\t\caption{
+%\t	acceleration.
+%\t}
+%\t\label{fig:acceleration}
+%\end{figure}
+
+
+
+\section{高阶壳中的属性传递}
+
+\paragraph{高阶壳内的重网格化}
+当在已构造的高阶壳 $\mS$ 中对输入网格 $\mI$ 进行重网格化以生成新网格 $\mR$ 时，需要满足两个硬约束：
+\begin{enumerate}
+  \item 新网格 $\mR$ 位于高阶壳 $\mS$ 内部。
+  \item 在 $\mR$ 上任意点处，$\mR$ 的三角面法向与高阶壳向量场之间的夹角小于 $\pi/2$。
+\end{enumerate}
+%\tr{other remeshing methods???}
+为保证这两个约束始终成立，将 $\mR$ 初始化为输入网格 $\mI$，随后执行边塌缩、边分裂、边翻转、顶点重定位等重网格操作，并通过显式检查拒绝任何导致约束违背的操作。
+%
+第一个约束可由本文提出的包围约束检查来保证。
+%
+%When computing the angle to check the second constraint, we need to know the vector at any point on $\mR$ (see the next paragraph). 
+第二个约束可通过本文提出的法向检查来保证。
+%
+在实践中，将 $\mL$ 的边在中点处细分，从而在一个棱柱内部构造四个子棱柱。
+%
+由于这种细分后向量场保持不变，因此可在这些子棱柱上应用所提出的法向检查。
+%
+三个向量能够对子棱柱内的向量场给出更紧的界定，从而使重网格后三角形在法向上拥有更大的自由度。
+
+%\tr{the vector changes on a triangle of $\mR$? how to check?}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_proxy.pdf}
+		{
+			%\put(72,-3){\small Thing10i}
+			%\put(19,-3){\small ABC}
+		}
+	\end{overpic}
+	\vspace{0mm}
+	\caption{
+		在低质量输入网格（左上）上应用 热核法~\cite{Crane2012GeodesicsIH} 会得到不光滑的距离场（右上）。
+  该距离场与精确离散测地距离~\cite{mitchell1987discrete}（上中）存在明显偏差。
+本文在高阶壳内部对输入网格进行重网格化（左中），得到高质量网格（左下）。
+  随后在高质量网格上用 heat method 计算距离场（下中），并利用双射投影将其传回输入网格（右下）。投影后的距离场更接近精确结果。
+	}
+	\label{fig:proxy}
+\end{figure}
+
+\paragraph{向量查询}
+在属性传递中，一个基础操作是在棱柱 $\cP$ 内给定点 $\mp$ 处查询向量 $\md$。
+%
+点 $\mp$ 将落在一条射线上，即 $\mp = \mv + t \md$，其中点 $\mv$ 位于线性三角形 $\mt_{\text{linear}}$ 上，$t$ 为参数。
+%
+由于通过重心坐标插值定义向量场，只要确定 $\mv$ 相对于 $\mt_{\text{linear}}$ 的重心坐标 $(u_1, u_2, u_3)$，即可得到 $\md = u_1 \md_1+u_2 \md_2+ u_3 \md_3$。
+%
+计算 $(u_1, u_2, u_3)$ 被称为逆重心映射问题，相关方法见文献~\cite{Maggiordomo2023TheIB}。
+%
+具体地，先通过求解一个三次方程来计算 $t$，使得点 $\mp$ 位于由顶点 $\mv_1+ t \md_1$、$\mv_2+ t \md_2$ 与 $\mv_3 + t \md_3$ 构成的三角形上。
+%
+在该问题中，该方程的根满足如下命题。
+\begin{proposition}\label{prop:vector-query}
+  若 $\mp$ 位于棱柱 $\cP$ 内部，且 $\cP$ 满足双射条件（命题~\ref{prop:bijective}），则该三次方程仅存在一个实根 $t_\text{real}$，并且 $\mp$ 位于三角形 $\triangle\mp_1\mp_2\mp_3$ 内，其中 $\mp_j = \mv_j + t_\text{real} \md_j, j=1,2,3$。 %s.t.
+  进一步地，当 $\left\langle\mv_2-\mv_1,\mv_3-\mv_1,\md-\mv_1\right\rangle>0$ 时，$t_\text{real}$ 是该三次方程中最小的正实根；反之，\( t_{\text{real}} \) 是最大的负实根。
+ % \tr{just one real root?}
+\end{proposition}
+\begin{proof}
+由于 $\cP$ 满足双射条件，可在 $\mt_{\text{linear}}$ 上找到点 $v$，使得 $\md(\mv) = u_1 \md_1+u_2 \md_2+ u_3 \md_3$ 命中点 $\mp$，这表明按命题所述三次方程至少存在一个实根 $t$。若还能在 $\mt_{\text{linear}}$ 内找到另一个 $\tilde{v}$，则 $\cF$ 在 $\mp$ 处不再单射，与条件矛盾。
+
+由对称性，下面仅证明当 $\left\langle\mv_2-\mv_1,\mv_3-\mv_1,\md-\mv_1\right\rangle>0$ 时，$t_\text{real}$ 是该三次方程最小的正实根。设存在 $\tilde{t}_{\text{real}}>0$ 且 $\tilde{t}_{\text{real}}<t_{\text{real}}$，考虑函数 $a(t)=\left \langle \mp_2-\mp_1,\mp_3-\mp_1,\md(\mv)\right \rangle$，它是关于 $t$ 的二次函数。则有 $a(0)>0,a(t_{\text{real}})=0,a(\tilde{t}_{\text{real}})=0$，从而 $a(t)<0$ 对于 $t\in (\tilde{t}_{\text{real}},t_{\text{real}})$ 成立。根据命题~\ref{prop:bijective}，这将导致等参数变换非双射，产生矛盾。
+\end{proof}
+$\mp$ 关于 $\triangle\mp_1\mp_2\mp_3$ 的重心坐标即为 $(u_1, u_2, u_3)$。
+
+
+\paragraph{棱柱定位}
+另一个基础操作是为给定点 $\mp$ 定位其所在棱柱。
+这里采用一种由粗到细的策略。
+在粗阶段，先将高阶壳 $\mS$ 的 \Bezier 三角面控制网细分 3 次以形成线性壳。
+随后使用文献~\cite{Jiang2020BijectivePI} 的方法定位一个棱柱 $\cP$。
+%
+由于细分网格只是 $\mS$ 的近似，当 $\mp$ 接近 $B$ 时，粗阶段在相邻棱柱之间可能返回错误棱柱。
+因此在细阶段，在 $\cP$ 中对 $\mp$ 执行向量查询。若处于错误棱柱中，则根据命题~\ref{prop:bijective} 的保证，将无法得到命题~\ref{prop:vector-query} 所述的根。随后转向相邻棱柱进行查询，该棱柱会根据命题~\ref{prop:vector-query} 仅产生一个实根。
+%Thus, in the fine step, we perform vector queries for $\mp$ in $\cP$ and its neighbor prisms. Then, we return the prism that produces only one real root according to Proposition~\ref{prop:vector-query}.
+
+%\tr{To quickly determine which prism contains the point $\mp$, we establish a linear tetrahedral framework amongst $\mT$, $\mM$ and $\mB$. The specific approach involves subdividing each Bezier triangle 3 times, and for the resulting linear mesh, we generate the corresponding tetrahedral mesh using the method proposed by~\cite{Jiang2020BijectivePI}. Although this method is not exact when $\mp$ is very close to $\mB$, according to Theorem 5, we can determine which prism the point is in by a calculation.}
+%
+%\tr{Forward and Inverse Projection}
+%In the shell space, we define a continuous vector field through barycentric coordinate interpolation.
+%The forward and inverse Projection are given by the projection of the vector field and the negative vector field.
+%
+%We need to determine the value of the vector field at each point
+%$\mathbf{p}$ within the shell. For any point $\mathbf{p}$, it will be hit by a ray.
+%
+%\begin{equation}
+%	\mathbf{p} = \mathbf{v} + t \mathbf{d}.
+%\end{equation}
+%
+%Given $\mathbf{p}$, to determine the barycentric coordinates of $\mathbf{v}$ with respect to this shell, known as the inverse barycentric mapping problem, is addressed in ~\cite{Maggiordomo2023TheIB}. The proposed solution first finds a value of \( t \) such that the point \( \mathbf{p} \) lies within the triangle formed by vertices $\mathbf{v}_0+t \mathbf{d}_0 $,$\mathbf{v}_1+t \mathbf{d}_1 $ and $\mathbf{v}_2+t \mathbf{d}_2 $,  which is a problem of finding the roots of a cubic equation.
+%Then \( \mathbf{p} \)'s barycentric coordinates within the triangle is the solution.
+
+%In our case, we always first determine whether point
+%$\mathbf{p}$ is above or below the triangle
+%$T$, and then choose the sign of
+%$\mathbf{d}$ accordingly. Afterward, we only need to consider the smallest positive value of
+%$t$ to determine whether
+%$\mathbf{p}$ is on the triangle, and thus, whether
+%$\mathbf{p}$ is inside the prism. If there are other values of $t$ that place
+%$\mathbf{p}$ inside the triangle, it would imply that the vector field intersects at point $\mathbf{p}$, which is not permissible.
+
+%\subsection{Predicates and functions}
+%Using our shell \( S \), we implement the following predicates and functions:
+%\begin{itemize}
+%	\item \texttt{is\_inside(p)}: returns true if the point \( p \in \mathbb{R}^3 \) is inside \( S \).
+%	\item \texttt{is\_section}(\( \mathcal{T} \)): returns true if the triangle mesh \( \mathcal{T} \) is a section of \( S \).
+%	\item \( \mathcal{P}(p) \): returns the prism id (\( \text{pid} \)), the barycentric coordinates (\( \alpha, \beta \)) in the corresponding triangle of the middle surface, and the relative offset distance from the middle surface (\( h \), which is -1 for the bottom surface, and 1 for the top surface) of the projection of the point \( p \).
+%	\item \( \mathcal{P}^{-1}(\text{pid}, \alpha, \beta, h) \) is the inverse of \( \mathcal{P}(p) \).
+%	\item \( \mathcal{P}_T(\text{tid}, \alpha, \beta) = \mathcal{P}(q) \), where \( q \) is the point in the triangle \text{tid} of the mesh \( \mathcal{T} \), with barycentric coordinates \( \alpha, \beta \).
+%	\item \( \mathcal{P}_T^{-1}(\text{pid}, \alpha, \beta) \) is the inverse of \( \mathcal{P}_T \).
+%\end{itemize}
+%
+%Given the unique characteristics of the curved shell, additional clarification regarding the operations performed therein is warranted:
+
+%\tr{To quickly determine which prism contains the point $\mp$, we establish a linear tetrahedral framework amongst $\mT$, $\mM$ and $\mB$. The specific approach involves subdividing each Bezier triangle 3 times, and for the resulting linear mesh, we generate the corresponding tetrahedral mesh using the method proposed by~\cite{Jiang2020BijectivePI}. Although this method is not exact when $\mp$ is very close to $\mB$, according to Theorem 5, we can determine which prism the point is in by a calculation.}
+
+
+\paragraph{应用}
+当上述工具就绪后，即可在高阶壳中，对满足命题~\ref{prop:projection} 的两张曲面实现双射属性传递。
+与文献~\cite{Jiang2020BijectivePI} 类似，本文展示四类应用，如图~\ref{fig:proxy}、\ref{fig:boolean}、\ref{fig:Dis_map} 和 \ref{fig:app_vector} 所示。
+
+\tr{此外，本文的高阶壳也支持高阶单元仿真。由于高阶壳的中层表面是 Bezier 三角网格，可采用文献~\cite{Khanteimouri20233Dbezier} 的算法生成用于仿真的高阶四面体网格，并利用壳内双射映射将属性传回。}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_boolean.pdf}
+		{
+			%\put(72,-3){\small Thing10i}
+			%\put(19,-3){\small ABC}
+		}
+	\end{overpic}
+	\vspace{0mm}
+	\caption{
+本文在高阶壳内对两个网格并集进行重网格化，同时保持双射对应关系，颜色传递结果对此进行了可视化展示。
+	}
+	\label{fig:boolean}
+\end{figure}
+%\paragraph{Displacement Mapping}
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_displace.pdf}
+		{
+			\put(7,1){\small \textbf{(a)}}
+                \put(34,1){\small \textbf{(b)}}
+                \put(62.5,1){\small \textbf{(c)}}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		高阶壳中的投影与用于定义位移贴图的 Phong 投影~\cite{Kobbelt1998InteractiveMM} 相似。
+对 $\mM$ 的 \Bezier 三角面进行细分（b）以形成新网格。
+  然后沿向量场将新网格的细分点投影到输入网格（a）上。
+  输入网格的细节被编码为新网格上的位移贴图（c）。
+	}
+	\label{fig:Dis_map}
+\end{figure}
+
+
+\begin{figure}[t]
+\centering
+\begin{overpic}[width=0.99\linewidth]{figures/chap3_app_vector.pdf}
+	{			
+		\put(13,-2){\small $N_f=648$}
+		\put(74,-2){\small $N_f=26392$}
+	}
+\end{overpic}
+\vspace{4mm}
+\caption{
+\tr{先在简化网格上运行 Globally-Optimal Direction Fields ~\cite{Knoppel:2013:GOD} 得到光滑向量场，再利用双射投影将该向量场传递到原始网格。}
+}
+\label{fig:app_vector}
+\end{figure}
+%\paragraph{High Order Meshing} 
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_diff_thick.pdf}
+		{
+			\put(8.3,-5.5){\small $\epsilon = 2\%$}
+			\put(33.3,-5.5){\small $\epsilon = 0.5\%$}
+			\put(58.3,-5.5){\small $\epsilon = 0.2\%$}
+			\put(82.6,-5.5){\small $\epsilon = 0.02\%$}
+			
+			\put(5.6,-2){\small $N_f = 566$}
+			\put(30.6,-2){\small $N_f = 626$}
+			\put(55.6,-2){\small $N_f = 864$}
+			\put(79.6,-2){\small $N_f = 3810$}
+		}
+	\end{overpic}
+	\vspace{7mm}
+	\caption{
+		壳厚度与单元数量 $N_f$ 之间的关系。
+	}
+	\label{fig:thickness-number}
+\end{figure}
+
+
+\section{实验与评估}\label{sec:results}
+本文在包含 8300 余个模型的两个数据集上测试了算法性能。
+两个数据集由 Thingi10K~\cite{Zhou2016Thingi10KAD} 子集与 ABC~\cite{Koch2018ABCAB} 构成，且每个网格均满足：流形、无自交、可定向。
+本文方法以 C++ 实现，所有实验在台式机上完成，硬件配置为 4.00 GHz Intel Core i7-4790K 与 16 GB 内存。
+%
+本算法唯一的用户可控参数是壳的目标厚度。
+在全部实验中（除非特别说明），默认设置 $\epsilon = 2\%$（相对于输入网格包围盒最长边）。
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_diff_tri.pdf}
+		{
+			\put(5,-1.5){\small $N_f = 238$}
+			\put(30,-1.5){\small $N_f = 274$}
+            \put(55,-1.5){\small $N_f = 418$}
+			\put(80,-1.5){\small $N_f = 428$}
+			\put(10,-5){\small \textbf{(a)}}
+			\put(35,-5){\small \textbf{(b)}}
+			\put(60,-5){\small \textbf{(c)}}
+			\put(85,-5){\small \textbf{(d)}}
+		}
+	\end{overpic}
+	\vspace{6mm}
+	\caption{
+		表示 手 模型的不同三角剖分。(a) 原始网格。(b) 简化网格。(c)-(d) 通过随机边翻转与顶点重定位得到的低质量和噪声剖分。底行展示在相同厚度（$\epsilon = 2\%$）下构造的壳。
+	}
+	\label{fig:diff-tri}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.9\linewidth]{figures/chap3_diff_initial.pdf}
+		{
+			\put(7 ,2.5){\small $N_f = 176$}
+			\put(32,2.5){\small $N_f = 184$}
+			\put(57.5,2.5){\small $N_f = 214$}
+			\put(83,2.5){\small $N_f = 238$}
+			
+			\put(10.5,-1){\small $t = 4$ min}
+			\put(35.5,-1){\small $t = 4$ min}
+			\put(61  ,-1){\small $t = 6$ min}
+			\put(86.7,-1){\small $t = 12$ min}
+
+   			\put(6.3,-4.5){\small $\epsilon_\text{opt} = 3 \epsilon/4$}
+			\put(31.5,-4.5){\small $\epsilon_\text{opt} =  \epsilon/2$}
+			\put(56.8,-4.5){\small $\epsilon_\text{opt} =  \epsilon/5$}
+			\put(82.7,-4.5){\small $\epsilon_\text{opt} = \epsilon/10$}
+		}
+	\end{overpic}
+	\vspace{6mm}
+	\caption{
+ 不同初始化 $\epsilon_\text{opt}$ 的影响。指定厚度 $\epsilon$ 为 $2\%$。
+ 顶行展示壳上 B\'{e}zier 三角网格 $\mT$ 的局部。
+ %The top displays the B\'{e}zier triangular meshes $\mT$ of the shells on the vase handle.
+		% Excessively thick initial shells lead to diminished fitting effectiveness, while overly thin shells result in prolonged processing times.
+	}
+	\label{fig:diff-init}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_diff_zoom.pdf}
+		{
+			\put(4.5,1){\small $N_f = 994$}
+			\put(29.5,1){\small $N_f = 1008$}
+			\put(53.5,1){\small $N_f = 1030$}
+			\put(79.5,1){\small $N_f = 1034$}
+			
+			\put(7.5,-2){\small $t = 18$ min}
+			\put(32.5,-2){\small $t = 12$ min}
+			\put(56.5,-2){\small $t = 12$ min}
+			\put(82.5,-2){\small $t = 12$ min}
+
+   		\put(7,-5){\small $\rho = 1.2$}
+			\put(32,-5){\small $\rho = 1.5$}
+			\put(56,-5){\small $\rho = 3.0$}
+			\put(82,-5){\small $\rho = 5.0$}
+		}
+	\end{overpic}
+	\vspace{7mm}
+	\caption{
+		不同缩放比例 $\rho$ 的影响。指定厚度 $\epsilon$ 为 2\%，且初始线性壳相同。
+  %Larger zoom ratios result in shells with uneven thickness, while smaller ones produce thin and sparsely distributed shells.
+	}
+	\label{fig:diff-zoom-ratio}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.70\linewidth]{figures/chap3_gallery.pdf}
+		{
+			\put(23,50){\small Thingi10k}
+			\put(25,-0.5){\small ABC}
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		高阶壳结果展示。
+	}
+	\label{fig:more-results}
+\end{figure}
+
+%\subsection{Intra-algorithm evaluations}
+\paragraph{不同目标厚度}
+我们在图~\ref{fig:thickness-number} 中测试四种不同厚度，以观察壳厚度与稀疏性之间的关系。
+%
+与直觉一致，更大的厚度会带来更稀疏的壳结构。
+%
+当指定厚度增大到一定程度后，壳中棱柱数量基本稳定。
+这是因为若继续减少棱柱，约束（尤其是双射约束和角度约束）会被破坏。
+
+%In , a direct proportionality between the shell's thickness and its sparsity is observed: a greater thickness corresponds to increased sparsity in the shell's structure. Remarkably, a high-order shell exhibits a small prism count at reduced thicknesses, followed by a gradual decrease in the number of prisms as the shell's thickness further increases.
+
+\paragraph{不同三角剖分}
+在图~\ref{fig:diff-tri} 中，分别在表示同一形状的四种三角剖分上运行算法。
+高质量且平滑的剖分会得到更稀疏的壳，而受扰动、非平滑网格会得到更稠密的壳。
+%
+在不规则且有噪声的网格上，角度约束更容易被违反，因此需要更多棱柱以保证约束始终满足。
+
+%The reason is that, to ensure bijection, it is necessary to maintain that the normals of the triangular facets do not violate the angle condition.
+
+
+
+\paragraph{不同初始线性壳}
+我们使用不同的 $\epsilon_\text{opt}$ 生成不同初始线性壳，并据此构造高阶壳，如图~\ref{fig:diff-init} 所示。
+%We conduct our algorithm under different initial linear shell of different thickness, as shown in Fig.~\ref{fig:diff-init}. 
+从图~\ref{fig:diff-init} 的局部放大可观察到：初始厚度更大的壳由于拟合约束更倾向保留线性形态，而初始线性壳更薄会导致更长计算时间。 % and increased computational duration.
+在实验中，默认选择 $\epsilon_\text{opt} = \epsilon/5$ 以平衡这两方面因素。
+
+
+\paragraph{不同缩放率}
+我们采用不同缩放率 $\rho$ 构造高阶壳，见图~\ref{fig:diff-zoom-ratio}。
+%
+较小缩放率会带来更多轮次和更长时间，得到较薄且分布较稀疏的壳。
+相反，较大缩放率会造成空间不均匀，而耗时相近。
+由于输入线性壳相同，且最终高阶壳棱柱数相近，局部操作次数近似，因此总体耗时相近。
+%todo{why cost similar time?}
+%
+在实验中默认设置 $\rho = 1.5$，以在运行时间与壳质量间取得较好折中。
+
+
+\begin{figure*}[t]
+	\centering
+	\begin{overpic}[width=0.70\linewidth]{figures/chap3_stats.pdf}
+		{
+	        
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		数据集统计结果。
+	}
+	\label{fig:result-stat}
+\end{figure*}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_compare_space.pdf}
+		{
+			%\put(8,-1){\small 0.012}
+			%\put(33,-1){\small 0.015}
+			%\put(57,-1){\small 0.030}
+			%\put(83,-1){\small 0.050}
+			
+			\put(3,-2){\small $N_f = 40274$}
+			\put(29,-2){\small $N_f = 18148$}
+			\put(57,-2){\small $N_f = 1372$}
+			\put(82,-2){\small $N_f = 1318$}
+
+                \put(9.5,-5){\small \textbf{(a)}}
+			\put(35.5,-5){\small \textbf{(b)}}
+			\put(61.5,-5){\small \textbf{(c)}}
+			\put(86.5,-5){\small \textbf{(d)}}   
+		}
+	\end{overpic}
+	\vspace{7mm}
+	\caption{
+给定输入网格 (a)，我们使用文献~\cite{Zhang2022ConstrainedRU} 在不使用壳结构的情况下进行重网格化得到新网格 (b)，并将 Hausdorff 距离约束在 0.1\% 以内。
+我们以 $\epsilon = 1\%$ 分别构造线性壳和高阶壳。
+ 然后将重网格化结果放入线性壳 (c) 和高阶壳 (d) 中。
+ %The remeshed mesh. (c)-(d) The remeshed mesh in linear shell and our high-order shell.  mesh, with the maximum Hausdorff distance being 0.1\%. We employe shells of 1\% thickness for both linear and higher-order shells. 
+ (c) 中局部放大显示该重网格网格与线性壳发生了相交。 % preventing a bijective mapping with the input.
+	}
+	\label{fig:good-union-space}
+\end{figure}
+
+%\begin{figure}[t]
+%\t\centering
+%\t\begin{overpic}[width=0.99\linewidth]{figures/chap3_diff_thick.pdf}
+%\t	{
+%\t		\put(11,-3){\small 0.05}
+%\t		\put(36,-3){\small 0.02}
+%\t		\put(60,-3){\small 0.005}
+%\t		\put(86,-3){\small 0.002}
+%\t	}
+%\t\end{overpic}
+%\t\vspace{1.5mm}
+%\t\caption{
+%\t\treach the specified number of vertices, different target number of vertices.
+%\t}
+%\t\label{fig:diff-remeshing}
+%\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_compare_linear.pdf}
+		{
+		 \put(8,-3.5){\small 原始}
+		 \put(42,-3.5){\small 线性壳~\cite{Jiang2020BijectivePI}}
+		 \put(83,-3.5){\small 本文方法}
+		}
+	\end{overpic}
+	\vspace{6mm}
+	\caption{
+	在同一重网格结果上与线性壳~\cite{Jiang2020BijectivePI} 的对比。
+	我们分别在两种壳内计算投影，并将新网格上的距离场传回原始网格。
+	线性壳中的双射投影在高曲率区域不够光滑。
+	}
+	\label{fig:cmp-linear}
+\end{figure}
+
+
+
+
+
+%\begin{figure}[t]
+%	\centering
+%	\begin{overpic}[width=0.69\linewidth]{figures/chap3_compare_more.pdf}
+%		{
+%			\put(7,52.5){\small 原始}
+%			\put(28,52.5){\small 线性壳~\cite{Jiang2020BijectivePI}}
+%			\put(60,52.5){\small 本文方法}
+%			
+%			\put(30,34.5){\small 原始}
+%			\put(26,16.5){\small 线性壳~\cite{Jiang2020BijectivePI}}
+%			\put(32,-1){\small 本文方法}
+%		}
+%	\end{overpic}
+%	\vspace{2mm}
+%	\caption{
+%		在两个模型上与线性壳~\cite{Jiang2020BijectivePI} 的对比。 %We execute a remeshing process on the input mesh to create new meshes, and subsequently, we project the solutions back onto the original mesh. This is done through the application of linear and high-order shell projections, respectively.
+%		两种方法采用相同厚度，即 $\epsilon = 2\%$。
+%	}
+%	\label{fig:more-cmp-linear}
+%\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.70\linewidth]{figures/chap3_camp_err.pdf}
+		{			
+			%\put(20,1){\small $N_f=648$}
+			%\put(72,1){\small $N_f=26392$}
+		}
+	\end{overpic}
+	\vspace{-2mm}
+	\caption{
+		与线性壳~\cite{Jiang2020BijectivePI} 在计算误差上的对比。
+	}
+	\label{fig:cmp-error}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap3_cmp_time.pdf}
+		{			
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		与线性壳~\cite{Jiang2020BijectivePI} 在耗时上的对比。
+	}
+	\label{fig:cmp-time}
+\end{figure}
+\paragraph{鲁棒性测试}
+我们在前述数据集上测试算法鲁棒性。
+全部网格均成功生成高阶壳。
+图~\ref{fig:more-results} 展示了 Thingi10K \cite{Zhou2016Thingi10KAD} 的 17 个代表性样例与 ABC \cite{Koch2018ABCAB} 的 16 个代表性样例。
+我们在图~\ref{fig:result-stat} 中报告了耗时与高阶壳棱柱数量统计。
+在 Thingi10k 与 ABC 数据集中，生成的棱柱数量分别约为输入三角形数量的 5\% 与 2\%。
+
+\paragraph{耗时}
+%and up to 16.6 hours for the largest model.
+%\tr{The generation and optimization of the shell takes 10 minutes and 52 seconds on average,  50\% of the meshes finish in 4 minutes and 10 seconds and 75\% in 10 minutes and 22 seconds. The generation of linear shell takes 21\% of the total time on average. Totally, the time almost linearly increase as the size of the input mesh increase.}
+
+
+我们收集了 Thingi10k 与 ABC 数据集的运行时间。
+构造高阶壳平均耗时 652 秒；50\% 的网格在 250 秒内完成，75\% 的网格在 622 秒内完成。
+线性壳生成阶段平均占总时间的 21\%。
+%
+对于图~\ref{fig:pipeline} 中 $N_f=12592$ 的 松鼠模型，构造高阶壳耗时 401.98 秒；对于图~\ref{fig:thickness-number} 中来自 Thingi10k 的 ID.78481 模型（$N_f=596736$），耗时 2911.22 秒。
+对 松鼠 模型，边塌缩、边翻转、几何优化、棱柱缩放耗时占比分别为 66.78\%、0.30\%、27.35\%、5.57\%。
+对于 Thingi10k 的 ID.78481 模型，上述四类操作耗时占比分别为 47.89\%、0.30\%、42.37\%、9.44\%。
+% \todo{two detailed examples: }
+% \tr{In the high order shell construction process,  }
+% \tr{The time almost linearly increases as the size of the input mesh increases.}
+
+在耗时方面，本文方法不具备与线性壳构造~\cite{Jiang2020BijectivePI} 的竞争力。
+但本文在高阶壳中获得了光滑双射投影，这对多类应用有帮助（图~\ref{fig:proxy}、\ref{fig:boolean} 和~\ref{fig:Dis_map}）。
+
+\paragraph{与线性壳~\cite{Jiang2020BijectivePI} 的比较}
+我们从壳构造与属性传递两个方面与 线性壳 进行比较。
+其中，定量误差与耗时比较分别见图~\ref{fig:cmp-error} 和图~\ref{fig:cmp-time}。
+%
+我们在生成线性壳与高阶壳时使用相同厚度参数。
+%\tr{Given that the target thickness is the sole user-controlled parameter for both the linear shell and our higher-order shell, we consistently apply this identical target thickness for direct comparison.}
+%\todo{how to generate the linear shell and high-order shell? using the same thickness?}
+
+%\todo{shell space}
+如图~\ref{fig:Space} 所示，我们与 线性壳 在壳空间均匀性上进行比较。输入网格到本文高阶壳的距离分布更均匀。
+%
+若一个网格未在高阶壳或线性壳内进行重网格化，则无法保证重网格后网格满足双射条件；然而，更均匀的高阶壳空间有助于形成双射，如图~\ref{fig:good-union-space} 所示。
+
+%\tr{We conducted a comparison with Jiang's work regarding the uniformity of the shell space, as depicted in Figure 3. From an application perspective, neither our shell structure nor Jiang's can guarantee that any remeshed mesh, if not utilizing the shell, meets the bijectivity condition. However, a shell space characterized by greater uniformity can aid in ensuring that the remeshed mesh directly conforms within the shell. This is further illustrated in Figure \ref{fig:good-union-space}.}
+
+我们分别使用线性壳投影与高阶壳投影，将属性从同一源传递到同一目标（图~\ref{fig:cmp-linear}），以及从不同源（分别在高阶壳与线性壳中重网格得到）传递到共同目标。
+%我们分别使用线性壳投影与高阶壳投影，将属性从同一源传递到同一目标（图~\ref{fig:cmp-linear}），以及从不同源（分别在高阶壳与线性壳中重网格得到）传递到共同目标（图~\ref{fig:more-cmp-linear}）。
+若源网格属性平滑且对应目标网格平滑，本文的投影可得到平滑的属性像。
+
+%\todo{transferring attributes}
+%\tr{We use the projection in linear shell and high order shell to transfer attributes from identical source to the same target (Fig.~\ref{fig:cmp-linear}), and from distinct sources (meshes remeshed in the linear shell and high-order shell, respectively) to a common target (Fig.~\ref{fig:more-cmp-linear}). 
+%As long as the attributes in the source mesh and corresponding target mesh are smooth, our projection can derive a smooth image of the attributes. }
+
+%\todo{Experimental setting, including sampling...}
+%\paragraph*{Implementation Details}
+%\tb{
+	
+%\tWe test our method with various input 3D shapes.
+%\tOur method is implemented in Python, and all of our experiments were performed on a desktop PC with a 4.2 GHz Intel Core i7-7700K processor with 32GB memory and a Nvidia GTX 1080Ti GPU.
+%We select the wrapping-based method~\cite{ion2020shape} and the edge-oriented method~\cite{zhao2022developability} as the competitors.
+
+%In the linear shell construction proposed by Jiang, it is typically observed that the thickness of the shell is directly proportional to its sparsity: the thicker the shell, the more sparse its structure. However, there is a threshold beyond which further increases in shell thickness do not result in increased sparsity. For curved shells, this limit is reached at a relatively smaller thickness.
+
+
+
+\section{本章小结}\label{sec:conclusion}
+本章围绕壳空间内的光滑双射投影问题，提出了一种高阶壳表示及其实用构造算法。我们以高阶三角棱柱为基本单元，在壳内构造连续向量场，并据此定义两张曲面之间的双射投影。围绕这一目标，本章给出了 \Bezier 三角面与双线性侧面的几何构造方式、壳内投影的可判定双射条件，以及基于边塌缩、几何优化、边翻转和棱柱缩放的迭代构造流程。实验结果表明，该方法能够在 8300 余个模型上稳定生成高阶壳，并在重网格化属性回传、布尔相关应用与位移贴图等任务中取得良好效果。与线性壳相比，本文方法得到的投影更光滑，壳空间分布也更均匀。
+
+当前方法仍主要面向无自交、可定向且流形的输入网格，且在壳空间均匀性的理论保证与构造效率方面仍有进一步优化空间。

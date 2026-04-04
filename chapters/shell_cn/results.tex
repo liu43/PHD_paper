@@ -1,0 +1,372 @@
+﻿\section{实验与评估}\label{sec:results}
+我们在包含 8300 余个模型的两个数据集上测试了算法性能。
+两个数据集由 Thingi10K~\cite{Zhou2016Thingi10KAD} 子集与 ABC~\cite{Koch2018ABCAB} 构成，且每个网格均满足：流形、无自交、可定向。
+我们的方法以 C++ 实现，所有实验在台式机上完成，硬件配置为 4.00 GHz Intel Core i7-4790K 与 16 GB 内存。
+%
+本算法唯一的用户可控参数是壳的目标厚度。
+在全部实验中（除非特别说明），默认设置 $\epsilon = 2\%$（相对于输入网格包围盒最长边）。
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{diff_tri}
+		{
+			\put(5,-1.5){\small $N_f = 238$}
+			\put(30,-1.5){\small $N_f = 274$}
+            \put(55,-1.5){\small $N_f = 418$}
+			\put(80,-1.5){\small $N_f = 428$}
+			\put(10,-5){\small \textbf{(a)}}
+			\put(35,-5){\small \textbf{(b)}}
+			\put(60,-5){\small \textbf{(c)}}
+			\put(85,-5){\small \textbf{(d)}}
+		}
+	\end{overpic}
+	\vspace{1.5mm}
+	\caption{
+		表示 Hand 模型的不同三角剖分。(a) 原始网格。(b) 简化网格。(c)-(d) 通过随机边翻转与顶点重定位得到的低质量和噪声剖分。底行展示在相同厚度（$\epsilon = 2\%$）下构造的壳。
+	}
+	\label{fig:diff-tri}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.9\linewidth]{diff_initial}
+		{
+			\put(7 ,2.5){\small $N_f = 176$}
+			\put(32,2.5){\small $N_f = 184$}
+			\put(57.5,2.5){\small $N_f = 214$}
+			\put(83,2.5){\small $N_f = 238$}
+			
+			\put(10.5,-1){\small $t = 4$ min}
+			\put(35.5,-1){\small $t = 4$ min}
+			\put(61  ,-1){\small $t = 6$ min}
+			\put(86.7,-1){\small $t = 12$ min}
+
+   			\put(6.3,-4.5){\small $\epsilon_\text{opt} = 3 \epsilon/4$}
+			\put(31.5,-4.5){\small $\epsilon_\text{opt} =  \epsilon/2$}
+			\put(56.8,-4.5){\small $\epsilon_\text{opt} =  \epsilon/5$}
+			\put(82.7,-4.5){\small $\epsilon_\text{opt} = \epsilon/10$}
+		}
+	\end{overpic}
+	\vspace{1.5mm}
+	\caption{
+ 不同初始化 $\epsilon_\text{opt}$ 的影响。指定厚度 $\epsilon$ 为 $2\%$。
+ 顶行展示壳上 B\'{e}zier 三角网格 $\mT$ 的局部。
+ %The top displays the B\'{e}zier triangular meshes $\mT$ of the shells on the vase handle.
+		% Excessively thick initial shells lead to diminished fitting effectiveness, while overly thin shells result in prolonged processing times.
+	}
+	\label{fig:diff-init}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{diff_zoom}
+		{
+			\put(4.5,1){\small $N_f = 994$}
+			\put(29.5,1){\small $N_f = 1008$}
+			\put(53.5,1){\small $N_f = 1030$}
+			\put(79.5,1){\small $N_f = 1034$}
+			
+			\put(7.5,-2){\small $t = 18$ min}
+			\put(32.5,-2){\small $t = 12$ min}
+			\put(56.5,-2){\small $t = 12$ min}
+			\put(82.5,-2){\small $t = 12$ min}
+
+   		\put(7,-5){\small $\rho = 1.2$}
+			\put(32,-5){\small $\rho = 1.5$}
+			\put(56,-5){\small $\rho = 3.0$}
+			\put(82,-5){\small $\rho = 5.0$}
+		}
+	\end{overpic}
+	\vspace{1.5mm}
+	\caption{
+		不同缩放比例 $\rho$ 的影响。指定厚度 $\epsilon$ 为 2\%，且初始线性壳相同。
+  %Larger zoom ratios result in shells with uneven thickness, while smaller ones produce thin and sparsely distributed shells.
+	}
+	\label{fig:diff-zoom-ratio}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{gallery}
+		{
+			\put(23,50){\small Thingi10k}
+			\put(25,-0.5){\small ABC}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		高阶壳结果展示。
+	}
+	\label{fig:more-results}
+\end{figure}
+
+%\subsection{Intra-algorithm evaluations}
+\paragraph{不同目标厚度}
+我们在图~\ref{fig:thickness-number} 中测试四种不同厚度，以观察壳厚度与稀疏性之间的关系。
+%
+与直觉一致，更大的厚度会带来更稀疏的壳结构。
+%
+当指定厚度增大到一定程度后，壳中棱柱数量基本稳定。
+这是因为若继续减少棱柱，约束（尤其是双射约束和角度约束）会被破坏。
+
+%In , a direct proportionality between the shell's thickness and its sparsity is observed: a greater thickness corresponds to increased sparsity in the shell's structure. Remarkably, a high-order shell exhibits a small prism count at reduced thicknesses, followed by a gradual decrease in the number of prisms as the shell's thickness further increases.
+
+\paragraph{不同三角剖分}
+在图~\ref{fig:diff-tri} 中，我们在表示同一形状的四种三角剖分上运行算法。
+高质量且平滑的剖分会得到更稀疏的壳，而受扰动、非平滑网格会得到更稠密的壳。
+%
+在不规则且有噪声的网格上，角度约束更容易被违反，因此需要更多棱柱以保证约束始终满足。
+
+%The reason is that, to ensure bijection, it is necessary to maintain that the normals of the triangular facets do not violate the angle condition.
+
+
+
+\paragraph{不同初始线性壳}
+我们使用不同的 $\epsilon_\text{opt}$ 生成不同初始线性壳，并据此构造高阶壳，如图~\ref{fig:diff-init} 所示。
+%We conduct our algorithm under different initial linear shell of different thickness, as shown in Fig.~\ref{fig:diff-init}. 
+从图~\ref{fig:diff-init} 的局部放大可观察到：初始厚度更大的壳由于拟合约束更倾向保留线性形态，而初始线性壳更薄会导致更长计算时间。 % and increased computational duration.
+在实验中，我们默认选择 $\epsilon_\text{opt} = \epsilon/5$ 以平衡这两方面因素。
+
+
+\paragraph{不同缩放率}
+我们采用不同缩放率 $\rho$ 构造高阶壳，见图~\ref{fig:diff-zoom-ratio}。
+%
+较小缩放率会带来更多轮次和更长时间，得到较薄且分布较稀疏的壳。
+相反，较大缩放率会造成空间不均匀，而耗时相近。
+由于输入线性壳相同，且最终高阶壳棱柱数相近，局部操作次数近似，因此总体耗时相近。
+%todo{why cost similar time?}
+%
+在实验中我们默认设置 $\rho = 1.5$，以在运行时间与壳质量间取得较好折中。
+
+
+\begin{figure*}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{stats}
+		{
+	        %ABC
+			\put(4,22){\footnotesize $10^{3}$}
+			\put(16.5,22){\footnotesize $10^{4}$}
+			\put(29.3,22){\footnotesize $10^{5}$}
+			\put(42,22){\footnotesize $10^{6}$}
+			
+			\put(2,26.5){\footnotesize $10^{2}$}
+			\put(2,31.5){\footnotesize $10^{3}$}
+			\put(2,36.5){\footnotesize $10^{4}$}
+			\put(2,40.5){\footnotesize $10^{5}$}
+			
+			\put(4,1){\footnotesize $10^{3}$}
+			\put(16.5,1){\footnotesize $10^{4}$}
+			\put(29.3,1){\footnotesize $10^{5}$}
+			\put(42,1){\footnotesize $10^{6}$}
+			
+			\put(2,6){\footnotesize $10^{2}$}
+			\put(2,10){\footnotesize $10^{3}$}
+			\put(2,14){\footnotesize $10^{4}$}
+			\put(2,19){\footnotesize $10^{5}$}
+			
+			\put(22,20.5){\footnotesize 输入 $N_f$}
+			\put(22,-0.5){\footnotesize 输入 $N_f$}
+                \put(22.5,-3){\small ABC}
+			
+			\put(0,10){\footnotesize \rotatebox{90}{时间(秒)}}
+			\put(0,28){\footnotesize \rotatebox{90}{输出 $N_f$}}
+			%Think
+			\put(59,22){\footnotesize $10^{1}$}
+                \put(65.9,22){\footnotesize $10^{2}$}
+                \put(72.8,22){\footnotesize $10^{3}$}
+                \put(79.7,22){\footnotesize $10^{4}$}
+                \put(86.6,22){\footnotesize $10^{5}$}
+                \put(93.5,22){\footnotesize $10^{6}$}
+                
+                \put(53,27){\footnotesize $10^{2}$}
+                \put(53,31.5){\footnotesize $10^{3}$}
+                \put(53,36){\footnotesize $10^{4}$}
+                \put(53,40.5){\footnotesize $10^{5}$}
+                
+                \put(59,1){\footnotesize $10^{1}$}
+                \put(65.9,1){\footnotesize $10^{2}$}
+                \put(72.8,1){\footnotesize $10^{3}$}
+                \put(79.7,1){\footnotesize $10^{4}$}
+                \put(86.6,1){\footnotesize $10^{5}$}
+                \put(93.5,1){\footnotesize $10^{6}$}
+                
+                \put(53,5){\footnotesize $10^{1}$}
+                \put(53,8.5){\footnotesize $10^{2}$}
+                \put(53,12){\footnotesize $10^{3}$}
+                \put(53,15.5){\footnotesize $10^{4}$}
+                \put(53,19){\footnotesize $10^{5}$}
+                
+                \put(75,20.5){\footnotesize 输入 $N_f$}
+                \put(75,-0.5){\footnotesize 输入 $N_f$}
+                \put(74,-3){\small Thingi10k}
+                
+                \put(51,10){\footnotesize \rotatebox{90}{时间(秒)}}
+                \put(51,28){\footnotesize \rotatebox{90}{输出 $N_f$}}
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		数据集统计结果。
+	}
+	\label{fig:result-stat}
+\end{figure*}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{compare_space}
+		{
+			%\put(8,-1){\small 0.012}
+			%\put(33,-1){\small 0.015}
+			%\put(57,-1){\small 0.030}
+			%\put(83,-1){\small 0.050}
+			
+			\put(3,-2){\small $N_f = 40274$}
+			\put(29,-2){\small $N_f = 18148$}
+			\put(57,-2){\small $N_f = 1372$}
+			\put(82,-2){\small $N_f = 1318$}
+
+                \put(9.5,-5){\small \textbf{(a)}}
+			\put(35.5,-5){\small \textbf{(b)}}
+			\put(61.5,-5){\small \textbf{(c)}}
+			\put(86.5,-5){\small \textbf{(d)}}   
+		}
+	\end{overpic}
+	\vspace{1.5mm}
+	\caption{
+ 给定输入网格 (a)，我们使用~\cite{Zhang2022ConstrainedRU} 在不使用壳结构的情况下进行重网格化得到新网格 (b)，并将 Hausdorff 距离约束在 0.1\% 以内。
+ 我们以 $\epsilon = 1\%$ 分别构造线性壳和高阶壳。
+ 然后将重网格化结果放入线性壳 (c) 和高阶壳 (d) 中。
+ %The remeshed mesh. (c)-(d) The remeshed mesh in linear shell and our high-order shell.  mesh, with the maximum Hausdorff distance being 0.1\%. We employe shells of 1\% thickness for both linear and higher-order shells. 
+ (c) 中局部放大显示该重网格网格与线性壳发生了相交。 % preventing a bijective mapping with the input.
+	}
+	\label{fig:good-union-space}
+\end{figure}
+
+%\begin{figure}[t]
+%\t\centering
+%\t\begin{overpic}[width=0.99\linewidth]{diff_thick}
+%\t	{
+%\t		\put(11,-3){\small 0.05}
+%\t		\put(36,-3){\small 0.02}
+%\t		\put(60,-3){\small 0.005}
+%\t		\put(86,-3){\small 0.002}
+%\t	}
+%\t\end{overpic}
+%\t\vspace{1.5mm}
+%\t\caption{
+%\t\treach the specified number of vertices, different target number of vertices.
+%\t}
+%\t\label{fig:diff-remeshing}
+%\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{compare_more}
+		{
+            \put(7,52.5){\small 原始}
+			\put(28,52.5){\small~\cite{Jiang2020BijectivePI}}
+			\put(60,52.5){\small 本文}
+  
+			\put(30,34.5){\small 原始}
+			\put(26,16.5){\small~\cite{Jiang2020BijectivePI}}
+			\put(32,-1){\small 本文}
+		}
+	\end{overpic}
+	\vspace{-2mm}
+	\caption{
+		在两个模型上与线性壳~\cite{Jiang2020BijectivePI} 的对比。 %We execute a remeshing process on the input mesh to create new meshes, and subsequently, we project the solutions back onto the original mesh. This is done through the application of linear and high-order shell projections, respectively.
+  两种方法采用相同厚度，即 $\epsilon = 2\%$。
+	}
+	\label{fig:more-cmp-linear}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{camp_err}
+		{			
+			%\put(20,1){\small $N_f=648$}
+			%\put(72,1){\small $N_f=26392$}
+		}
+	\end{overpic}
+	\vspace{-2mm}
+	\caption{
+		与线性壳~\cite{Jiang2020BijectivePI} 在计算误差上的对比。
+	}
+	\label{fig:cmp-error}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{blank}
+		{			
+			\put(20,1){\small $N_f=648$}
+			\put(72,1){\small $N_f=26392$}
+		}
+	\end{overpic}
+	\vspace{-2mm}
+	\caption{
+		与线性壳~\cite{Jiang2020BijectivePI} 在耗时上的对比。
+	}
+	\label{fig:cmp-time}
+\end{figure}
+\paragraph{鲁棒性测试}
+我们在前述数据集上测试算法鲁棒性。
+全部网格均成功生成高阶壳。
+图~\ref{fig:more-results} 展示了 Thingi10K \cite{Zhou2016Thingi10KAD} 的 17 个代表性样例与 ABC \cite{Koch2018ABCAB} 的 16 个代表性样例。
+我们在图~\ref{fig:result-stat} 中报告了耗时与高阶壳棱柱数量统计。
+在 Thingi10k 与 ABC 数据集中，我们生成的棱柱数量分别约为输入三角形数量的 5\% 与 2\%。
+
+\paragraph{耗时}
+%and up to 16.6 hours for the largest model.
+%\tr{The generation and optimization of the shell takes 10 minutes and 52 seconds on average,  50\% of the meshes finish in 4 minutes and 10 seconds and 75\% in 10 minutes and 22 seconds. The generation of linear shell takes 21\% of the total time on average. Totally, the time almost linearly increase as the size of the input mesh increase.}
+
+
+我们收集了 Thingi10k 与 ABC 数据集的运行时间。
+构造高阶壳平均耗时 652 秒；50\% 的网格在 250 秒内完成，75\% 的网格在 622 秒内完成。
+线性壳生成阶段平均占总时间的 21\%。
+%
+对于图~\ref{fig:pipeline} 中 $N_f=12592$ 的 Squirrel 模型，构造高阶壳耗时 401.98 秒；对于图~\ref{fig:thickness-number} 中来自 Thingi10k 的 ID.78481 模型（$N_f=596736$），耗时 2911.22 秒。
+对 Squirrel 模型，边塌缩、边翻转、几何优化、棱柱缩放耗时占比分别为 66.78\%、0.30\%、27.35\%、5.57\%。
+对于 Thingi10k 的 ID.78481 模型，上述四类操作耗时占比分别为 47.89\%、0.30\%、42.37\%、9.44\%。
+% \todo{two detailed examples: }
+% \tr{In the high order shell construction process,  }
+% \tr{The time almost linearly increases as the size of the input mesh increases.}
+
+在耗时方面，我们的方法不具备与线性壳构造~\cite{Jiang2020BijectivePI} 的竞争力。
+但我们在高阶壳中获得了光滑双射投影，这对多类应用有帮助（图~\ref{fig:proxy}、\ref{fig:boolean} 和~\ref{fig:Dis_map}）。
+
+\paragraph{与~\cite{Jiang2020BijectivePI} 的比较}
+我们从壳构造与属性传递两个方面与 LienarShell 进行比较。
+作者友好地提供了参考实现。
+%
+我们在生成线性壳与高阶壳时使用相同厚度参数。
+%\tr{Given that the target thickness is the sole user-controlled parameter for both the linear shell and our higher-order shell, we consistently apply this identical target thickness for direct comparison.}
+%\todo{how to generate the linear shell and high-order shell? using the same thickness?}
+
+%\todo{shell space}
+如图~\ref{fig:Space} 所示，我们与 LienarShell 在壳空间均匀性上进行比较。输入网格到我们高阶壳的距离分布更均匀。
+%
+若一个网格未在高阶壳或线性壳内进行重网格化，我们无法保证重网格后网格满足双射条件；然而，更均匀的高阶壳空间有助于形成双射，如图~\ref{fig:good-union-space} 所示。
+
+%\tr{We conducted a comparison with Jiang's work regarding the uniformity of the shell space, as depicted in Figure 3. From an application perspective, neither our shell structure nor Jiang's can guarantee that any remeshed mesh, if not utilizing the shell, meets the bijectivity condition. However, a shell space characterized by greater uniformity can aid in ensuring that the remeshed mesh directly conforms within the shell. This is further illustrated in Figure \ref{fig:good-union-space}.}
+
+我们分别使用线性壳投影与高阶壳投影，将属性从同一源传递到同一目标（图~\ref{fig:cmp-linear}），以及从不同源（分别在高阶壳与线性壳中重网格得到）传递到共同目标（图~\ref{fig:more-cmp-linear}）。
+若源网格属性平滑且对应目标网格平滑，我们的投影可得到平滑的属性像。
+
+%\todo{transferring attributes}
+%\tr{We use the projection in linear shell and high order shell to transfer attributes from identical source to the same target (Fig.~\ref{fig:cmp-linear}), and from distinct sources (meshes remeshed in the linear shell and high-order shell, respectively) to a common target (Fig.~\ref{fig:more-cmp-linear}). 
+%As long as the attributes in the source mesh and corresponding target mesh are smooth, our projection can derive a smooth image of the attributes. }
+
+%\todo{Experimental setting, including sampling...}
+%\paragraph*{Implementation Details}
+%\tb{
+	
+%\tWe test our method with various input 3D shapes.
+%\tOur method is implemented in Python, and all of our experiments were performed on a desktop PC with a 4.2 GHz Intel Core i7-7700K processor with 32GB memory and a Nvidia GTX 1080Ti GPU.
+%We select the wrapping-based method~\cite{ion2020shape} and the edge-oriented method~\cite{zhao2022developability} as the competitors.
+
+%In the linear shell construction proposed by Jiang, it is typically observed that the thickness of the shell is directly proportional to its sparsity: the thicker the shell, the more sparse its structure. However, there is a threshold beyond which further increases in shell thickness do not result in increased sparsity. For curved shells, this limit is reached at a relatively smaller thickness.
+

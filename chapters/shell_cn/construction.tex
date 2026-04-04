@@ -1,0 +1,323 @@
+﻿\section{高阶壳构造} \label{sec:construction}
+\subsection{问题与方法}
+\paragraph{输入与目标}
+输入包括一个无自交、可定向、流形三角网格 $\mI$ 以及指定厚度 $\epsilon$。
+我们的目标是在以下约束下生成有效的高阶壳 $\cS$：
+\begin{enumerate}
+  \item \emph{包围约束}：$\mI$ 被 $\cS$ 的上表面 $\mT$ 包围，且 $\cS$ 的下表面 $\mB$ 被 $\mI$ 包围；
+  \item \emph{角度约束}：在 $\mI$ 上任意点处，$\mI$ 的表面法向与向量 \tr{$\cF$} 的夹角不大于 $\pi/2$；
+  \item \emph{厚度约束}：每个棱柱长度不大于 $\epsilon$。
+\end{enumerate}
+包围约束和角度约束是实现 $\mI$ 与 $\cS$ 内其他网格之间双射属性传递的前提。
+%
+此外还包含三个优化目标：
+\begin{enumerate}
+  \item \emph{角度目标}：\tr{$\cF$ 在 $\mI$ 任意点处的方向尽可能接近 $\mI$ 的表面法向方向；}
+  \item \emph{复杂度目标}：$\cS$ 的棱柱数量尽可能少；
+  \item \emph{质量目标}：每个 B\'{e}zier 三角形具有较高质量指标。
+\end{enumerate}
+角度目标用于尽可能减小沿向量场进行属性传递时产生的偏差。
+复杂度目标用于提高属性传递效率。
+我们在实验中发现，质量目标有助于减少棱柱数量和棱柱长度。
+
+%Our algorithm converts a self-intersection free, orientable, manifold triangle mesh \( \mathcal{T} = \{V_{\mathcal{T}}, F_{\mathcal{T}}\} \), where \( V_{\mathcal{T}} \) are the vertex coordinates and \( F_{\mathcal{T}} \) the connectivity of the mesh, into a shell composed of generalized prisms \( S = \{ (B_{S}, M_{S}, T_{S}), F_{S} \} \), where \( B_{S}, M_{S}, T_{S} \) are bottom, middle, and top surfaces of the shell, consisting of bottom, middle, and top Bezier triangles of the prisms, and \( F_{S} \) is the connectivity of the prisms.
+
+%\todo{list the Constraints and objectives}
+
+\paragraph{流程}
+由于约束与目标之间彼此限制且强耦合，同时充分满足约束并达到目标具有挑战性。
+%
+为此，我们采用内点策略以保证约束被满足（图~\ref{fig:pipeline} 和算法~\ref{alg:shell-construct}）。
+%
+具体而言，我们先初始化一个满足硬约束的壳 $\cS$。
+随后迭代施加局部操作，对壳 $\cS$ 进行优化，直到达到指定厚度。
+在优化过程中，若某个局部操作会导致任一约束被违反，则拒绝该操作。
+我们使用四类局部操作（图~\ref{fig:local-operation}）：边塌缩、棱柱几何优化、边翻转和棱柱缩放。
+%
+
+%\tr{Interior-point strategy}: To satisfy the hard constraints, we use the interior-point method. We already have a valid initial cage from the first phase. During optimization,a local remeshing operation will be rejected if it causes an invalid cage, i.e., the resulting cage is non-manifold, contains self-intersections, or does not enclose the input mesh.
+%We iteratively apply three types of local operations, i.e., edge collapse, edge fl ip, and vertex relocation, as shown in Alg. 1.
+
+
+\IncMargin{0.5em}
+\begin{algorithm}[t]
+  \caption{壳构造}\label{alg:shell-construct}
+  \newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+  \SetCommentSty{mycommfont}
+  \SetKwInOut{AlgoInput}{输入}
+  \SetKwInOut{AlgoOutput}{输出}
+  \SetKwFunction{RC}{CollapseEdges}
+  \SetKwFunction{OP}{OptimizePrismGeometries}
+  \SetKwFunction{FL}{FlipEdges}
+  \SetKwFunction{ZM}{ZoomPrisms}
+
+  \AlgoInput{ 三角网格 $\mI$ 和指定厚度 $\epsilon$}
+  \AlgoOutput{ 粗高阶壳 $\mS$}
+
+  \Repeat {满足任一终止条件}
+  {
+    \tcc{为降低复杂度，执行边塌缩}
+    $\mS \leftarrow$ \RC($\mS$)\;
+    \tcc{为降低能量，优化棱柱几何}
+    $\mS \leftarrow$ \OP($\mS$)\;
+    \tcc{为降低能量，执行边翻转}
+    $\mS \leftarrow$ \FL($\mS$)\;
+    \tcc{为改变厚度，执行棱柱缩放}
+    $\mS \leftarrow$ \ZM($\mS$)\;
+  }
+\end{algorithm}
+\DecMargin{0.5em}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{local_operation2}
+		{			
+			\put(18.5,35){\small 塌缩}
+			\put(37,18){\small 缩放}
+			\put(61,20){\small 翻转}
+			\put(69,36){\small 优化}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		局部操作示意图。
+	}
+	\label{fig:local-operation}
+\end{figure}
+
+\subsection{算法细节}
+
+\paragraph{变量}
+依据第~\ref{sec:construct-from-L} 节的构造方法，当线性三角网格 $\mL$、向量 $\{\md\}$ 以及定义在顶点上的厚度 $\epsilon^{+}, \epsilon^{-}$ 已确定后，即可构造高阶壳 $\cS$。
+%
+此外，在实际构造上/下 B\'{e}zier 三角面时，我们对每个顶点都设置 $\epsilon^{+} = \|\md\|_2$。
+%
+因此，在内点策略中需要优化的变量仅包括 $\mL$、向量和厚度 $\epsilon^{-}$。
+
+\paragraph{构造 \Bezier 三角面}
+%All the local operations described below directly change the middle surface, and consequently affect the extruded shell. After every operation, the middle surface is recomputed by intersecting $\mathcal{T}$ with the edges of the prisms in $\mathcal{S}$.
+%\tr{goal?}
+给定线性三角网格 $\mL$ 与向量后，我们通过曲面拟合构造中层 \Bezier 三角面。
+计算单个中层 \Bezier 三角面 $\mt_\text{middle}$ 的步骤如下：
+\begin{enumerate}
+  \item 在 \(\mt_{\text{linear}}\) 上均匀采样 \( \ms_i, i = 1, \ldots, m \)，并记 $\ms_i$ 的重心坐标为 $\mathbf{u}_i$。
+  \item 将每个样本 $\ms_i$ 沿向量 $\md(\ms_i)$（由~\eqref{equ:vector-bc} 计算）投影到输入网格 \(\mI\) 上，得到目标点 \( \mx_i\)。
+  \item 记从参数域 $\mt_\text{para}$ 到中层 \Bezier 三角面 $\mt_\text{middle}$ 的映射为 $\phi_\text{middle}$。通过求解下式得到 $\phi_\text{middle}$：
+      \begin{equation}\label{equ:fitting}
+		\min_{\{\mp_{\text{mid}}\}} \sum_{i=1}^{m} \left\| \mx_i - \phi_\text{middle}(\mathbf{u}_i) \right\|_2^2 \,\, \text{s.t.} \,\, \eqref{equ:edge-control-1} \text{ being satisfied},
+	\end{equation}
+其中 \( \{\mp_{\text{mid}}\}\) 为定义 $\phi_\text{middle}$ 的 $\mt_\text{middle}$ 控制点。
+由于 $\phi_\text{middle}(\mathbf{u}_i)$ 是控制点的线性函数，问题~\eqref{equ:fitting} 是仅含线性等式约束的二次规划，易于求解。
+\end{enumerate}
+%\tr{We generate samples \( \ms_i, i = 1, \ldots, m \) on \(\mt_{\text{linear}}\) and project each sample $\ms_i$ along the vectors to onto \(\mT\) to derive its target point \( \mt_i\). Subsequently, \( s_i \) is mapped onto \(\mM(s_i)\), which is the value of the middle B茅zier map on the barycentric coordinates of \( s_i \) in \(\mt_{\text{linear}}\). Utilizing these mapped points, we solve the following problem:
+%\t\begin{equation}
+%\t\t\min_{\mp_{\text{mid}}} \sum_{i=1}^{m} \left\| s_i - \mM(s_i) \right\|^2 \quad \text{subject to} \quad (\ref{equ:edge-control-1}) \text{ being satisfied},
+%\t\end{equation}
+%\twhere \( \mp_{\text{mid} }\) are the control points of \(\mM\). Given that \(\mM(s_i)\) is a linear function of \( \mp_{\text{mid} }\), this formulation leads to a constrained quadratic optimization problem.
+%}
+%
+确定中层 \Bezier 三角面后，我们采用第~\ref{sec:construct-from-L} 节方法构造上层和下层 \Bezier 三角面。对上/下 \Bezier 三角面的中心控制点我们不施加额外约束。为保证空间更均匀，我们将其相对中层 \Bezier 三角面的位移设置为其余 9 个控制点平均位移。
+
+\paragraph{目标函数}
+我们将优化目标与约束编码为能量函数：
+\begin{equation}\label{equ:enenrgy}
+	E = E_{\text{angle}} + E_{\text{quality}} + E_\text{constraint}.
+\end{equation}
+其中，使用输入网格 $\mI$ 上向量与法向之间的夹角定义 $E_{\text{angle}}$：
+\begin{equation}\label{equ:angle}
+ E_{\text{angle}} = \frac{1}{N_t} \sum_{\mt_{\text{linear}} \in \mL} \frac{1}{m} \sum_{i=1}^{m} \sin^2 \angle (d(\ms_i), \mn(\mx_i))),
+\end{equation}
+其中 $\ms_i$ 继承用于中层 \Bezier 三角面拟合的采样点，$\mn(\mx_i)$ 表示 $\mx_i$ 处法向，$N_t$ 为线性网格 $\mL$ 的三角形数量。
+%where $\mn(s_i)$ is the normal of the triangle of $\mT$ on which \(t(s_i)\) is located, and $N_t$ indicates the number of triangles in $\mM$.
+%
+我们使用二维 MIPS 共形能量定义质量指标 $E_{\text{quality}}$：
+\begin{equation}\label{equ:quality}
+\begin{split}
+  E_{\text{MIPS}}(\mathbf{u}) &= \|J(\mathbf{u})\|_F \|J(\mathbf{u})^{-1}\|_F \\
+  E_{\text{quality}} &= \sum_{\mt_\text{middle} \in \mM}  \int_{\mt_\text{para}} E_{\text{MIPS}}^2(\mathbf{u})) d \mathbf{u},
+\end{split}
+\end{equation}
+其中 $J(\mathbf{u})$ 为 $\phi_\text{middle}$ 在 $\mathbf{u}$ 处的雅可比矩阵，$\|\cdot\|_F$ 表示 Frobenius 范数。
+由于 $\phi_\text{middle}$ 是嵌入三维空间中的二维映射，我们在切平面上计算 $J(\mathbf{u})$，其为 $2 \times 2$ 矩阵。
+随后通过数值积分近似计算 $E_{\text{quality}}$。
+关于计算 $J(\mathbf{u})$ 与 $E_\text{quality}$ 的更多细节见补充材料。
+这里仅使用中层 \Bezier 三角面 $\mt_\text{middle} \in \mM$ 评估 $E_{\text{quality}}$，因为按我们的构造方法，上层和下层与中层形态相近。
+%
+%\begin{equation}
+%\tE =\sum_{t \in \mM}A_t E_{\text{mips}}^T + \lambda_t A_t E_{\text{angle}}^T
+%\end{equation}
+$E_\text{constraint}$ 是用于避免违反任意约束的势垒函数。
+\begin{equation}\label{equ:constraint}
+    E_\text{constraint} =
+    \begin{cases}
+        0,      &\text{if no constraints is violated;}  \\
+	 	\infty, &\text{otherwise.}
+    \end{cases}
+\end{equation}
+
+\paragraph{初始化}
+由于~\cite{Jiang2020BijectivePI} 可稳健且高效地生成线性壳，我们采用其方法以初始厚度 $\epsilon_\text{init}$ 生成稠密线性壳，再进一步优化到厚度 $\epsilon_\text{opt}$。
+在实验中设 $\epsilon_\text{init} = \epsilon/10$，$\epsilon_\text{opt} = \epsilon/5$。
+%In~\cite{Jiang2020BijectivePI}, they robustly generated linear bijective shells. Their construct of a linear bijective hull can also be interpreted as a curved hull if the pillars extending upward and downward from each point are of equal size. Owing to their method's robustness and efficiency, we employ their generation technique to initially create a thin linear shell as our starting point.
+我们将优化后线性壳的中层表面初始化为 $\mL$。
+向量初始化为该线性壳中层顶点到上层顶点的向量。
+厚度 $\epsilon^{-}$ 初始化为中层顶点到下层顶点的距离。
+%At each vertex $\mv$ of $\mL$, the vector $\md$ is from the
+%We initialize $\cS$ by elevating each triangle of the optimized linear shell to the desired order $n$ without changing the geometries.
+%\tr{vector field: direction + length?? linear mesh $\mt_\text{linear}$?? positive and negative thickness?}
+我们并不使用第~\ref{sec:construct-from-L} 节方法重新构造上/中/下 B\'{e}zier 三角面，而是直接将优化后线性壳的每个三角面升阶至目标阶数 $n$ 且不改变其几何形状。
+这种初始化满足所有约束。
+
+%The partial derivatives of the energy with respect to the vertex positions \( \mv \) and the normals \( \md \) are:
+%\[
+%\frac{\partial E}{\partial \mv} \approx \frac{\partial E_{\text{mips}}}{\partial \mv},
+% \frac{\partial E}{\partial \md} \approx \frac{\partial E_{\text{angle}}}{\partial \md} .
+%\]
+%
+%Specifically, the derivative of \( E_{\text{mips}} \) with respect to a vertex is:
+%\begin{equation}
+%\t\frac{\partial E_{\text{mips}}(\xi)}{\partial \mv} = \sum_{i=1}^{10} \frac{\partial E_{\text{mips}}(\xi)}{\partial \mp_i} \cdot \frac{\partial \mp_i}{\partial \mv},
+%\end{equation}
+%where \( \mp_i \) are the control points.
+%
+%\begin{equation}
+%\t\frac{\partial E_{\text{angle}}}{\partial \md} = \sum_{s_i \in N(v)} \frac{\partial E_{\text{angle}}(s_i)}{\partial \md},
+%\end{equation}
+%According to Prospotion 1, we yield the following weights:
+%\[
+%\t\frac{\partial p_i}{\partial v}= \{1,2/3, 1/3, 0, 2/3, 0,0, 1/3, 0, 0\}.
+%\]
+%This leads to the final weights for the optimization.
+
+\paragraph{棱柱几何优化}
+我们在不改变某顶点厚度 $\epsilon^{-}$ 的前提下，优化该顶点向量 $\md$ 与其在 $\mI$ 上的位置 $\mv$，以更新棱柱并降低目标函数值。
+%
+当 $\md$ 和 $\mv$ 变化时，我们先构造三张 \Bezier 三角面，再评估目标函数。
+%
+因此目标函数对 $\md$ 与 $\mv$ 不可导。
+为此，我们采用进化算法，即差分进化算法~\cite{Neri2010advance,Das2011Differential}，该算法已在~\cite{Zhang2022ConstrainedRU} 的顶点重定位中成功应用。
+%
+该优化逐顶点进行。
+
+\tr{在边翻转和边塌缩过程中，Bezier 元的新控制点是如何初始化的？}
+\paragraph{边塌缩}
+我们通过边塌缩降低复杂度。
+%
+当塌缩 $\mL$ 的一条边并生成新顶点后，新顶点厚度 $\epsilon^{-}$ 采用平均值，\tr{随后构造 B\'{e}zier 三角面}，并通过差分进化算法优化新顶点的向量与位置。
+%After we collapse an edge of $\mL$ to generate a new vertex, the thickness $\epsilon^{-}$ of the new vertex is averaged, and the vector and the position of the new vertex are optimized via the differential evolution algorithm.
+%
+如果找不到满足全部约束的解，则拒绝该边塌缩操作。
+否则，无论 $E_{\text{angle}} + E_{\text{quality}}$ 是否增大，都接受该操作。
+%\todo{only consider constraints without angle and quality objectives, using smoothing to reduce angle and quality objectives}
+在一轮塌缩中，中层曲面 $\mM$ 的曲边越短，其在线性网格 $\mL$ 上对应边的塌缩优先级越高。
+
+% \tr{in ascending order of the lengths of the curved edges of $\mM$}
+
+\paragraph{边翻转}
+我们通过边翻转降低目标函数。 % \tr{following a descending order of the lengths of curved edges of $\mM$}.
+%
+尽管翻转 $\mL$ 的一条边后向量、位置与厚度不变，但网格连接关系会更新。
+因此我们重新构造新的 \Bezier 三角面以评估目标函数。
+若目标函数降低，则接受该翻转；否则不执行翻转。
+%\todo{order???}
+在一轮翻转中，中层曲面 $\mM$ 的曲边越长，其在线性网格 $\mL$ 上对应边的翻转优先级越高。
+
+
+%\paragraph{Optimization}
+%During shell optimization, we perform local operations (Figure 11) on a valid shell to reduce its complexity and increase the quality. Before applying every operation, we check the validity of the operation to ensure that: (1) the resulting middle surface will be manifold \cite{Dey et al. 1999} and (2) the shell will be valid with respect to $\mathcal{T}$ (to
+%ensure a bijective projection). We forbid any operation that does not pass these checks. We would like to remark that, while there are different choices to guide the shell modification, we experimentally discovered that allowing shell simplification and optimization consistently leads to thicker shells with a richer space of sections.
+%
+%Our local operations (satisfying the definition of $\mathcal{O}$ in Theorem 3.7) are translated from surface remeshing methods \citep{Dunyach et al. 2013} since our shell can be regarded as a triangle mesh (middle surface) extruded through a displacement field $\mathcal{N}$. All the local operations described below directly change the middle surface, and consequently affect the extruded shell. After every operation, the middle surface is recomputed by intersecting $\mathcal{T}$ with the edges of the prisms in $\mathcal{S}$.
+
+%\paragraph{Energy Optimization}
+% \begin{figure}[t]
+% 	\centering
+% 	\begin{overpic}[width=0.99\linewidth]{normal_opt}
+% 		{
+% 			%\put(72,-3){\small Ours}
+% 			%\put(19,0){\scriptsize $N = 24$}
+% 		}
+% 	\end{overpic}
+% 	\vspace{1.5mm}
+% 	\caption{
+% 		We visualize the angles between the input triangle mesh and the vector field in the shell. 
+%   Using locally optimal normals, the vector field forms large angles with the input mesh (middle). After optimizing vertex positions and normals, the angles decrease (right).
+% 	}
+% 	\label{fig:opt-normal}
+% \end{figure}
+
+\paragraph{棱柱缩放}
+%\todo{change the lengths of the vectors, check constraints?}
+我们逐步放大向量与厚度，直到向量长度和厚度达到给定厚度 $\epsilon$。
+%
+对于顶点 $\mv_i$，我们计算临时向量 $$\md_{\text{temp},i} = \frac{\rho}{N_i} \sum_{\mv_j \in \Omega(\mv_i)} \md_j$$ 和临时厚度 $$\epsilon^{-}_{\text{temp},i} = \frac{\rho}{N_i} \sum_{\mv_j \in \Omega(\mv_i)} \epsilon^{-}_j,$$ 其中 $\Omega(\mv_i)$ 表示 $\mv_i$ 的一环邻域顶点集合，$N_i$ 为其中元素个数，$\rho > 1$ 为放大比例。
+%
+若 $\md_{\text{temp},i}$ 的长度大于 $\epsilon$，则令 $\md_{\text{temp},i} \leftarrow \epsilon \md_{\text{temp},i}/\|\md_{\text{temp},i}\|_2$。
+类似地，若 $\epsilon^{-}_{\text{temp},i}  > \epsilon$，则令 $\epsilon^{-}_{\text{temp},i}  \leftarrow \epsilon$。
+%
+使用 $\md_{\text{temp},i}$ 和 $\epsilon^{-}_{\text{temp},i} $ 构造三张 \Bezier 三角面。
+若任一约束被违反，则拒绝该放大操作；否则将 $\mv_i$ 的向量（或厚度）更新为 $\md_{\text{temp},i}$（或 $\epsilon^{-}_{\text{temp},i}$）。
+%
+%\todo{order???}
+在一轮缩放中，我们遍历线性网格 $\mL$ 的全部顶点并逐个执行该操作。
+%
+在实验中设置 $\rho = 1.5$。
+
+
+\paragraph{包围约束检查}
+为保证 $\mS$ 的上下表面包围且不与 $\mI$ 相交，我们检查上/下 \Bezier 三角面凸包与 $\mI$ 的相交情况。
+%
+若检测到相交，则执行自适应细分以细化对应 \Bezier 三角面。
+在实验中，我们设置最大细分次数为 3。
+%
+若达到最大细分次数后仍存在相交，则返回包围约束被违反；否则认为包围约束未被违反。
+%\todo{convex hull}
+
+\paragraph{法向检查}
+为保证角度约束不被违反，我们按如下流程检查。
+首先构造包围 $\cP$ 的八面体，以加速角度条件验证。
+%
+该八面体是三角形 $\triangle\mt_1\mt_2\mt_3$ 与 $\triangle\mb_1\mb_2\mb_3$ 的凸包，其中 $\mt_i=\mv_i+t^+ \md_i, \mb_i=\mv_i-t^- \md_i, i=1,2,3$。
+我们迭代增大 $t^+$ 与 $t^-$，使上、下 \Bezier 三角面均被该凸包包围。 %$\triangle\mt_1\mt_2\mt_3$ and $\triangle\mb_1\mb_2\mb_3$}.
+%
+随后找出 $\mI$ 中位于该八面体内或与之相交的三角形。这些三角形覆盖了棱柱内部可能出现的三角形。
+%
+最后分别检查这些三角形法向与 $\md_i,i=1,2,3$ 的夹角。
+由于 $\cF$ 是对 $\md_i$ 的重心插值，三角形法向与 $\cF$ 的夹角受上述检查角度控制。
+
+\paragraph{终止条件}
+当无法继续执行任何局部操作，或迭代轮数达到上限时终止算法；实验中该上限设为 30。
+
+\subsection{变体}
+\paragraph{奇异点}
+\tr{当两条以上棱线汇聚时会形成奇异点，即 $\mI$ 上不满足约束 (2) 的顶点。与~\cite{Jiang2020BijectivePI} 类似，我们扩展定义以允许这些奇异点处厚度为零。由此在存在奇异点时，棱柱结构会退化：一个奇异点时退化为棱锥，两个奇异点时退化为四面体，这两种情形都自然满足条件 (2)。}
+\paragraph{含自交输入}
+\tr{无自交要求是保证任意两张满足命题(~\ref{prop:bijective}) 的网格之间存在双射的必要条件。若放弃该双射性要求，我们的方法可扩展以处理含自交网格。}
+	
+\tr{若 $\mI$ 存在自交，我们的算法可直接调整为生成保持局部单射的壳。此时映射在沉浸意义下仍为双射。为此需修改约束 (1)：将全局相交检测替换为局部三角片重叠检测。}
+%\paragraph{Acceleration}
+%\todo{How to ensure that the constraint will not be violated?}
+%
+%In the process of generating shells in Jiang2020's linear shell method and our proposed shell method, determining which triangles of the input mesh are within the shell and checking their normals is time-consuming, especially when the input mesh has a large number of triangles, due to the extensive intersection checks involved. However, we can initially generate an extremely thin layer of linear shell near the input mesh. During the generation of this linear shell, we can record the angle perturbations between the triangles of the input mesh and the intermediate triangles of the linear shell. In subsequent operations, we no longer consider the input triangular mesh, but instead use the upper and lower surfaces of the linear shell as spatial proxies, and the normals of the intermediate triangles of the shell, with added perturbations, as proxies for the normals of the input triangles. It is important to note that at the initial generation, the perturbation of the normals is set to zero, and the spatial proxy perturbation corresponds to the initial thickness.
+%
+%The selection of the threshold for the perturbation angle needs to balance simplification while not significantly impacting subsequent operations. In our experiments, we have chosen a threshold of 5 degrees. It is important to note that the perturbation of the angle is solely for the purpose of approximation and not for simplification. Therefore, for parts with sharp angles, the resulting perturbed angle can be zero degrees.
+%
+%This approach offers two significant advantages. Firstly, it reduces the number of triangles that need to be checked. Secondly, it alleviates the need to handle extremely large or elongated triangles from the input mesh that would span across multiple shells. Now, these can be disregarded in the processing phase.
+
+%\begin{figure}[t]
+%\t\centering
+%\t\begin{overpic}[width=0.99\linewidth]{Nfaces}
+%\t	{
+%\t		\put(11,-3){\small 0.05}
+%\t		\put(36,-3){\small 0.02}
+%\t		\put(60,-3){\small 0.005}
+%\t		\put(86,-3){\small 0.002}
+%\t	}
+%\t\end{overpic}
+%\t\vspace{1.5mm}
+%\t\caption{
+%\t	acceleration.
+%\t}
+%\t\label{fig:acceleration}
+%\end{figure}
+

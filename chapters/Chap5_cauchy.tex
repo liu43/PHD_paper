@@ -1,0 +1,103 @@
+\chapter{笼空间中的解析的高阶柯西坐标}
+
+% ===== Chapter 5 macros =====
+\providecommand{\Bezier}{B\'{e}zier }
+\providecommand{\tr}[1]{#1}
+\providecommand{\tb}[1]{#1}
+\providecommand{\todo}[1]{}
+\providecommand{\argmin}{\mathop{\mathrm{arg\,min}}\limits}
+\providecommand{\argmax}{\mathop{\mathrm{arg\,max}}\limits}
+\providecommand{\res}{\mathop{\mathrm{Res}}}
+\providecommand{\re}{\mathop{\mathrm{Re}}}
+\providecommand{\im}{\mathop{\mathrm{Im}}}
+
+\makeatletter
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{prop}{%
+  \@ifundefined{theorem}{%
+    \newtheorem{prop}{Proposition}[chapter]%
+  }{%
+    \newtheorem{prop}[theorem]{Proposition}%
+  }%
+}{}
+\makeatother
+
+\def \ma {\mathbf{a}}
+\def \me {\mathbf{e}}
+\def \mb {\mathbf{b}}
+\def \mc {\mathbf{c}}
+\def \md {\mathbf{d}}
+\def \mf {\mathbf{f}}
+\def \mg {\mathbf{g}}
+\def \mh {\mathbf{h}}
+\def \mi {\mathbf{i}}
+\def \mj {\mathbf{j}}
+\def \mk {\mathbf{k}}
+\def \ml {\mathbf{l}}
+\def \mm {\mathbf{m}}
+\def \mn {\mathbf{n}}
+\def \mo {\mathbf{o}}
+\def \mp {\mathbf{p}}
+\def \mq {\mathbf{q}}
+\def \mr {\mathbf{r}}
+\def \ms {\mathbf{s}}
+\def \mt {\mathbf{t}}
+\def \muu {\mathbf{u}}
+\def \mv {\mathbf{v}}
+\def \mw {\mathbf{w}}
+\def \mx {\mathbf{x}}
+\def \my {\mathbf{y}}
+\def \mz {\mathbf{z}}
+
+\section{概述}\label{sec:chap5-cauchy-overview}
+本章从笼空间中的映射问题出发。与壳空间映射不同，笼空间映射以笼边界围成的控制域为定义域，需要将边界上的控制量稳定传播到内部区域，因此其关键在于构造兼具插值性、线性精确性与良好形变质量的坐标函数。笼坐标为这一类问题提供了统一表述：用户只需在边界上给定稀疏约束，即可将其传播到整个内部区域。由于具有直观的边界控制能力，这类方法已被广泛用于二维形状变形、图像着色和艺术编辑等任务。现有笼坐标大致可分为两类：一类通过边界顶点值的加权组合实现插值，如均值坐标、正均值坐标与调和坐标~\cite{Floater2003,Hormann2006,Lipman2007,Joshi2007}；另一类进一步引入边界导数信息，如 Green 坐标与 Cauchy 坐标~\cite{Lipman2008,Weber2009}。其中，Green 坐标与 Cauchy 坐标在二维情形下都与保角形变密切相关，因此在形状保持方面具有明显优势。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{figures/chap4_teaser.pdf}
+		{
+			\put(10,20){\small 输入}
+			\put(75,21){\small 输入}
+			\put(15,2){\small 变形后}
+			\put(70,-2){\small 变形后}
+		}
+	\end{overpic}
+	\vspace{4mm}
+	\caption{
+		利用本文坐标及其导数进行变形。上排为输入图像与三次笼，下排分别为基于笼的变形与点到点变形。
+	}
+	\label{fig:cau-teaser}
+\end{figure}
+
+当笼空间映射面对具有明显曲边特征的输入形状时，线性笼往往需要大量边段才能贴合轮廓，这不仅削弱了交互操控的直观性，也容易影响边界附近的形变光滑性。近年来，三次均值坐标、多项式 Green 坐标和多项式 Cauchy 坐标等工作开始支持将初始直边笼推广为高阶多项式曲线~\cite{Li2013,MichelThiery2023,Lin2024PolynomialCC}。沿着这一思路，本文关注由多项式曲线组成的输入笼，并将其称为高阶笼。与线性笼相比，高阶笼能够更紧密地逼近原始形状，以更少的参数表达边界；同时，多项式边界与 CAD 中常见的自由形状设计方式更一致，更适合作为直接的编辑界面；此外，高阶笼诱导的变形在边界附近也更光滑。
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.95\linewidth]{figures/chap4_compare_cagenew.pdf}
+		{
+			\put(46,68){\small 线性笼}
+			\put(47,63){\small 72 段}
+			\put(46,47){\small 线性笼}
+			\put(46,41.5){\small 120 段}
+			\put(46,24){\small 三次笼}
+			\put(47,18){\small 24 段}
+		}
+	\end{overpic}
+	\vspace{2mm}
+	\caption{
+		使用线性输入笼与高阶输入笼的变形对比。在线性笼下，需要大量边段才能包围复杂曲边形状；而高阶输入笼只需更少控制量即可产生更自然的变形。
+	}
+	\label{fig:cau-cmp-cages}
+\end{figure}
+
+在笼空间映射中，Cauchy 坐标尤其适用于强调角度保持与光滑传播的编辑任务。尽管已有工作将 Cauchy 坐标推广到高阶笼~\cite{Lin2024PolynomialCC}，但其仍需借助中间线性笼，并通过数值方式计算从中间笼到输入笼映射的逆映射。这带来两个问题：其一，坐标及其导数缺乏闭式表达，难以直接支持点到点变形；其二，高阶输入笼需要满足较强且不够直观的几何约束，因此难以处理任意有效的高阶包围边界。围绕这一问题，本章给出二维高阶笼上的 Cauchy 坐标及其导数的闭式形式。核心在于将相关积分转化为有理多项式积分，并结合对数函数与留数定理构造可计算的解析表达；同一积分框架还可扩展到高阶笼上的 Green 坐标。
+
+接下来，\S~\ref{sec:cau-method} 节给出高阶笼上的 Cauchy 坐标推导、闭式解、扩展与实现细节，\S~\ref{sec:cau-results} 节展示其在基于笼变形和点到点变形中的效果与对比实验。
+
+\input{chapters/chap4_cn/cauchy_method}
+\input{chapters/chap4_cn/cauchy_results}
+
+
+\section{本章小结}\label{sec:chap5-cauchy-conclusion}
+本章提出了一种定义在高阶输入笼上的二维 Cauchy 坐标及其导数的闭式解析方法。为实现这一目标，我们从 Cauchy 变换出发，将由多项式曲线组成的高阶笼纳入统一的坐标框架，并将坐标计算转化为有理多项式积分的解析求值。基于对数函数与留数定理，我们给出了坐标及其导数的闭式表达，同时说明了同一积分框架向高阶 Green 坐标扩展的方式。实验结果表明，本文方法能够支持基于笼的交互式变形与点到点变形，在保持保角特性的同时获得更光滑、更贴合边界且更符合编辑意图的变形结果；与线性笼及已有相关方法相比，本文方法在高阶输入笼场景下具有更好的几何适应性与实用性。

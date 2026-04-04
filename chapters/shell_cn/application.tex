@@ -1,0 +1,197 @@
+﻿\section{高阶壳中的属性传递}
+
+\paragraph{高阶壳内的重网格化}
+当在已构造的高阶壳 $\mS$ 中对输入网格 $\mI$ 进行重网格化以生成新网格 $\mR$ 时，需要满足两个硬约束：
+\begin{enumerate}
+  \item 新网格 $\mR$ 位于高阶壳 $\mS$ 内部。
+  \item 在 $\mR$ 上任意点处，$\mR$ 的三角面法向与高阶壳向量场之间的夹角小于 $\pi/2$。
+\end{enumerate}
+%\tr{other remeshing methods???}
+为保证这两个约束始终成立，我们将 $\mR$ 初始化为输入网格 $\mI$，随后执行边塌缩、边分裂、边翻转、顶点重定位等重网格操作，并通过显式检查拒绝任何导致约束违背的操作。
+%
+第一个约束可由本文提出的包围约束检查来保证。
+%
+%When computing the angle to check the second constraint, we need to know the vector at any point on $\mR$ (see the next paragraph). 
+第二个约束可通过本文提出的法向检查来保证。
+%
+在实践中，我们将 $\mL$ 的边在中点处细分，从而在一个棱柱内部构造四个子棱柱。
+%
+由于这种细分后向量场保持不变，因此可在这些子棱柱上应用所提出的法向检查。
+%
+三个向量能够对子棱柱内的向量场给出更紧的界定，从而使重网格后三角形在法向上拥有更大的自由度。
+
+%\tr{the vector changes on a triangle of $\mR$? how to check?}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{proxy}
+		{
+			%\put(72,-3){\small Thing10i}
+			%\put(19,-3){\small ABC}
+		}
+	\end{overpic}
+	\vspace{-3.5mm}
+	\caption{
+		在低质量输入网格（左上）上应用 heat method~\cite{Crane2012GeodesicsIH} 会得到不光滑的距离场（右上）。
+  该距离场与精确离散测地距离~\cite{mitchell1987discrete}（上中）存在明显偏差。
+  我们在高阶壳内部对输入网格进行重网格化（左中），得到高质量网格（左下）。
+  随后在高质量网格上用 heat method 计算距离场（下中），并利用双射投影将其传回输入网格（右下）。投影后的距离场更接近精确结果。
+	}
+	\label{fig:proxy}
+\end{figure}
+
+\paragraph{向量查询}
+在属性传递中，一个基础操作是在棱柱 $\cP$ 内给定点 $\mp$ 处查询向量 $\md$。
+%
+点 $\mp$ 将落在一条射线上，即 $\mp = \mv + t \md$，其中点 $\mv$ 位于线性三角形 $\mt_{\text{linear}}$ 上，$t$ 为参数。
+%
+由于我们通过重心坐标插值定义向量场，只要确定 $\mv$ 相对于 $\mt_{\text{linear}}$ 的重心坐标 $(u_1, u_2, u_3)$，即可得到 $\md = u_1 \md_1+u_2 \md_2+ u_3 \md_3$。
+%
+计算 $(u_1, u_2, u_3)$ 被称为逆重心映射问题，相关方法见~\cite{Maggiordomo2023TheIB}。
+%
+具体地，我们先通过求解一个三次方程来计算 $t$，使得点 $\mp$ 位于由顶点 $\mv_1+ t \md_1$、$\mv_2+ t \md_2$ 与 $\mv_3 + t \md_3$ 构成的三角形上。
+%
+在我们的问题中，该方程的根满足如下命题。
+\begin{prop}\label{prop:vector-query}
+  若 $\mp$ 位于棱柱 $\cP$ 内部，且 $\cP$ 满足双射条件（命题~\ref{prop:bijective}），则该三次方程仅存在一个实根 $t_\text{real}$，并且 $\mp$ 位于三角形 $\triangle\mp_1\mp_2\mp_3$ 内，其中 $\mp_j = \mv_j + t_\text{real} \md_j, j=1,2,3$。 %s.t.
+  进一步地，当 $\left\langle\mv_2-\mv_1,\mv_3-\mv_1,\md-\mv_1\right\rangle>0$ 时，$t_\text{real}$ 是该三次方程中最小的正实根；反之，\( t_{\text{real}} \) 是最大的负实根。
+ % \tr{just one real root?}
+\end{prop}
+\begin{proof}
+由于 $\cP$ 满足双射条件，我们可在 $\mt_{\text{linear}}$ 上找到点 $v$，使得 $\md(\mv) = u_1 \md_1+u_2 \md_2+ u_3 \md_3$ 命中点 $\mp$，这表明按命题所述三次方程至少存在一个实根 $t$。若还能在 $\mt_{\text{linear}}$ 内找到另一个 $\tilde{v}$，则 $\cF$ 在 $\mp$ 处不再单射，与条件矛盾。
+
+由对称性，下面仅证明当 $\left\langle\mv_2-\mv_1,\mv_3-\mv_1,\md-\mv_1\right\rangle>0$ 时，$t_\text{real}$ 是该三次方程最小的正实根。设存在 $\tilde{t}_{\text{real}}>0$ 且 $\tilde{t}_{\text{real}}<t_{\text{real}}$，考虑函数 $a(t)=\left \langle \mp_2-\mp_1,\mp_3-\mp_1,\md(\mv)\right \rangle$，它是关于 $t$ 的二次函数。我们有 $a(0)>0,a(t_{\text{real}})=0,a(\tilde{t}_{\text{real}})=0$，从而 $a(t)<0$ 对于 $t\in (\tilde{t}_{\text{real}},t_{\text{real}})$ 成立。根据命题~\ref{prop:bijective}，这将导致等参数变换非双射，产生矛盾。
+\end{proof}
+$\mp$ 关于 $\triangle\mp_1\mp_2\mp_3$ 的重心坐标即为 $(u_1, u_2, u_3)$。
+
+
+\paragraph{棱柱定位}
+另一个基础操作是为给定点 $\mp$ 定位其所在棱柱。
+我们提出一种由粗到细的策略。
+在粗阶段，我们先将高阶壳 $\mS$ 的 \Bezier 三角面控制网细分 3 次以形成线性壳。
+随后使用~\cite{Jiang2020BijectivePI} 的方法定位一个棱柱 $\cP$。
+%
+由于细分网格只是 $\mS$ 的近似，当 $\mp$ 接近 $B$ 时，粗阶段在相邻棱柱之间可能返回错误棱柱。
+因此在细阶段，我们在 $\cP$ 中对 $\mp$ 执行向量查询。若处于错误棱柱中，则根据命题~\ref{prop:bijective} 的保证，将无法得到命题~\ref{prop:vector-query} 所述的根。随后转向相邻棱柱进行查询，该棱柱会根据命题~\ref{prop:vector-query} 仅产生一个实根。
+%Thus, in the fine step, we perform vector queries for $\mp$ in $\cP$ and its neighbor prisms. Then, we return the prism that produces only one real root according to Proposition~\ref{prop:vector-query}.
+
+%\tr{To quickly determine which prism contains the point $\mp$, we establish a linear tetrahedral framework amongst $\mT$, $\mM$ and $\mB$. The specific approach involves subdividing each Bezier triangle 3 times, and for the resulting linear mesh, we generate the corresponding tetrahedral mesh using the method proposed by~\cite{Jiang2020BijectivePI}. Although this method is not exact when $\mp$ is very close to $\mB$, according to Theorem 5, we can determine which prism the point is in by a calculation.}
+%
+%\tr{Forward and Inverse Projection}
+%In the shell space, we define a continuous vector field through barycentric coordinate interpolation.
+%The forward and inverse Projection are given by the projection of the vector field and the negative vector field.
+%
+%We need to determine the value of the vector field at each point
+%$\mathbf{p}$ within the shell. For any point $\mathbf{p}$, it will be hit by a ray.
+%
+%\begin{equation}
+%	\mathbf{p} = \mathbf{v} + t \mathbf{d}.
+%\end{equation}
+%
+%Given $\mathbf{p}$, to determine the barycentric coordinates of $\mathbf{v}$ with respect to this shell, known as the inverse barycentric mapping problem, is addressed in ~\cite{Maggiordomo2023TheIB}. The proposed solution first finds a value of \( t \) such that the point \( \mathbf{p} \) lies within the triangle formed by vertices $\mathbf{v}_0+t \mathbf{d}_0 $,$\mathbf{v}_1+t \mathbf{d}_1 $ and $\mathbf{v}_2+t \mathbf{d}_2 $,  which is a problem of finding the roots of a cubic equation.
+%Then \( \mathbf{p} \)'s barycentric coordinates within the triangle is the solution.
+
+%In our case, we always first determine whether point
+%$\mathbf{p}$ is above or below the triangle
+%$T$, and then choose the sign of
+%$\mathbf{d}$ accordingly. Afterward, we only need to consider the smallest positive value of
+%$t$ to determine whether
+%$\mathbf{p}$ is on the triangle, and thus, whether
+%$\mathbf{p}$ is inside the prism. If there are other values of $t$ that place
+%$\mathbf{p}$ inside the triangle, it would imply that the vector field intersects at point $\mathbf{p}$, which is not permissible.
+
+%\subsection{Predicates and functions}
+%Using our shell \( S \), we implement the following predicates and functions:
+%\begin{itemize}
+%	\item \texttt{is\_inside(p)}: returns true if the point \( p \in \mathbb{R}^3 \) is inside \( S \).
+%	\item \texttt{is\_section}(\( \mathcal{T} \)): returns true if the triangle mesh \( \mathcal{T} \) is a section of \( S \).
+%	\item \( \mathcal{P}(p) \): returns the prism id (\( \text{pid} \)), the barycentric coordinates (\( \alpha, \beta \)) in the corresponding triangle of the middle surface, and the relative offset distance from the middle surface (\( h \), which is -1 for the bottom surface, and 1 for the top surface) of the projection of the point \( p \).
+%	\item \( \mathcal{P}^{-1}(\text{pid}, \alpha, \beta, h) \) is the inverse of \( \mathcal{P}(p) \).
+%	\item \( \mathcal{P}_T(\text{tid}, \alpha, \beta) = \mathcal{P}(q) \), where \( q \) is the point in the triangle \text{tid} of the mesh \( \mathcal{T} \), with barycentric coordinates \( \alpha, \beta \).
+%	\item \( \mathcal{P}_T^{-1}(\text{pid}, \alpha, \beta) \) is the inverse of \( \mathcal{P}_T \).
+%\end{itemize}
+%
+%Given the unique characteristics of the curved shell, additional clarification regarding the operations performed therein is warranted:
+
+%\tr{To quickly determine which prism contains the point $\mp$, we establish a linear tetrahedral framework amongst $\mT$, $\mM$ and $\mB$. The specific approach involves subdividing each Bezier triangle 3 times, and for the resulting linear mesh, we generate the corresponding tetrahedral mesh using the method proposed by~\cite{Jiang2020BijectivePI}. Although this method is not exact when $\mp$ is very close to $\mB$, according to Theorem 5, we can determine which prism the point is in by a calculation.}
+
+
+\paragraph{应用}
+当上述工具就绪后，我们即可在高阶壳中，对满足命题~\ref{prop:projection} 的两张曲面实现双射属性传递。
+与~\cite{Jiang2020BijectivePI} 类似，我们展示三类应用，如图~\ref{fig:proxy}、\ref{fig:boolean} 和 \ref{fig:Dis_map} 所示。
+
+\tr{此外，我们的高阶壳也支持高阶单元仿真。由于高阶壳的中层表面是 Bezier 三角网格，我们可以采用~\cite{Khanteimouri20233Dbezier} 的算法生成用于仿真的高阶四面体网格，并利用壳内双射映射将属性传回。}
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{boolean}
+		{
+			%\put(72,-3){\small Thing10i}
+			%\put(19,-3){\small ABC}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		我们在高阶壳内对两个网格并集进行重网格化，同时保持双射对应关系，颜色传递结果对此进行了可视化展示。
+	}
+	\label{fig:boolean}
+\end{figure}
+%\paragraph{Displacement Mapping}
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{displace}
+		{
+			\put(7,1){\small \textbf{(a)}}
+                \put(34,1){\small \textbf{(b)}}
+                \put(62.5,1){\small \textbf{(c)}}
+		}
+	\end{overpic}
+	\vspace{-3mm}
+	\caption{
+		高阶壳中的投影与用于定义位移贴图的 Phong 投影~\cite{Kobbelt1998InteractiveMM} 相似。
+  我们对 $\mM$ 的 \Bezier 三角面进行细分（b）以形成新网格。
+  然后沿向量场将新网格的细分点投影到输入网格（a）上。
+  输入网格的细节被编码为新网格上的位移贴图（c）。
+	}
+	\label{fig:Dis_map}
+\end{figure}
+
+
+\begin{figure}[t]
+\centering
+\begin{overpic}[width=0.99\linewidth]{app_vector}
+	{			
+		\put(13,-2){\small $N_f=648$}
+		\put(74,-2){\small $N_f=26392$}
+	}
+\end{overpic}
+\vspace{-1mm}
+\caption{
+	\tr{我们先在简化网格上运行 Globally-Optimal Direction Fields ~\cite{Knoppel:2013:GOD} 得到光滑向量场，再利用双射投影将该向量场传递到原始网格。}
+}
+\label{fig:app_vector}
+\end{figure}
+%\paragraph{High Order Meshing} 
+
+
+\begin{figure}[t]
+	\centering
+	\begin{overpic}[width=0.99\linewidth]{diff_thick}
+		{
+			\put(8.3,-5.5){\small $\epsilon = 2\%$}
+			\put(33.3,-5.5){\small $\epsilon = 0.5\%$}
+			\put(58.3,-5.5){\small $\epsilon = 0.2\%$}
+			\put(82.6,-5.5){\small $\epsilon = 0.02\%$}
+			
+			\put(5.6,-2){\small $N_f = 566$}
+			\put(30.6,-2){\small $N_f = 626$}
+			\put(55.6,-2){\small $N_f = 864$}
+			\put(79.6,-2){\small $N_f = 3810$}
+		}
+	\end{overpic}
+	\vspace{1.5mm}
+	\caption{
+		壳厚度与单元数量 $N_f$ 之间的关系。
+	}
+	\label{fig:thickness-number}
+\end{figure}

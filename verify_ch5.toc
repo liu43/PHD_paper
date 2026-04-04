@@ -1,0 +1,162 @@
+\contentsline {chapter}{\numberline {第1章}绪论}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}包围几何}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}包围几何内的映射}{4}{section.1.2}%
+\contentsline {section}{\numberline {1.3}高阶包围几何内的映射构造目标}{5}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}壳结构内的光滑映射}{5}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}笼结构内的光滑映射}{6}{subsection.1.3.2}%
+\contentsline {subsubsection}{\numberline {1.3.2.1}在高阶壳/笼上构造光滑、可验证且高效的映射}{6}{subsubsection.1.3.2.1}%
+\contentsline {section}{\numberline {1.4}本文内容与结构安排}{7}{section.1.4}%
+\contentsline {chapter}{\numberline {第2章}预备知识与相关工作}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}预备知识}{8}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}壳空间与双射投影}{8}{subsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.1.1}线性壳与高阶壳：等参映射与向量场约束}{8}{subsubsection.2.1.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}笼编辑与广义重心坐标}{9}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}复变函数与留数定理}{11}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}双调和边值问题与边界元基础}{12}{subsection.2.1.4}%
+\contentsline {section}{\numberline {2.2}相关工作}{12}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}包围几何生成与应用}{12}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}笼坐标与边界积分方法}{14}{subsection.2.2.2}%
+\contentsline {paragraph}{均值坐标（Mean Value Coordinates）}{15}{paragraph*.28}%
+\contentsline {paragraph}{调和坐标（Harmonic Coordinates）}{16}{paragraph*.29}%
+\contentsline {paragraph}{Green 坐标与 Cauchy 坐标}{16}{paragraph*.31}%
+\contentsline {subsection}{\numberline {2.2.3}双调和坐标与高阶 BEM}{17}{subsection.2.2.3}%
+\contentsline {paragraph}{双调和坐标（Biharmonic Coordinates）}{17}{paragraph*.32}%
+\contentsline {section}{\numberline {2.3}本章小结}{17}{section.2.3}%
+\contentsline {chapter}{\numberline {第3章}壳空间内的光滑双射投影}{19}{chapter.3}%
+\contentsline {section}{\numberline {3.1}概述}{19}{section.3.1}%
+\contentsline {section}{\numberline {3.2}高阶壳}{20}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}定义}{20}{subsection.3.2.1}%
+\contentsline {paragraph}{组成}{20}{paragraph*.34}%
+\contentsline {paragraph}{连续向量场构造}{20}{paragraph*.35}%
+\contentsline {paragraph}{条件}{20}{paragraph*.37}%
+\contentsline {subsection}{\numberline {3.2.2}构造}{21}{subsection.3.2.2}%
+\contentsline {paragraph}{向量场与双线性侧面的构造}{21}{paragraph*.38}%
+\contentsline {paragraph}{B\'{e}zier 三角面的构造}{21}{paragraph*.39}%
+\contentsline {paragraph}{上/中/下 B\'{e}zier 三角面的构造}{22}{paragraph*.41}%
+\contentsline {paragraph}{其他阶次}{23}{paragraph*.42}%
+\contentsline {paragraph}{双射条件}{24}{paragraph*.43}%
+\contentsline {paragraph}{引理}{24}{paragraph*.44}%
+\contentsline {paragraph}{引理证明}{24}{paragraph*.45}%
+\contentsline {subsection}{\numberline {3.2.3}双射投影}{25}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}高阶壳构造}{26}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}问题与方法}{26}{subsection.3.3.1}%
+\contentsline {paragraph}{输入与目标}{26}{paragraph*.48}%
+\contentsline {paragraph}{流程}{26}{paragraph*.49}%
+\contentsline {subsection}{\numberline {3.3.2}算法细节}{27}{subsection.3.3.2}%
+\contentsline {paragraph}{变量}{27}{paragraph*.52}%
+\contentsline {paragraph}{构造 B\'{e}zier 三角面}{27}{paragraph*.53}%
+\contentsline {paragraph}{目标函数}{28}{paragraph*.54}%
+\contentsline {paragraph}{初始化}{28}{paragraph*.55}%
+\contentsline {paragraph}{棱柱几何优化}{28}{paragraph*.56}%
+\contentsline {paragraph}{边塌缩}{29}{paragraph*.57}%
+\contentsline {paragraph}{边翻转}{29}{paragraph*.58}%
+\contentsline {paragraph}{棱柱缩放}{29}{paragraph*.59}%
+\contentsline {paragraph}{包围约束检查}{29}{paragraph*.60}%
+\contentsline {paragraph}{法向检查}{30}{paragraph*.61}%
+\contentsline {paragraph}{终止条件}{30}{paragraph*.62}%
+\contentsline {subsection}{\numberline {3.3.3}变体}{30}{subsection.3.3.3}%
+\contentsline {paragraph}{奇异点}{30}{paragraph*.63}%
+\contentsline {paragraph}{含自交输入}{30}{paragraph*.64}%
+\contentsline {section}{\numberline {3.4}高阶壳中的属性传递}{30}{section.3.4}%
+\contentsline {paragraph}{高阶壳内的重网格化}{30}{paragraph*.65}%
+\contentsline {paragraph}{向量查询}{31}{paragraph*.67}%
+\contentsline {paragraph}{棱柱定位}{32}{paragraph*.68}%
+\contentsline {paragraph}{应用}{32}{paragraph*.69}%
+\contentsline {section}{\numberline {3.5}实验与评估}{32}{section.3.5}%
+\contentsline {paragraph}{不同目标厚度}{33}{paragraph*.78}%
+\contentsline {paragraph}{不同三角剖分}{34}{paragraph*.79}%
+\contentsline {paragraph}{不同初始线性壳}{35}{paragraph*.80}%
+\contentsline {paragraph}{不同缩放率}{35}{paragraph*.81}%
+\contentsline {paragraph}{鲁棒性测试}{35}{paragraph*.87}%
+\contentsline {paragraph}{耗时}{35}{paragraph*.88}%
+\contentsline {paragraph}{与\nobreakspace {}\cite {Jiang2020BijectivePI} 的比较}{36}{paragraph*.89}%
+\contentsline {section}{\numberline {3.6}结论与讨论}{38}{section.3.6}%
+\contentsline {section}{\numberline {3.7}线性壳总结}{40}{section.3.7}%
+\contentsline {section}{\numberline {3.8}证明位置说明}{40}{section.3.8}%
+\contentsline {chapter}{\numberline {第4章}高阶笼上的柯西–格林坐标：闭式解析}{41}{chapter.4}%
+\contentsline {section}{\numberline {4.1}概述}{41}{section.4.1}%
+\contentsline {section}{\numberline {4.2}方法（柯西坐标）}{42}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}回顾 Cauchy 坐标}{42}{subsection.4.2.1}%
+\contentsline {paragraph}{Cauchy 变换}{42}{paragraph*.90}%
+\contentsline {paragraph}{笼（Cage）}{42}{paragraph*.91}%
+\contentsline {paragraph}{Cauchy 坐标推导}{42}{paragraph*.92}%
+\contentsline {subsection}{\numberline {4.2.2}高阶笼上的二维 Cauchy 坐标及其导数}{43}{subsection.4.2.2}%
+\contentsline {paragraph}{更强的变形交互性}{43}{paragraph*.94}%
+\contentsline {paragraph}{边界上的全纯性}{43}{paragraph*.95}%
+\contentsline {paragraph}{推导}{44}{paragraph*.96}%
+\contentsline {subsection}{\numberline {4.2.3}闭式解}{45}{subsection.4.2.3}%
+\contentsline {paragraph}{表示方式}{45}{paragraph*.98}%
+\contentsline {paragraph}{定理}{45}{paragraph*.99}%
+\contentsline {paragraph}{说明}{46}{paragraph*.101}%
+\contentsline {paragraph}{一般根}{46}{paragraph*.102}%
+\contentsline {paragraph}{重根}{47}{paragraph*.103}%
+\contentsline {subsection}{\numberline {4.2.4}扩展}{47}{subsection.4.2.4}%
+\contentsline {paragraph}{多项式 Green 坐标}{47}{paragraph*.104}%
+\contentsline {paragraph}{有理多项式笼}{47}{paragraph*.105}%
+\contentsline {subsection}{\numberline {4.2.5}实现细节}{47}{subsection.4.2.5}%
+\contentsline {paragraph}{计算 \(\{\mitzeta _j\}\)}{47}{paragraph*.106}%
+\contentsline {paragraph}{递推计算}{47}{paragraph*.107}%
+\contentsline {paragraph}{数值稳定性}{48}{paragraph*.109}%
+\contentsline {section}{\numberline {4.3}实验与评估（柯西坐标）}{48}{section.4.3}%
+\contentsline {paragraph}{基于笼的变形}{49}{paragraph*.110}%
+\contentsline {paragraph}{点到点（P2P）变形}{49}{paragraph*.111}%
+\contentsline {paragraph}{时间与内存}{49}{paragraph*.112}%
+\contentsline {paragraph}{与\nobreakspace {}\cite {Weber2009} 的比较}{49}{paragraph*.113}%
+\contentsline {paragraph}{与\nobreakspace {}\cite {Li2013} 的比较}{49}{paragraph*.116}%
+\contentsline {paragraph}{与\nobreakspace {}\cite {Lin2024PolynomialCC} 的比较}{50}{paragraph*.117}%
+\contentsline {section}{\numberline {4.4}方法（Query）}{51}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}广义绕数}{52}{subsection.4.4.1}%
+\contentsline {paragraph}{定义}{52}{paragraph*.119}%
+\contentsline {paragraph}{有向曲线集合的 GWN}{52}{paragraph*.120}%
+\contentsline {paragraph}{平移不变性}{52}{paragraph*.121}%
+\contentsline {paragraph}{有理参数曲线的 GWN}{52}{paragraph*.122}%
+\contentsline {subsection}{\numberline {4.4.2}B\'{e}zier 曲线 GWN 的闭式表达}{53}{subsection.4.4.2}%
+\contentsline {paragraph}{B\'{e}zier 曲线的 GWN}{53}{paragraph*.123}%
+\contentsline {paragraph}{\{$\mitomega _k$\} 的计算}{54}{paragraph*.125}%
+\contentsline {paragraph}{一般根}{55}{paragraph*.126}%
+\contentsline {paragraph}{特殊根}{56}{paragraph*.129}%
+\contentsline {subsection}{\numberline {4.4.3}边界上的 GWN}{56}{subsection.4.4.3}%
+\contentsline {paragraph}{实根}{56}{paragraph*.130}%
+\contentsline {paragraph}{另一种理解}{57}{paragraph*.131}%
+\contentsline {paragraph}{边界点判定}{57}{paragraph*.132}%
+\contentsline {subsection}{\numberline {4.4.4}GWN 的导数}{58}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}实验与评估（Query）}{58}{section.4.5}%
+\contentsline {paragraph}{数值稳定性}{58}{paragraph*.140}%
+\contentsline {paragraph}{不同次数}{59}{paragraph*.141}%
+\contentsline {paragraph}{取整绕数}{60}{paragraph*.142}%
+\contentsline {paragraph}{大规模评估}{61}{paragraph*.143}%
+\contentsline {paragraph}{与 \cite {Spainhour2024RobustCQ} 的比较}{62}{paragraph*.146}%
+\contentsline {chapter}{\numberline {第5章}高阶笼上的双调和坐标：高阶 BEM 框架}{63}{chapter.5}%
+\contentsline {section}{\numberline {5.1}概述}{63}{section.5.1}%
+\contentsline {section}{\numberline {5.2}方法}{63}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}边界元方法}{64}{subsection.5.2.1}%
+\contentsline {paragraph}{BEM 概述}{64}{paragraph*.147}%
+\contentsline {paragraph}{双调和 Dirichlet 问题}{64}{paragraph*.148}%
+\contentsline {paragraph}{边界积分方程}{64}{paragraph*.149}%
+\contentsline {paragraph}{线性笼上的双调和坐标}{65}{paragraph*.150}%
+\contentsline {subsection}{\numberline {5.2.2}多项式双调和坐标}{65}{subsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.2.1}重写边界积分方程}{65}{subsubsection.5.2.2.1}%
+\contentsline {paragraph}{高阶单元}{65}{paragraph*.152}%
+\contentsline {paragraph}{高阶边界条件}{66}{paragraph*.153}%
+\contentsline {paragraph}{高阶形函数}{66}{paragraph*.154}%
+\contentsline {paragraph}{方程重写}{66}{paragraph*.155}%
+\contentsline {paragraph}{积分及其导数的解析计算}{67}{paragraph*.156}%
+\contentsline {subsubsection}{\numberline {5.2.2.2}边界积分方程求解}{68}{subsubsection.5.2.2.2}%
+\contentsline {paragraph}{奇异积分}{68}{paragraph*.157}%
+\contentsline {paragraph}{矩阵约束}{68}{paragraph*.158}%
+\contentsline {paragraph}{近似代数方程}{68}{paragraph*.159}%
+\contentsline {subsection}{\numberline {5.2.3}变形控制}{69}{subsection.5.2.3}%
+\contentsline {paragraph}{提高精度}{69}{paragraph*.160}%
+\contentsline {paragraph}{变形能量}{69}{paragraph*.162}%
+\contentsline {paragraph}{不同权重}{70}{paragraph*.165}%
+\contentsline {section}{\numberline {5.3}实验与评估}{71}{section.5.3}%
+\contentsline {paragraph}{时间与内存}{71}{paragraph*.168}%
+\contentsline {paragraph}{不同目标次数}{72}{paragraph*.170}%
+\contentsline {paragraph}{对比}{73}{paragraph*.173}%
+\contentsline {chapter}{\numberline {第6章}总结与展望}{74}{chapter.6}%
+\contentsline {section}{\numberline {6.1}本文工作总结}{74}{section.6.1}%
+\contentsline {section}{\numberline {6.2}未来工作展望}{75}{section.6.2}%
+\contentsline {chapter}{参考文献}{76}{chapter*.174}%
+\contentsline {chapter}{致谢}{80}{chapter*.175}%
+\contentsline {chapter}{在读期间取得的科研成果}{81}{chapter*.176}%
+\contentsfinish 

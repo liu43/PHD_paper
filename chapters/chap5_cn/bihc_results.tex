@@ -1,0 +1,43 @@
+﻿\section{实验与评估}\label{sec:bihc-results}
+\tr{
+我们的方法采用 C++ 实现，使用 Eigen~\cite{eigenweb} 求解线性系统。全部实验在一台配备 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存的台式机上完成。
+}
+
+\paragraph{时间与内存}
+\tr{本文展示的所有基于笼变形算法均可实时运行。
+预处理时间分为两部分：(1) 构建笼并求解矩阵约束；(2) 计算图像上各点的坐标。
+图~\ref{fig:bihc-order} 中的变形是最简单案例，初始笼由 4 条二次 \Bezier 曲线组成。对于其中三组变形，步骤 (1) 分别耗时 8 ms、20 ms 和 36 ms；对 8000 个点的步骤 (2) 分别耗时 44 ms、64 ms 和 90 ms。
+相比之下，图~\ref{fig:bihc-teaser} 中的章鱼案例接近最复杂场景，笼由 22 条三次 \Bezier 曲线组成。步骤 (1) 耗时 1.02 s，其中 96.6\% 时间用于 Eigen 库中的 6 次矩阵运算；步骤 (2) 对 8800 个点耗时 0.40 s。我们的所有案例中，预处理总内存占用均未超过 150 MB。}
+
+\begin{figure}[t]
+  \centering
+  \begin{overpic}[width=0.99\linewidth]{diff_order}
+    {
+    }
+  \end{overpic}
+  \vspace{-2mm}
+  \caption{
+输入二次笼（左上）被变形为不同次数的笼：二次（右上）、三次（左下）和四次（右下）。
+  }
+  \label{fig:bihc-order}
+\end{figure}
+
+
+\paragraph{不同目标次数}
+在设置边界条件 \eqref{equ:bihc-g} 时，选择不同的 \(n\) 值，对应将笼变形为不同次数，如图~\ref{fig:bihc-more-examples} 和图~\ref{fig:bihc-order} 所示；这对初始笼是线性还是高阶均成立。
+尽管我们允许变形后笼具有任意高次数，但需注意：次数越高，积分计算 \eqref{equ:bihc-basis_inte} 越复杂，求解坐标 \eqref{equ:bihc-final_BHC} 所需矩阵约束也越大，从而带来更高预计算时间。
+
+\input{chapters/chap5_cn/bihc_fig_only}
+
+\paragraph{对比}
+当初始笼为线性时，我们选择 Cubic MVC~\cite{Li2013} 与 Polynomial Green Coordinate（PolyGC）~\cite{MichelThiery2023} 作为对比方法；当初始笼为高阶时，我们选择~\cite{liu2024polygc} 与~\cite{Lin2024PolynomialCC} 进行对比。
+
+与我们的坐标一样，Cubic MVC 同时插值边界上的函数值与导数。但该坐标与常规均值坐标一样会产生伪影，尤其在非凸形状上表现较差（见图~\ref{fig:bihc-cmp-cmvc}）。此外，我们的坐标继承了调和坐标的优势，即最小化所谓 Hessian 能量~\cite{Stein2018NaturalBC}，并具有调和拉普拉斯，从而产生更低失真的变形（见图~\ref{fig:bihc-more-cmp}）。同时，Cubic MVC 不支持高阶笼。
+
+\cite{Lin2024PolynomialCC} 通过将多项式 Cauchy 坐标与其逆映射结合，实现了曲边笼之间的变形。然而，其方法需要用户额外指定一个中间线性笼，且逆映射计算依赖数值积分，不具解析表达。
+\tr{此外，他们的高阶笼需要后验调整，无法像我们的方法那样紧密贴合变形后形状。
+这些原因和差异使我们无法与其进行公平对比。}
+
+我们的坐标在表达形式和变形结果上与 PolyGC 和 CurvedGC 更为接近。
+PolyGC 与 CurvedGC 用插值性换取保角性；而我们的坐标提供了在保角性与插值性之间灵活折中的方式。
+如图~\ref{fig:bihc-weights} 与图~\ref{fig:bihc-more-curvedcmp} 所示，我们对所有点的坐标施加了简单线性加权。还可以采用更复杂的加权策略，例如以距离函数作为权重，从而允许用户指定笼内区域优先满足保角性或插值性。

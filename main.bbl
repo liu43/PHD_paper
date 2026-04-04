@@ -1,0 +1,985 @@
+\begin{thebibliography}{156}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{#1}
+\expandafter\ifx\csname urlstyle\endcsname\relax\else
+  \urlstyle{same}\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \DeclareUrlCommand\doi{\urlstyle{rm}}
+  \def\eprint#1#2{#2}
+\else
+  \def\doi#1{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+  \let\eprint\href
+\fi
+
+\bibitem[Maggiordomo 等人(2023)Maggiordomo, Moreton, and
+  Tarini]{Maggiordomo2023MicroMesh}
+Maggiordomo A, Moreton H, Tarini M.
+\newblock Micro-mesh construction\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (4): 121:1-121:18.
+
+\bibitem[Praun 等人(2001)Praun, Sweldens, and
+  Schr{\"o}der]{praun2001consistent}
+Praun E, Sweldens W, Schr{\"o}der P.
+\newblock Consistent mesh parameterizations\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2001: 179-184.
+
+\bibitem[Kraevoy 等人(2004)Kraevoy and Sheffer]{kraevoy2004cross}
+Kraevoy V, Sheffer A.
+\newblock Cross-parameterization and compatible remeshing of 3D
+  models\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2004, 23\allowbreak (3): 861-869.
+
+\bibitem[Jiao 等人(2004)Jiao and Heath]{JiaoInternationalJO}
+Jiao X, Heath M~T.
+\newblock Overlaying surface meshes, part I: algorithms\allowbreak[J].
+\newblock International Journal of Computational Geometry and Applications,
+  2004, 14\allowbreak (6): 379-402.
+
+\bibitem[Sharp 等人(2019)Sharp, Soliman, and Crane]{Sharp2019NavigatingIT}
+Sharp N, Soliman Y, Crane K.
+\newblock Navigating intrinsic triangulations\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2019, 38\allowbreak (4): 55:1-55:16.
+
+\bibitem[Takayama(2022)]{Takayama2022CompatibleIntrinsicTriangulations}
+Takayama K.
+\newblock Compatible intrinsic triangulations\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2022, 41\allowbreak (4): 57:1-57:12.
+
+\bibitem[Schmidt 等人(2023)Schmidt, Pieper, and
+  Kobbelt]{Schmidt2023SurfaceMapsViaAdaptiveTriangulations}
+Schmidt P, Pieper D, Kobbelt L.
+\newblock Surface maps via adaptive triangulations\allowbreak[J].
+\newblock Computer Graphics Forum, 2023, 42\allowbreak (2): 103-117.
+
+\bibitem[Kwok 等人(2014)Kwok and
+  Wang]{Kwok2014DomainConstructionVolumetricCrossParameterization}
+Kwok T~H, Wang C~C~L.
+\newblock Domain construction for volumetric
+  cross-parameterization\allowbreak[J].
+\newblock Computers \& Graphics, 2014, 38\allowbreak (1): 86-96.
+
+\bibitem[Tarini 等人(2004)Tarini, Hormann, Cignoni, and
+  Montani]{Tarini2004PolyCubeMaps}
+Tarini M, Hormann K, Cignoni P, et~al.
+\newblock PolyCube-maps\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2004, 23\allowbreak (3): 853-860.
+
+\bibitem[Gregson 等人(2011)Gregson, Sheffer, and
+  Zhang]{Gregson2011AllHexMeshGenerationViaVolumetricPolyCubeDeformation}
+Gregson J, Sheffer A, Zhang E.
+\newblock All-hex mesh generation via volumetric PolyCube
+  deformation\allowbreak[J].
+\newblock Computer Graphics Forum, 2011, 30\allowbreak (5): 1407-1416.
+
+\bibitem[Porumbescu 等人(2005)Porumbescu, Budge, Feng, and
+  Joy]{porumbescu2005shell}
+Porumbescu S~D, Budge B, Feng L, et~al.
+\newblock Shell maps\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2005, 24\allowbreak (3): 626-633.
+
+\bibitem[Jeschke 等人(2007)Jeschke, Mantler, and
+  Wimmer]{Jeschke2007InteractiveSmoothAndCurvedShellMapping}
+Jeschke S, Mantler S, Wimmer M.
+\newblock Interactive smooth and curved shell
+  mapping\allowbreak[C]//\allowbreak
+Eurographics Symposium on Rendering.
+\newblock 2007: 351-360.
+
+\bibitem[Jiang 等人(2020)Jiang, Schneider, Zorin, and
+  Panozzo]{Jiang2020BijectivePI}
+Jiang Z, Schneider T, Zorin D, et~al.
+\newblock Bijective projection in a shell\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2020, 39\allowbreak (6): 247:1-247:18.
+
+\bibitem[Aubry 等人(2017)Aubry, Dey, Mestreau, and
+  Karamete]{aubry2017boundary}
+Aubry R, Dey S, Mestreau E, et~al.
+\newblock Boundary layer mesh generation on arbitrary geometries\allowbreak[J].
+\newblock International Journal for Numerical Methods in Engineering, 2017,
+  112\allowbreak (2): 157-173.
+
+\bibitem[Chen 等人(2023)Chen, Xie, Yuksel, Kaufman, Yang, Jiang, and
+  Li]{chen2023multilayerthickshells}
+Chen Y, Xie T, Yuksel C, et~al.
+\newblock Multi-layer thick shells\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2023: 1-9.
+
+\bibitem[Jin 等人(2019)Jin, Song, Wang, Huang, Song, and He]{jin2019shell}
+Jin Y, Song D, Wang T, et~al.
+\newblock A shell space constrained approach for curve design on surface
+  meshes\allowbreak[J].
+\newblock Computer-Aided Design, 2019, 113: 24-34.
+
+\bibitem[Gain 等人(2008)Gain and Bechmann]{Gain2008Survey}
+Gain J, Bechmann D.
+\newblock A survey of spatial deformation from a user-centered
+  perspective\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2008, 27\allowbreak (4): 107:1-107:21.
+
+\bibitem[Chadwick 等人(1989)Chadwick, Haumann, and Parent]{Chadwick1989}
+Chadwick J~E, Haumann D~R, Parent R~E.
+\newblock Layered construction for deformable animated
+  characters\allowbreak[J].
+\newblock Computers \& Graphics, 1989, 23\allowbreak (3): 243-252.
+
+\bibitem[Singh 等人(1998)Singh and Fiume]{Singh1998Wires}
+Singh K, Fiume E.
+\newblock Wires: a geometric deformation technique\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1998: 405-414.
+
+\bibitem[Borrel 等人(1991)Borrel and Bechmann]{Borrel1991}
+Borrel P, Bechmann D.
+\newblock Deformation of n-dimensional objects\allowbreak[J].
+\newblock International Journal of Computational Geometry and Applications,
+  1991, 1\allowbreak (4): 427-453.
+
+\bibitem[Feng 等人(1996)Feng, Ma, and Peng]{Feng1996}
+Feng J, Ma L, Peng Q.
+\newblock A new free-form deformation through the control of parametric
+  surfaces\allowbreak[J].
+\newblock Computers \& Graphics, 1996, 20\allowbreak (4): 531-539.
+
+\bibitem[Ju 等人(2005)Ju, Schaefer, and Warren]{Ju2005}
+Ju T, Schaefer S, Warren J.
+\newblock Mean value coordinates for closed triangular meshes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2005, 24\allowbreak (3): 561-566.
+
+\bibitem[Joshi 等人(2007)Joshi, Meyer, DeRose, Green, and Sanocki]{Joshi2007}
+Joshi P, Meyer M, DeRose T, et~al.
+\newblock Harmonic coordinates for character articulation\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2007, 26\allowbreak (3): 71:1-71:9.
+
+\bibitem[Lipman 等人(2008)Lipman, Levin, and Cohen-Or]{Lipman2008Green}
+Lipman Y, Levin D, Cohen-Or D.
+\newblock Green coordinates\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2008, 27\allowbreak (3): 78:1-78:10.
+
+\bibitem[Calderon 等人(2017)Calderon and Boubekeur]{calderon2017bounding}
+Calderon S, Boubekeur T.
+\newblock Bounding proxies for shape approximation.\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2017, 36\allowbreak (4): 57:1-57:13.
+
+\bibitem[Thiery 等人(2022)Thiery and Boubekeur]{Thiery2022TriquadGC}
+Thiery J~M, Boubekeur T.
+\newblock Green coordinates for triquad cages in 3D\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH Asia.
+\newblock 2022: 1-8.
+
+\bibitem[Str{\"o}ter 等人(2024)Str{\"o}ter, Thiery, Hormann, Chen, Chang,
+  Besler, Mueller-Roemer, Boubekeur, Stork, and Fellner]{Stroter2024CageSurvey}
+Str{\"o}ter D, Thiery J~M, Hormann K, et~al.
+\newblock A survey on cage-based deformation of 3D models\allowbreak[J].
+\newblock Computer Graphics Forum, 2024, 43\allowbreak (2): e15060.
+
+\bibitem[Sacht 等人(2015)Sacht, Vouga, and Jacobson]{Sacht2015}
+Sacht L, Vouga E, Jacobson A.
+\newblock Nested cages\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2015, 34\allowbreak (6): 170:1-170:14.
+
+\bibitem[Guo 等人(2024)Guo, Zhang, Ye, and Fu]{Guo2024RobustCage}
+Guo J~P, Zhang W~X, Ye C, et~al.
+\newblock Robust coarse cage construction with small approximation
+  errors\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2024,
+  30\allowbreak (7): 4234-4245.
+
+\bibitem[Lin 等人(2024)Lin and Chen]{Lin2024PolynomialCC}
+Lin Z, Chen R.
+\newblock Polynomial cauchy coordinates for curved
+  cages\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH Asia.
+\newblock 2024: 1-8.
+
+\bibitem[Qin 等人(2024)Qin, Zhou, Ying, Li, and Deng]{Qin2024Coons}
+Qin K, Zhou Y, Ying C, et~al.
+\newblock $C^0$ generalized coons patches for high-order cage-based
+  deformation\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (6): 220:1-220:15.
+
+\bibitem[Xiao 等人(2025)Xiao and Chen]{Xiao2025BezierCage}
+Xiao D, Chen R.
+\newblock Flexible 3D cage-based deformation via green coordinates on
+  B{\'e}zier patches\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2025: 58:1-58:10.
+
+\bibitem[Thiery 等人(2024)Thiery, Michel, and Chen]{thiery2024biharmonic}
+Thiery J~M, Michel {\'E}, Chen J.
+\newblock Biharmonic coordinates and their derivatives for triangular 3D
+  cages\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (4): 138:1-138:17.
+
+\bibitem[Portaneri 等人(2022)Portaneri, Rouxel-Labb{\'e}, Hemmer,
+  Cohen-Steiner, and Alliez]{Portaneri2022AlphaWrapping}
+Portaneri C, Rouxel-Labb{\'e} M, Hemmer M, et~al.
+\newblock Alpha wrapping with an offset\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2022, 41\allowbreak (4): 127:1-127:22.
+
+\bibitem[Liu 等人(2024)Liu, Ji, Guo, Liu, and Fu]{liu2024curveshell}
+Liu S, Ji Y, Guo J~P, et~al.
+\newblock Smooth bijective projection in a high-order shell\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (4): 59:1-59:13.
+
+\bibitem[Wang 等人(2024)Wang, Wang, Wang, Chen, Xin, Guo, Wang, and
+  Tu]{Wang2024PCO}
+Wang L, Wang X, Wang P, et~al.
+\newblock PCO: precision-controllable offset surfaces with sharp
+  features\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (6): 169:1-169:16.
+
+\bibitem[Zint 等人(2025)Zint, Chen, Zhu, Zorin, Schneider, and
+  Panozzo]{Zint2025TopologicalOffsets}
+Zint D, Chen Z, Zhu Y, et~al.
+\newblock Topological offsets\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2025, 44\allowbreak (4): 144:1-144:19.
+
+\bibitem[Sun 等人(2026)Sun, Wu, Bao, and
+  Huang]{Sun2026VariationalMeshOffsetting}
+Sun H, Wu S, Bao H, et~al.
+\newblock Variational mesh offsetting by smoothed winding number\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2026,
+  32\allowbreak (2): 1668-1681.
+
+\bibitem[Jacobson 等人(2013)Jacobson, Kavan, and
+  Sorkine-Hornung]{Jacobson2013RobustIS}
+Jacobson A, Kavan L, Sorkine-Hornung O.
+\newblock Robust inside-outside segmentation using generalized winding
+  numbers\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (4): 33:1-33:12.
+
+\bibitem[Weber 等人(2009)Weber, Ben-Chen, and Craig~Gotsman]{Weber2009}
+Weber O, Ben-Chen M, Craig~Gotsman e~a.
+\newblock Complex barycentric coordinates with application to planar shape
+  deformation\allowbreak[J].
+\newblock Computer Graphics Forum, 2009, 28\allowbreak (5): 587-597.
+
+\bibitem[Weber 等人(2012)Weber, Poranne, and Gotsman]{Weber2012}
+Weber O, Poranne R, Gotsman C.
+\newblock Biharmonic coordinates\allowbreak[J].
+\newblock Computer Graphics Forum, 2012, 31\allowbreak (5): 2409-2422.
+
+\bibitem[Shimrat(1962)]{Shimrat1962Algorithm1P}
+Shimrat M.
+\newblock Algorithm 112: position of point relative to polygon\allowbreak[J].
+\newblock Communications of the ACM, 1962, 5\allowbreak (8): 434.
+
+\bibitem[Haines(1994)]{Haines1994Point}
+Haines E.
+\newblock Point in polygon strategies\allowbreak[M]//\allowbreak
+Graphics Gems IV.
+\newblock 1994: 24-46.
+
+\bibitem[Carvalho 等人(1995)Carvalho and Cavalcanti]{Carvalho1995}
+Carvalho P~C~P, Cavalcanti P~R.
+\newblock Point in polyhedron testing using spherical
+  polygons\allowbreak[M]//\allowbreak
+Graphics Gems V.
+\newblock 1995: 42-49.
+
+\bibitem[Nishita 等人(1990)Nishita, Sederberg, and
+  Kakimoto]{Nishita1990RayTT}
+Nishita T, Sederberg T~W, Kakimoto M.
+\newblock Ray tracing trimmed rational surface
+  patches\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1990: 337-345.
+
+\bibitem[Piegl 等人(1997)Piegl and Tiller]{1997The}
+Piegl L~A, Tiller W.
+\newblock The NURBS book\allowbreak[M].
+\newblock 1997.
+
+\bibitem[Marussig 等人(2017)Marussig and Hughes]{Marussig2017ARO}
+Marussig B, Hughes T~J~R.
+\newblock A review of trimming in isogeometric analysis: challenges, data
+  exchange and simulation aspects\allowbreak[J].
+\newblock Archives of Computational Methods in Engineering, 2017, 25\allowbreak
+  (4): 1059-1127.
+
+\bibitem[Sevilla 等人(2008)Sevilla, Fern{\'a}ndez-M{\'e}ndez, and
+  Huerta]{Sevilla2008NURBSenhancedFE}
+Sevilla R, Fern{\'a}ndez-M{\'e}ndez S, Huerta A.
+\newblock NURBS-enhanced finite element method for euler
+  equations\allowbreak[J].
+\newblock International Journal for Numerical Methods in Fluids, 2008,
+  57\allowbreak (9): 1051-1069.
+
+\bibitem[Meister(1771)]{meister1771generalia}
+Meister A~L~F.
+\newblock Generalia de genesi figurarum planarum et inde pendentibus earum
+  affectionibus\allowbreak[J].
+\newblock Novi Commentarii Societatis Regiae Scientiarum Gottingensis, 1771, 1:
+  144-180.
+
+\bibitem[Sun 等人(2024)Sun, Wang, Bao, and Huang]{Sun2024GauWNGW}
+Sun H, Wang J, Bao H, et~al.
+\newblock GauWN: {G}aussian-smoothed winding number and its
+  derivatives\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH Asia.
+\newblock 2024: 1-9.
+
+\bibitem[McAdams 等人(2011)McAdams, Zhu, Selle, Empey, Tamstorf, Teran, and
+  Sifakis]{McAdams2011EfficientEF}
+McAdams A, Zhu Y, Selle A, et~al.
+\newblock Efficient elasticity for character skinning with contact and
+  collisions\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2011: 1-12.
+
+\bibitem[Orzan 等人(2013)Orzan, Bousseau, Barla, Winnem{\"o}ller, Thollot,
+  and Salesin]{Orzan2013DiffusionCA}
+Orzan A, Bousseau A, Barla P, et~al.
+\newblock Diffusion curves: a vector representation for smooth-shaded
+  images\allowbreak[J].
+\newblock Communications of the ACM, 2013, 56\allowbreak (7): 101-108.
+
+\bibitem[Scrivener 等人(2024)Scrivener, Coldren, and
+  Chien]{Scrivener2024WindingNF}
+Scrivener D, Coldren E, Chien E.
+\newblock Winding number features for vector sketch colorization\allowbreak[J].
+\newblock Computer Graphics Forum, 2024, 43\allowbreak (5): 1-10.
+
+\bibitem[Barill 等人(2018)Barill, Dickson, Schmidt, Levin, and
+  Jacobson]{Barill2018}
+Barill G, Dickson N, Schmidt R, et~al.
+\newblock Fast winding numbers for soups and clouds\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2018, 37\allowbreak (4): 43:1-43:12.
+
+\bibitem[Feng 等人(2023)Feng, Gillespie, and Crane]{Feng2023WindingNO}
+Feng N, Gillespie M, Crane K.
+\newblock Winding numbers on discrete surfaces\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (4): 36:1-36:17.
+
+\bibitem[Spainhour 等人(2024)Spainhour, Gunderman, and
+  Weiss]{Spainhour2024RobustCQ}
+Spainhour J, Gunderman D, Weiss K.
+\newblock Robust containment queries over collections of rational parametric
+  curves via generalized winding numbers\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (4): 38:1-38:14.
+
+\bibitem[Martens 等人(2025)Martens and Bessmeltsev]{Martens2024OneShotMF}
+Martens C, Bessmeltsev M.
+\newblock One-shot method for computing generalized winding
+  numbers\allowbreak[J].
+\newblock Computer Graphics Forum, 2025, 44\allowbreak (5): e70194.
+
+\bibitem[Ming 等人(2015)Ming, Li, and He]{Ming2015WindingNC}
+Ming Y, Li H, He X.
+\newblock Winding number constrained contour detection\allowbreak[J].
+\newblock IEEE Transactions on Image Processing, 2015, 24\allowbreak (1):
+  68-79.
+
+\bibitem[Trettner 等人(2022)Trettner, Nehring-Wirxel, and
+  Kobbelt]{Trettner2022EMBER}
+Trettner P, Nehring-Wirxel J, Kobbelt L.
+\newblock EMBER: exact mesh booleans via efficient \& robust local
+  arrangements\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2022, 41\allowbreak (4): 39:1-39:15.
+
+\bibitem[Balu 等人(2023)Balu, Rajanna, Khristy, Xu, Krishnamurthy, and
+  Hsu]{Balu2023}
+Balu A, Rajanna M~R, Khristy J, et~al.
+\newblock Direct immersogeometric fluid flow and heat transfer analysis of
+  objects represented by point clouds\allowbreak[J].
+\newblock Computer Methods in Applied Mechanics and Engineering, 2023, 404:
+  115742.
+
+\bibitem[Hu 等人(2019)Hu, Schneider, Gao, Zhou, Jacobson, Zorin, and
+  Panozzo]{hu2019TriWild}
+Hu Y, Schneider T, Gao X, et~al.
+\newblock TriWild: robust triangulation with curve constraints\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2019, 38\allowbreak (4): 52:1-52:15.
+
+\bibitem[Cheng 等人(2019)Cheng, Fu, Zhang, and Chai]{cheng2019practical}
+Cheng X~X, Fu X~M, Zhang C, et~al.
+\newblock Practical error-bounded remeshing by adaptive
+  refinement\allowbreak[J].
+\newblock Computers \& Graphics, 2019, 82: 163-173.
+
+\bibitem[Hu 等人(2020)Hu, Schneider, Wang, Zorin, and Panozzo]{hu2020fast}
+Hu Y, Schneider T, Wang B, et~al.
+\newblock Fast tetrahedral meshing in the wild\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2020, 39\allowbreak (4): 117:1-117:18.
+
+\bibitem[Chen 等人(2004)Chen, Tong, Wang, Lin, Guo, and Shum]{chen2004shell}
+Chen Y, Tong X, Wang J, et~al.
+\newblock Shell texture functions\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2004, 23\allowbreak (3): 343-353.
+
+\bibitem[Hormann 等人(2007)Hormann, L{\'e}vy, and Sheffer]{hormann2007mesh}
+Hormann K, L{\'e}vy B, Sheffer A.
+\newblock Mesh parameterization: theory and practice\allowbreak[M].
+\newblock 2007.
+
+\bibitem[Lengyel 等人(2001)Lengyel, Praun, Finkelstein, and
+  Hoppe]{lengyel2001real}
+Lengyel J, Praun E, Finkelstein A, et~al.
+\newblock Real-time fur over arbitrary surfaces\allowbreak[C]//\allowbreak
+Symposium on Interactive 3D Graphics.
+\newblock 2001: 227-232.
+
+\bibitem[Peng 等人(2004)Peng, Kristjansson, and Zorin]{peng2004interactive}
+Peng J, Kristjansson D, Zorin D.
+\newblock Interactive modeling of topologically complex geometric
+  detail\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2004: 635-643.
+
+\bibitem[Wang 等人(2003)Wang, Wang, Tong, Lin, Hu, Guo, and
+  Shum]{wang2003view}
+Wang L, Wang X, Tong X, et~al.
+\newblock View-dependent displacement mapping\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2003, 22\allowbreak (3): 334-339.
+
+\bibitem[Wang 等人(2004)Wang, Tong, Lin, Hu, Guo, and
+  Shum]{wang2004generalized}
+Wang X, Tong X, Lin S, et~al.
+\newblock Generalized displacement maps\allowbreak[C]//\allowbreak
+Eurographics Symposium on Rendering.
+\newblock 2004: 227-233.
+
+\bibitem[Garimella 等人(2000)Garimella and Shephard]{garimella2000boundary}
+Garimella R~V, Shephard M~S.
+\newblock Boundary layer mesh generation for viscous flow
+  simulations\allowbreak[J].
+\newblock International Journal for Numerical Methods in Engineering, 2000,
+  49\allowbreak (1-2): 193-218.
+
+\bibitem[Thiery 等人(2012)Thiery, Tierny, and Boubekeur]{thiery2012cager}
+Thiery J~M, Tierny J, Boubekeur T.
+\newblock CageR: cage-based reverse engineering of animated 3D
+  shapes\allowbreak[J].
+\newblock Computer Graphics Forum, 2012, 31\allowbreak (8): 2303-2316.
+
+\bibitem[Farin(1986)]{farin1986triangular}
+Farin G.
+\newblock Triangular {B}ernstein-{B\'e}zier patches\allowbreak[J].
+\newblock Computer Aided Geometric Design, 1986, 3\allowbreak (2): 83-127.
+
+\bibitem[Mandad 等人(2020)Mandad and Campen]{mandad2020bezier}
+Mandad M, Campen M.
+\newblock B{\'e}zier guarding: precise higher-order meshing of curved 2D
+  domains\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2020, 39\allowbreak (4): 103:1-103:15.
+
+\bibitem[Dey 等人(1999)Dey, O'Bara, and Shephard]{Dey99curvilinearmesh}
+Dey S, O'Bara R~M, Shephard M~S.
+\newblock Curvilinear mesh generation in 3{D}\allowbreak[C]//\allowbreak
+International Meshing Roundtable.
+\newblock 1999: 407-417.
+
+\bibitem[Ferguson 等人(2023)Ferguson, Jain, Zorin, Schneider, and
+  Panozzo]{Ferguson2022HighOrderIP}
+Ferguson Z, Jain P, Zorin D, et~al.
+\newblock High-order incremental potential contact for elastodynamic simulation
+  on curved meshes\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2023: 1-11.
+
+\bibitem[Ruiz-Giron\'{e}s 等人(2021)Ruiz-Giron\'{e}s, Sarrate, and
+  Roca]{Ruiz-Giron2021Measure}
+Ruiz-Giron\'{e}s E, Sarrate J, Roca X.
+\newblock Measuring and improving the geometric accuracy of piece-wise
+  polynomial boundary meshes\allowbreak[J].
+\newblock Journal of Computational Physics, 2021, 443: 110500.
+
+\bibitem[Liu 等人(2021)Liu, Su, Liu, Ye, Liu, and Fu]{LIU2021103080}
+Liu Z~Y, Su J~P, Liu H, et~al.
+\newblock Error-bounded edge-based remeshing of high-order tetrahedral
+  meshes\allowbreak[J].
+\newblock Computer-Aided Design, 2021, 139: 103080.
+
+\bibitem[Jiang 等人(2021)Jiang, Zhang, Hu, Schneider, Zorin, and
+  Panozzo]{Jiang2021Bijectiveandcoarse}
+Jiang Z, Zhang Z, Hu Y, et~al.
+\newblock Bijective and coarse high-order tetrahedral meshes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2021, 40\allowbreak (4): 157:1-157:16.
+
+\bibitem[Xu 等人(2014)Xu and Chernikov]{Xu2014}
+Xu J, Chernikov A~N.
+\newblock Automatic curvilinear quality mesh generation driven by smooth
+  boundary and guaranteed fidelity\allowbreak[J].
+\newblock Procedia Engineering, 2014, 82: 200-212.
+
+\bibitem[Jiang 等人(2021)Jiang, Zhang, Hu, Schneider, Zorin, and
+  Panozzo]{Jiang2021BijectiveAC}
+Jiang Z, Zhang Z, Hu Y, et~al.
+\newblock Bijective and coarse high-order tetrahedral meshes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2021, 40\allowbreak (4): 157:1-157:16.
+
+\bibitem[Lee 等人(2000)Lee, Moreton, and Hoppe]{lee2000displaced}
+Lee A, Moreton H, Hoppe H.
+\newblock Displaced subdivision surfaces\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2000: 85-94.
+
+\bibitem[Kobbelt 等人(1998)Kobbelt, Campagna, Vorsatz, and
+  Seidel]{Kobbelt1998InteractiveMM}
+Kobbelt L, Campagna S, Vorsatz J, et~al.
+\newblock Interactive multi-resolution modeling on arbitrary
+  meshes\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1998: 105-114.
+
+\bibitem[Ezuz 等人(2019)Ezuz, Solomon, and Ben-Chen]{ezuz2019reversible}
+Ezuz D, Solomon J, Ben-Chen M.
+\newblock Reversible harmonic maps between discrete surfaces\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2019, 38\allowbreak (2): 15:1-15:12.
+
+\bibitem[Panozzo 等人(2013)Panozzo, Baran, Diamanti, and
+  Sorkine-Hornung]{panozzo2013weighted}
+Panozzo D, Baran I, Diamanti O, et~al.
+\newblock Weighted averages on surfaces\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (4): 60:1-60:12.
+
+\bibitem[Tutte(1963)]{tutte1963draw}
+Tutte W~T.
+\newblock How to draw a graph\allowbreak[J].
+\newblock Proceedings of the London Mathematical Society, 1963, 3\allowbreak
+  (1): 743-767.
+
+\bibitem[Floater(1997)]{floater1997parametrization}
+Floater M~S.
+\newblock Parametrization and smooth approximation of surface
+  triangulations\allowbreak[J].
+\newblock Computer Aided Geometric Design, 1997, 14\allowbreak (3): 231-250.
+
+\bibitem[Surazhsky 等人(2001)Surazhsky and Gotsman]{surazhsky2001morphing}
+Surazhsky V, Gotsman C.
+\newblock Morphing stick figures using optimized compatible
+  triangulations\allowbreak[C]//\allowbreak
+Pacific Conference on Computer Graphics and Applications.
+\newblock 2001: 40-49.
+
+\bibitem[Jiang 等人(2017)Jiang, Schaefer, and Panozzo]{jiang2017simplicial}
+Jiang Z, Schaefer S, Panozzo D.
+\newblock Simplicial complex augmentation framework for bijective
+  maps\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2017, 36\allowbreak (6): 186:1-186:9.
+
+\bibitem[Aigerman 等人(2017)Aigerman, Kovalsky, and
+  Lipman]{aigerman2017spherical}
+Aigerman N, Kovalsky S~Z, Lipman Y.
+\newblock Spherical orbifold tutte embeddings\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2017, 36\allowbreak (4): 90:1-90:13.
+
+\bibitem[Jin 等人(2008)Jin, Kim, Luo, and Gu]{jin2008discrete}
+Jin M, Kim J, Luo F, et~al.
+\newblock Discrete surface ricci flow\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2008,
+  14\allowbreak (5): 1030-1043.
+
+\bibitem[Kharevych 等人(2006)Kharevych, Springborn, and
+  Schr{\"o}der]{kharevych2006discrete}
+Kharevych L, Springborn B, Schr{\"o}der P.
+\newblock Discrete conformal mappings via circle patterns\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2006, 25\allowbreak (2): 412-438.
+
+\bibitem[Shoham 等人(2019)Shoham, Vaxman, and
+  Ben-Chen]{shoham2019hierarchical}
+Shoham M, Vaxman A, Ben-Chen M.
+\newblock Hierarchical functional maps between subdivision
+  surfaces\allowbreak[J].
+\newblock Computer Graphics Forum, 2019, 38\allowbreak (5): 55-73.
+
+\bibitem[Pietroni 等人(2009)Pietroni, Tarini, and
+  Cignoni]{pietroni2009almost}
+Pietroni N, Tarini M, Cignoni P.
+\newblock Almost isometric mesh parameterization through abstract
+  domains\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2009,
+  16\allowbreak (4): 621-635.
+
+\bibitem[Hormann 等人(2017)Hormann and Sukumar]{hormann2017generalized}
+Hormann K, Sukumar N.
+\newblock Generalized barycentric coordinates in computer graphics and
+  computational mechanics\allowbreak[M].
+\newblock 2017.
+
+\bibitem[Ovsjanikov 等人(2012)Ovsjanikov, Ben-Chen, Solomon, Butscher, and
+  Guibas]{Ovsjanikov_Ben-Chen_Solomon_Butscher_Guibas_2012}
+Ovsjanikov M, Ben-Chen M, Solomon J, et~al.
+\newblock Functional maps: a flexible representation of maps between
+  shapes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2012, 31\allowbreak (4): 30:1-30:11.
+
+\bibitem[Schmidt 等人(2020)Schmidt, Campen, Born, and
+  Kobbelt]{Schmidt2020IntersurfaceMV}
+Schmidt P, Campen M, Born J, et~al.
+\newblock Inter-surface maps via constant-curvature metrics\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2020, 39\allowbreak (4): 119:1-119:15.
+
+\bibitem[Gillespie 等人(2021)Gillespie, Sharp, and
+  Crane]{Gillespie2021IntegerCF}
+Gillespie M, Sharp N, Crane K.
+\newblock Integer coordinates for intrinsic geometry processing\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2021, 40\allowbreak (6): 252:1-252:13.
+
+\bibitem[Cohen 等人(1997)Cohen, Manocha, and Olano]{cohen1997simplifying}
+Cohen J, Manocha D, Olano M.
+\newblock Simplifying polygonal models using successive
+  mappings\allowbreak[C]//\allowbreak
+IEEE Visualization.
+\newblock 1997: 395-402.
+
+\bibitem[Lee 等人(1998)Lee, Sweldens, Schr{\"o}der, Cowsar, and
+  Dobkin]{Lee1998MAPSMA}
+Lee A~W~F, Sweldens W, Schr{\"o}der P, et~al.
+\newblock MAPS: multiresolution adaptive parameterization of
+  surfaces\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1998: 95-104.
+
+\bibitem[Liu 等人(2020)Liu, Kim, Chaudhuri, Aigerman, and
+  Jacobson]{Liu2020NeuralS}
+Liu H~T~D, Kim V~G, Chaudhuri S, et~al.
+\newblock Neural subdivision\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2020, 39\allowbreak (4): 124:1-124:16.
+
+\bibitem[Liu 等人(2023)Liu, Gillespie, Chislett, Sharp, Jacobson, and
+  Crane]{Liu2023SurfaceSU}
+Liu H~T~D, Gillespie M, Chislett B, et~al.
+\newblock Surface simplification using intrinsic error metrics\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (4): 118:1-118:17.
+
+\bibitem[Sharp 等人(2021)Sharp, Gillespie, and Crane]{Sharp2021GeometryPW}
+Sharp N, Gillespie M, Crane K.
+\newblock Geometry processing with intrinsic triangulations\allowbreak[M].
+\newblock 2021.
+
+\bibitem[Edelstein 等人(2025)Edelstein, Liu, and
+  Ben-Chen]{Edelstein2025CageNet}
+Edelstein M, Liu H~T~D, Ben-Chen M.
+\newblock CageNet: a meta-framework for learning on wild
+  meshes\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2025: 1-11.
+
+\bibitem[Sederberg 等人(1986)Sederberg and Parry]{Sederberg1986}
+Sederberg T~W, Parry S~R.
+\newblock Free-form deformation of solid geometric
+  models\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1986: 151-160.
+
+\bibitem[Schaefer 等人(2006)Schaefer, McPhail, and Warren]{Schaefer2006}
+Schaefer S, McPhail T, Warren J.
+\newblock Image deformation using moving least
+  squares\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2006: 533-540.
+
+\bibitem[Goes 等人(2017)Goes and James]{DeGoes2017}
+Goes F~D, James D~L.
+\newblock Regularized kelvinlets: sculpting brushes based on fundamental
+  solutions of elasticity\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2017, 36\allowbreak (4): 40:1-40:11.
+
+\bibitem[Floater(2003)]{Floater2003}
+Floater M~S.
+\newblock Mean value coordinates\allowbreak[J].
+\newblock Computer Aided Geometric Design, 2003, 20\allowbreak (1): 19-27.
+
+\bibitem[Hormann 等人(2006)Hormann and Floater]{Hormann2006}
+Hormann K, Floater M~S.
+\newblock Mean value coordinates for arbitrary planar polygons\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2006, 25\allowbreak (4): 1424-1441.
+
+\bibitem[Huang 等人(2006)Huang, Shi, Liu, Zhou, Wei, Teng, Bao, Guo, and
+  Shum]{Huang2006}
+Huang J, Shi X, Liu X, et~al.
+\newblock Subspace gradient domain mesh deformation\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2006: 1126-1134.
+
+\bibitem[Farbman 等人(2009)Farbman, Hoffer, Lipman, Cohen-Or, and
+  Lischinski]{Farbman2009}
+Farbman Z, Hoffer G, Lipman Y, et~al.
+\newblock Coordinates for instant image cloning\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2009, 28\allowbreak (3): 67:1-67:9.
+
+\bibitem[Lipman 等人(2007)Lipman, Kopf, Cohen-Or, and Levin]{Lipman2007}
+Lipman Y, Kopf J, Cohen-Or D, et~al.
+\newblock GPU-assisted positive mean value coordinates for mesh
+  deformations\allowbreak[C]//\allowbreak
+Symposium on Geometry Processing.
+\newblock 2007: 117-123.
+
+\bibitem[Li 等人(2013)Li and Hu]{li2012poisson}
+Li X~Y, Hu S~M.
+\newblock Poisson coordinates\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2013,
+  19\allowbreak (2): 344-352.
+
+\bibitem[Hormann 等人(2008)Hormann and Sukumar]{Hormann2008Maximum}
+Hormann K, Sukumar N.
+\newblock Maximum entropy coordinates for arbitrary polytopes\allowbreak[J].
+\newblock Computer Graphics Forum, 2008, 27\allowbreak (5): 1513-1520.
+
+\bibitem[Chang 等人(2023)Chang, Deng, and Hormann]{Chang2023Maximum}
+Chang Q, Deng C, Hormann K.
+\newblock Maximum likelihood coordinates\allowbreak[J].
+\newblock Computer Graphics Forum, 2023, 42\allowbreak (5): 1-8.
+
+\bibitem[Zhang\ 等人(2014)Zhang, Deng, Liu, Patan猫Giuseppe, Bouaziz,
+  Hormann, and Liu]{Zhang2014Local}
+Zhang J, Deng B, Liu Z, et~al.
+\newblock Local barycentric coordinates\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2014, 33\allowbreak (6): 188:1-188:12.
+
+\bibitem[Dodik 等人(2023)Dodik, Stein, Sitzmann, and
+  Solomon]{Dodik2023Variational}
+Dodik A, Stein O, Sitzmann V, et~al.
+\newblock Variational barycentric coordinates\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (6): 255:1-255:16.
+
+\bibitem[Lipman 等人(2008)Lipman, Levin, and Cohen-Or]{Lipman2008}
+Lipman Y, Levin D, Cohen-Or D.
+\newblock Green coordinates\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2008, 27\allowbreak (3): 78:1-78:10.
+
+\bibitem[Chen 等人(2023)Chen, de~Goes, and Desbrun]{chen2023somigliana}
+Chen J, de~Goes F, Desbrun M.
+\newblock Somigliana coordinates: an elasticity-derived approach for cage
+  deformation\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2023: 1-8.
+
+\bibitem[Hou 等人(2020)Hou, Sun, Fang, Liu, Hu, Qin, Hao, and He]{Hou2017}
+Hou F, Sun Q, Fang Z, et~al.
+\newblock Poisson vector graphics (PVG)\allowbreak[J].
+\newblock IEEE Transactions on Visualization and Computer Graphics, 2020,
+  26\allowbreak (2): 1361-1371.
+
+\bibitem[Ilbery 等人(2013)Ilbery, Kendall, Concolato, and
+  McCosker]{Ilbery2013}
+Ilbery P, Kendall L, Concolato C, et~al.
+\newblock Biharmonic diffusion curve images from boundary
+  elements\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (6): 219:1-219:12.
+
+\bibitem[Mandad 等人(2021)Mandad and Campen]{Mandad2021Guaranteed}
+Mandad M, Campen M.
+\newblock Guaranteed-quality higher-order triangular meshing of 2D
+  domains\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2021, 40\allowbreak (4): 154:1-154:14.
+
+\bibitem[Yang 等人(2022)Yang, Liu, Chai, Liu, and Fu]{Yang2022PreciseHM}
+Yang J, Liu S, Chai S, et~al.
+\newblock Precise high‐order meshing of 2D domains with rational B{\'e}zier
+  curves\allowbreak[J].
+\newblock Computer Graphics Forum, 2022, 41\allowbreak (5): 79-88.
+
+\bibitem[Khanteimouri 等人(2022)Khanteimouri, Mandad, and
+  Campen]{Khanteimouri2022RationalBG}
+Khanteimouri P, Mandad M, Campen M.
+\newblock Rational B{\'e}zier guarding\allowbreak[J].
+\newblock Computer Graphics Forum, 2022, 41\allowbreak (5): 89-99.
+
+\bibitem[Li 等人(2013)Li, Ju, and Hu]{Li2013}
+Li X~Y, Ju T, Hu S~M.
+\newblock Cubic mean value coordinates\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (4): 126:1-126:10.
+
+\bibitem[Michel 等人(2023)Michel and Thiery]{MichelThiery2023}
+Michel {\'E}, Thiery J~M.
+\newblock Polynomial 2D green coordinates for polygonal
+  cages\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 2023: 1-9.
+
+\bibitem[Liu 等人(2024)Liu, Liu, and Fu]{liu2024polygc}
+Liu S, Liu L, Fu X~M.
+\newblock Polynomial 2D green coordinates for high-order cages\allowbreak[A].
+\newblock arXiv (2024).
+
+\bibitem[James 等人(1999)James and Pai]{James1999ArtDefoAR}
+James D~L, Pai D~K.
+\newblock ArtDefo: accurate real time deformable
+  objects\allowbreak[C]//\allowbreak
+Proceedings of SIGGRAPH.
+\newblock 1999: 65-72.
+
+\bibitem[Schreck 等人(2019)Schreck, Hafner, and Wojtan]{Schreck2019}
+Schreck C, Hafner C, Wojtan C.
+\newblock Fundamental solutions for water wave animation\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2019, 38\allowbreak (4): 130:1-130:14.
+
+\bibitem[Da 等人(2016)Da, Hahn, Batty, Wojtan, and
+  Grinspun]{Da2016SurfaceonlyL}
+Da F, Hahn D, Batty C, et~al.
+\newblock Surface-only liquids\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2016, 35\allowbreak (4): 78:1-78:12.
+
+\bibitem[Solomon 等人(2017)Solomon, Vaxman, and
+  Bommes]{Solomon2017BoundaryEO}
+Solomon J~M, Vaxman A, Bommes D.
+\newblock Boundary element octahedral fields in volumes\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2017, 36\allowbreak (3): 28:1-28:16.
+
+\bibitem[Levi 等人(2016)Levi and Weber]{Levi2016OnTC}
+Levi Z, Weber O.
+\newblock On the convexity and feasibility of the bounded distortion harmonic
+  mapping problem\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2016, 35\allowbreak (4): 106:1-106:15.
+
+\bibitem[Bang 等人(2023)Bang, Serkh, Stein, and Jacobson]{Bang2023}
+Bang S, Serkh K, Stein O, et~al.
+\newblock An adaptive fast-multipole-accelerated hybrid boundary integral
+  equation method for accurate diffusion curves\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (6): 215:1-215:28.
+
+\bibitem[Chen 等人(2024)Chen, Schaefer, and Desbrun]{Chen2024LightningfastMO}
+Chen J, Schaefer F, Desbrun M.
+\newblock Lightning-fast method of fundamental solutions\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2024, 43\allowbreak (4): 77:1-77:16.
+
+\bibitem[Mortenson(1985)]{Mortenson1985GeometricM}
+Mortenson M~E.
+\newblock Geometric modeling\allowbreak[M].
+\newblock 1985.
+
+\bibitem[Ma 等人(2003)Ma and Hewitt]{Ma2003PointIA}
+Ma Y, Hewitt W~T.
+\newblock Point inversion and projection for NURBS curve and surface: control
+  polygon approach\allowbreak[J].
+\newblock Computer Aided Geometric Design, 2003, 20\allowbreak (2): 79-99.
+
+\bibitem[Skowron 等人(2012)Skowron and Gould]{Skowron2012}
+Skowron J, Gould A.
+\newblock General complex polynomial root solver and its further optimization
+  for binary microlenses\allowbreak[A].
+\newblock arXiv (2012).
+
+\bibitem[Ciarlet(1991)]{Ciarlet1991BasicEE}
+Ciarlet P~G.
+\newblock Basic error estimates for elliptic problems\allowbreak[J].
+\newblock Handbook of Numerical Analysis, 1991, 2: 17-351.
+
+\bibitem[Knabner 等人(2001)Knabner and Summ]{Knabner2001TheIO}
+Knabner P, Summ G.
+\newblock The invertibility of the isoparametric mapping for pyramidal and
+  prismatic finite elements\allowbreak[J].
+\newblock Numerische Mathematik, 2001, 88\allowbreak (4): 661-681.
+
+\bibitem[Neri 等人(2010)Neri and Tirronen]{Neri2010advance}
+Neri F, Tirronen V.
+\newblock Recent advances in differential evolution: a survey and experimental
+  analysis\allowbreak[J].
+\newblock Artificial Intelligence Review, 2010, 33\allowbreak (1-2): 61-106.
+
+\bibitem[Das 等人(2011)Das and Suganthan]{Das2011Differential}
+Das S, Suganthan P~N.
+\newblock Differential evolution: a survey of the
+  state-of-the-art\allowbreak[J].
+\newblock IEEE Transactions on Evolutionary Computation, 2011, 15\allowbreak
+  (1): 4-31.
+
+\bibitem[Zhang 等人(2022)Zhang, Wang, Guo, Chai, Liu, and
+  Fu]{Zhang2022ConstrainedRU}
+Zhang W~X, Wang Q, Guo J, et~al.
+\newblock Constrained remeshing using evolutionary vertex
+  optimization\allowbreak[J].
+\newblock Computer Graphics Forum, 2022, 41\allowbreak (2): 237-247.
+
+\bibitem[Crane 等人(2013)Crane, Weischedel, and
+  Wardetzky]{Crane2012GeodesicsIH}
+Crane K, Weischedel C, Wardetzky M.
+\newblock Geodesics in heat: a new approach to computing distance based on heat
+  flow\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (5): 152:1-152:11.
+
+\bibitem[Mitchell 等人(1987)Mitchell, Mount, and
+  Papadimitriou]{mitchell1987discrete}
+Mitchell J~S, Mount D~M, Papadimitriou C~H.
+\newblock The discrete geodesic problem\allowbreak[J].
+\newblock SIAM Journal on Computing, 1987, 16\allowbreak (4): 647-668.
+
+\bibitem[Maggiordomo 等人(2024)Maggiordomo, Uralsky, Moreton, and
+  Tarini]{Maggiordomo2023TheIB}
+Maggiordomo A, Uralsky Y, Moreton H~P, et~al.
+\newblock The inverse barycentric displacement problem\allowbreak[J].
+\newblock The Visual Computer, 2024, 40\allowbreak (3): 2081-2088.
+
+\bibitem[Khanteimouri 等人(2023)Khanteimouri and
+  Campen]{Khanteimouri20233Dbezier}
+Khanteimouri P, Campen M.
+\newblock 3D B\'{e}zier guarding: boundary-conforming curved tetrahedral
+  meshing\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2023, 42\allowbreak (6): 182:1-182:19.
+
+\bibitem[Kn\"{o}ppel 等人(2013)Kn\"{o}ppel, Crane, Pinkall, and
+  Schr\"{o}der]{Knoppel:2013:GOD}
+Kn\"{o}ppel F, Crane K, Pinkall U, et~al.
+\newblock Globally optimal direction fields\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2013, 32\allowbreak (4): 59:1-59:10.
+
+\bibitem[Zhou 等人(2016)Zhou and Jacobson]{Zhou2016Thingi10KAD}
+Zhou Q, Jacobson A.
+\newblock Thingi10K: a dataset of 10,000 3D-printing models\allowbreak[A].
+\newblock arXiv (2016).
+
+\bibitem[Koch 等人(2019)Koch, Matveev, Jiang, Williams, Artemov, Burnaev,
+  Alexa, Zorin, and Panozzo]{Koch2018ABCAB}
+Koch S, Matveev A, Jiang Z, et~al.
+\newblock ABC: a big CAD model dataset for geometric deep
+  learning\allowbreak[C]//\allowbreak
+IEEE/CVF Conference on Computer Vision and Pattern Recognition.
+\newblock 2019: 9601-9611.
+
+\bibitem[Bell(2015)]{Bell2015cauchytransform}
+Bell S~R.
+\newblock The cauchy transform, potential theory and conformal
+  mapping\allowbreak[M].
+\newblock 2015.
+
+\bibitem[Brebbia(1978)]{Brebbia1978TheBE}
+Brebbia C~A.
+\newblock The boundary element method for engineers\allowbreak[M].
+\newblock 1978.
+
+\bibitem[Fischer 等人(1999)Fischer, Tilg, Wach, Modre, Leder, and
+  Nowak]{Fischer1999ApplicationOH}
+Fischer G, Tilg B, Wach P, et~al.
+\newblock Application of high-order boundary elements to the
+  electrocardiographic inverse problem.\allowbreak[J].
+\newblock Computer Methods and Programs in Biomedicine, 1999, 58\allowbreak
+  (2): 119-131.
+
+\bibitem[Frijns 等人(2000)Frijns, de~Snoo, and
+  Schoonhoven]{Frijns2000ImprovingTA}
+Frijns J~H~M, de~Snoo S~L, Schoonhoven R.
+\newblock Improving the accuracy of the boundary element method by the use of
+  second-order interpolation functions\allowbreak[J].
+\newblock IEEE Transactions on Biomedical Engineering, 2000, 47\allowbreak
+  (10): 1336-1346.
+
+\bibitem[Gravenkamp 等人(2019)Gravenkamp, Saputra, and
+  Duczek]{gravenkamp2019high}
+Gravenkamp H, Saputra A~A, Duczek S.
+\newblock High-order shape functions in the scaled boundary finite element
+  method revisited\allowbreak[J].
+\newblock Archives of Computational Methods in Engineering, 2019, 28\allowbreak
+  (2): 473-494.
+
+\bibitem[Guennebaud 等人(2010)Guennebaud, Jacob, et~al]{eigenweb}
+Guennebaud G, Jacob B, et~al.
+\newblock Eigen V3\allowbreak[Z].
+\newblock 2010.
+
+\bibitem[Smith 等人(2015)Smith and Schaefer]{Smith2015}
+Smith J, Schaefer S.
+\newblock Bijective parameterization with free boundaries\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2015, 34\allowbreak (4): 70:1-70:9.
+
+\bibitem[Stein 等人(2018)Stein, Grinspun, Wardetzky, and
+  Jacobson]{Stein2018NaturalBC}
+Stein O, Grinspun E, Wardetzky M, et~al.
+\newblock Natural boundary conditions for smoothing in geometry
+  processing\allowbreak[J].
+\newblock ACM Transactions on Graphics, 2018, 37\allowbreak (2): 23:1-23:13.
+
+\end{thebibliography}
