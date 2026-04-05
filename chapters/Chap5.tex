@@ -55,7 +55,7 @@
 
 作为调和坐标的自然推广，双调和坐标通过引入更丰富的变形空间，在保持较低扭曲的同时提供了更均衡的边界控制能力~\cite{Weber2012,thiery2024biharmonic}。已有工作分别在线性二维多边形笼和三维三角网格笼上给出了双调和坐标的闭式构造~\cite{Weber2012,thiery2024biharmonic}。另一方面，高阶笼以多项式曲线替代分段直线，不仅能更紧密地贴合曲边形状，还能更自然地表达边界的切向拉伸与曲率变化。围绕这一表示，已有工作将均值坐标、Green 坐标与 Cauchy 坐标推广到高阶笼~\cite{Li2013,MichelThiery2023,Lin2024PolynomialCC,liu2024polygc}；但二维高阶笼上的双调和坐标仍缺少相应构造。这也意味着，第五章已经获得的高阶笼几何表达能力与共形变形优势，尚未进一步转化为“边界可控且内部低扭曲”的坐标体系。
 
-本章据此构造笼空间中的半解析半数值的高阶双调和坐标。方法上，本文在高阶边界元框架下，将曲边笼边界、边界条件以及未知场统一表示为 Bernstein 多项式，并结合解析积分与数值求解建立可计算的坐标形式。由此得到的坐标以边界控制与低扭曲为核心目标：一方面，它能够更好地约束边界值及其导数，从而提高曲边笼编辑中的边界可控性；另一方面，它在内部保持较平滑的传播过程，以减轻剪切、拉伸与局部伪影。\S~\ref{sec:bihc-method} 节首先回顾双调和坐标的边界元求解基础，随后给出高阶单元下的边界积分方程重写、代数系统求解与变形控制方法；\S~\ref{sec:bihc-results} 节通过时间、不同目标次数以及与现有坐标方法的对比实验，评估所提出方法在计算效率、边界控制能力与变形质量上的表现。
+本章据此构造笼空间中的半解析半数值的高阶双调和坐标。方法上，我们在高阶边界元框架下，将曲边笼边界、边界条件以及未知场统一表示为 Bernstein 多项式，并结合解析积分与数值求解建立可计算的坐标形式。由此得到的坐标以边界控制与低扭曲为核心目标：一方面，它能够更好地约束边界值及其导数，从而提高曲边笼编辑中的边界可控性；另一方面，它在内部保持较平滑的传播过程，以减轻剪切、拉伸与局部伪影。\S~\ref{sec:bihc-method} 节首先回顾双调和坐标的边界元求解基础，随后给出高阶单元下的边界积分方程重写、代数系统求解与变形控制方法；\S~\ref{sec:bihc-results} 节通过时间、不同目标次数以及与现有坐标方法的对比实验，评估所提出方法在计算效率、边界控制能力与变形质量上的表现。
 
 \input{chapters/chap5_cn/bihc_intro_figs}
 
@@ -129,8 +129,8 @@ $G_2(\xi,\eta)=-\frac{\|\xi-\eta\|^2}{8 \pi}(\ln\|\xi-\eta\|-1)$。
 %
 将这些函数表示为边界单元节点处函数值后，即可通过在不同边界点上评估 \(\eta'\) 建立代数方程组。
 %
-在代数方程组求解方面，\citet{Weber2012} 将代数约束~\eqref{equ:bihc-BIE2} 代入~\eqref{equ:bihc-BIE1}，形成线性系统并求解。
-在三维情形中，\citet{thiery2024biharmonic} 同时最小化两类约束，从而得到更平稳的变形结果。高阶边界元设置的整体示意见图~\ref{fig:bihc-schematic}。
+在代数方程组求解方面，文献\cite{Weber2012} 将代数约束~\eqref{equ:bihc-BIE2} 代入~\eqref{equ:bihc-BIE1}，形成线性系统并求解。
+在三维情形中，文献\cite{thiery2024biharmonic} 同时最小化两类约束，从而得到更平稳的变形结果。高阶边界元设置的整体示意见图~\ref{fig:bihc-schematic}。
 
 \begin{figure}[t]
   \centering
@@ -150,7 +150,7 @@ $G_2(\xi,\eta)=-\frac{\|\xi-\eta\|^2}{8 \pi}(\ln\|\xi-\eta\|-1)$。
 
 \subsection{多项式双调和坐标}\label{sec:bihc-HighOrderBEM}
 
-为实现曲边到曲边的变形，本文采用高阶边界元方法~\cite{Fischer1999ApplicationOH,Frijns2000ImprovingTA,gravenkamp2019high}，这需要高阶单元和高阶形函数。
+为实现曲边到曲边的变形，我们采用高阶边界元方法~\cite{Fischer1999ApplicationOH,Frijns2000ImprovingTA,gravenkamp2019high}，这需要高阶单元和高阶形函数。
 
 
 \subsubsection{重写边界积分方程}\label{sec:bihc-reformulating-bie}
@@ -179,7 +179,7 @@ $G_2(\xi,\eta)=-\frac{\|\xi-\eta\|^2}{8 \pi}(\ln\|\xi-\eta\|-1)$。
 由于 \(\mg_1(t)\) 意味着变形后笼边是 $n$ 次多项式曲线，因此取 \(n \geq m\) 以保证变形连续性。
 
 \paragraph{高阶形函数}
-本文使用高阶形函数来近似边界上未知函数 \(\Delta f\) 和 \(\partial \Delta f/\partial \mn\)。
+我们使用高阶形函数来近似边界上未知函数 \(\Delta f\) 和 \(\partial \Delta f/\partial \mn\)。
 通常，在 \(\mc_i(t)\) 上用 $k$ 次多项式近似 \(\Delta f\)，用 $(k-1)$ 次多项式近似 \(\partial \Delta f/\partial \mn\)：
 \begin{equation}\label{equ:bihc-Df}
 \begin{aligned}
@@ -235,7 +235,7 @@ $
 F_{h,4}^{c,\eta} := \int_0^1 \frac{t^h}{\|c(t) - \eta \|^4} \, dt.
 $
 
-因此，只需计算 \(F_{h,2}^{c,\eta}\) 与 \(F_{h,4}^{c,\eta}\)。\citet{liu2024polygc} 给出了如下引理：
+因此，只需计算 \(F_{h,2}^{c,\eta}\) 与 \(F_{h,4}^{c,\eta}\)。文献\cite{liu2024polygc} 给出了如下引理：
 \begin{lemma}
 对于 \(p(t) = \prod_{i=1}^{n} (t - \omega_i)^{n_i}\)，有
 \[
@@ -248,10 +248,10 @@ $p(t)=\|c(t) - \eta \|^2$ 与 $p(t)=\|c(t) - \eta \|^4$。
 
 \subsubsection{边界积分方程求解}
 \paragraph{奇异积分}
-为得到代数方程组，本文在边界上采样 \(\eta^{\text{b}}\)。
+为得到代数方程组，我们在边界上采样 \(\eta^{\text{b}}\)。
 %
-此时，上述积分求值涉及奇异积分计算。关于该问题，在边界元方法中已有大量研究~\cite{Fischer1999ApplicationOH}。本文遵循文献~\cite{Weber2012} 的建议：当 \(\eta\) 趋近边界时，这些积分的极限存在。
-\tr{在本问题中，上述解析方法无法直接计算该极限，因为每一项 \(F_{h,2}^{c,\eta}\) 都趋于无穷大。本文在补充推导中单独给出该极限的显式表达。另一种实用策略是将点 \(\eta^{\text{b}}\) 略微向笼内部偏移，再直接计算积分。实验表明，这一做法同样可得到准确结果。}
+此时，上述积分求值涉及奇异积分计算。关于该问题，在边界元方法中已有大量研究~\cite{Fischer1999ApplicationOH}。我们遵循文献~\cite{Weber2012} 的建议：当 \(\eta\) 趋近边界时，这些积分的极限存在。
+\tr{在本问题中，上述解析方法无法直接计算该极限，因为每一项 \(F_{h,2}^{c,\eta}\) 都趋于无穷大。我们在补充推导中单独给出该极限的显式表达。另一种实用策略是将点 \(\eta^{\text{b}}\) 略微向笼内部偏移，再直接计算积分。实验表明，这一做法同样可得到准确结果。}
 
 \paragraph{矩阵约束}
 将边界上的 \(\eta^{\text{b}}\) 代入 \eqref{equ:bihc-dis_Int1} 与 \eqref{equ:bihc-dis_Int2}，可得如下矩阵约束：
@@ -274,7 +274,7 @@ $p(t)=\|c(t) - \eta \|^2$ 与 $p(t)=\|c(t) - \eta \|^4$。
 \paragraph{近似代数方程}
 求解代数方程组有两种方式：一种严格施加拉普拉斯约束，另一种较宽松地施加该约束。
 为简化说明，这里只讨论 \(k=n\) 的情形；\(k>n\) 的情况同理。
-此时，方程组中的 8 个矩阵可简化为 5 个。由此可得到本文正则化双调和坐标的表达：
+此时，方程组中的 8 个矩阵可简化为 5 个。由此可得到本章正则化双调和坐标的表达：
 \begin{equation}\label{equ:bihc-final_BHC}
     \begin{aligned}
 f(\eta) &= \big[ \phi(\eta) + (\bar{\phi}(\eta) C_L + \bar{\psi}(\eta) C_D)(M_n - \Phi_n) \big] G_1 \\
@@ -283,7 +283,7 @@ f(\eta) &= \big[ \phi(\eta) + (\bar{\phi}(\eta) C_L + \bar{\psi}(\eta) C_D)(M_n 
 \end{aligned}
 \end{equation}
 其中，\(\phi(\eta)\) 表示在 \(\eta\) 处由 \(\phi_{i,j}\) 取值组成的行向量；\(\bar{\phi}(\eta)\)、\(\bar{\psi}(\eta)\) 和 \(\psi(\eta)\) 同理。
-\(\alpha(\eta)\) 与 \(\beta(\eta)\) 共同构成本文双调和坐标。
+\(\alpha(\eta)\) 与 \(\beta(\eta)\) 共同构成本章双调和坐标。
 在~\cite{Weber2012} 提出的第一种方法（记作 $\text{BiHC}_1$）中，仅优化 \eqref{equ:bihc-dis_Int1}，同时严格满足 \eqref{equ:bihc-dis_Int2}。
 相应矩阵为：\(C_L = (\bar{\Phi}_n + \bar{\Psi}_n A)^{-1}\)、\(C_D = A (\bar{\Phi}_n + \bar{\Psi}_n A)^{-1}\)，其中 \(A = \Psi_n^{-1} (M_n - \Phi_n)\)。
 %
@@ -309,7 +309,7 @@ C_D
     \item 增加采样点 \(\eta^\text{b}\) 数量，形成超定方程组，使积分方程在最小二乘意义下于更多点成立，从而使变形结果更光滑。
 \end{enumerate}
 实验表明，方法 (1) 与方法 (2) 结果相近。
-在实践中，本文将每条笼边细分为 4 个单元，并在每个单元参数域上均匀采样 \(2n\) 个点构建方程组。
+在实践中，我们将每条笼边细分为 4 个单元，并在每个单元参数域上均匀采样 \(2n\) 个点构建方程组。
 
 \begin{figure}[t]
   \centering
@@ -334,9 +334,9 @@ C_D
 令 \(s_j=1\) 时，得到与文献~\cite{MichelThiery2023} 相同的边界条件。不同于其公式，这类边界条件可在双调和函数空间中被精确满足。可以观察到，该选择在边界附近呈现与 Green 坐标相似的保角行为，并在多组样例中取得了良好结果。}
 然而，对于偏离保角较大的笼变形，这种边界附近的局部保角性可能导致笼内部产生更大的剪切。
 在这种情况下，需要考虑笼的全局变形。
-按照文献~\cite{Weber2012} 与文献~\cite{thiery2024biharmonic} 的做法，本文给出两种根据边界位置自动推导边界导数的方法。
+按照文献~\cite{Weber2012} 与文献~\cite{thiery2024biharmonic} 的做法，我们给出两种根据边界位置自动推导边界导数的方法。
 由于 \(s_i<0\) 在变形时可能导致边界附近退化与折叠，因此约束 \(s_i>0\)。
-本文在 \(\partial\Omega\) 上采样点约束 $C=\{q_k\}$，以离散两种不同的变形能量：
+我们在 \(\partial\Omega\) 上采样点约束 $C=\{q_k\}$，以离散两种不同的变形能量：
 \begin{enumerate}
 \item 尽可能调和（As-Harmonic-As-Possible, AHAP）能量：$\sum_k \|\Delta f(q_k)\|^2$。该能量通过~\eqref{equ:bihc-dis_Int2} 计算。
 \item 尽可能仿射（As-Affine-As-Possible, AAAP）能量：$\sum_k \|f'(q_k)\|^2$。该能量通过~\eqref{equ:bihc-final_BHC} 计算。其评估需要积分 \(\phi(\eta),\psi(\eta),\bar{\phi}(\eta),\bar{\phi}(\eta)\) 的导数，而这部分计算已在第~\ref{sec:bihc-reformulating-bie} 节给出。
@@ -393,7 +393,7 @@ C_D
 \end{equation*}
 其中 \(\{\alpha_c,\beta_c\}\) 对应 Green 坐标并提供保角变形，\(\{\alpha_{\text{i}},\beta_{\text{i}}\}\) 是一个双调和函数项，用于把保角变形后的边界拉回到笼边界。
 %
-本文定义新坐标 \(\{\alpha_c + w \alpha_{\text{i}},\beta_c+w\beta_{\text{i}}\}\)，用户可调节 \(w\) 以控制变形。
+我们定义新坐标 \(\{\alpha_c + w \alpha_{\text{i}},\beta_c+w\beta_{\text{i}}\}\)，用户可调节 \(w\) 以控制变形。
 当 \(w=0\) 时，变形是保角的；当 \(w=1\) 时，结果完全插值边界。
 通常取中间值 \(w\) 可得到更直观且更满意的变形效果（见图~\ref{fig:bihc-weights}）。
 
@@ -442,14 +442,14 @@ C_D
 
 \section{实验与评估}\label{sec:bihc-results}
 \tr{
-本文方法采用 C++ 实现，使用 Eigen~\cite{eigenweb} 求解线性系统。全部实验在一台配备 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存的台式机上完成。
+本章方法采用 C++ 实现，使用 Eigen~\cite{eigenweb} 求解线性系统。全部实验在一台配备 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存的台式机上完成。
 }
 
 \paragraph{时间与内存}
-\tr{本文展示的所有基于笼变形算法均可实时运行。
+\tr{本章展示的所有基于笼变形算法均可实时运行。
 预处理时间分为两部分：(1) 构建笼并求解矩阵约束；(2) 计算图像上各点的坐标。
 图~\ref{fig:bihc-order} 中的变形是最简单案例，初始笼由 4 条二次 \Bezier 曲线组成。对于其中三组变形，步骤 (1) 分别耗时 8 ms、20 ms 和 36 ms；对 8000 个点的步骤 (2) 分别耗时 44 ms、64 ms 和 90 ms。
-相比之下，图~\ref{fig:bihc-teaser} 中的章鱼案例接近最复杂场景，笼由 22 条三次 \Bezier 曲线组成。步骤 (1) 耗时 1.02 s，其中 96.6\% 时间用于 Eigen 库中的 6 次矩阵运算；步骤 (2) 对 8800 个点耗时 0.40 s。在本文所有案例中，预处理总内存占用均未超过 150 MB。}
+相比之下，图~\ref{fig:bihc-teaser} 中的章鱼案例接近最复杂场景，笼由 22 条三次 \Bezier 曲线组成。步骤 (1) 耗时 1.02 s，其中 96.6\% 时间用于 Eigen 库中的 6 次矩阵运算；步骤 (2) 对 8800 个点耗时 0.40 s。在本章所有案例中，预处理总内存占用均未超过 150 MB。}
 
 \begin{figure}[t]
   \centering
@@ -467,7 +467,7 @@ C_D
 
 \paragraph{不同目标次数}
 在设置边界条件 \eqref{equ:bihc-g} 时，选择不同的 \(n\) 值，对应将笼变形为不同次数，如图~\ref{fig:bihc-more-examples} 和图~\ref{fig:bihc-order} 所示；这对初始笼是线性还是高阶均成立。
-尽管本文允许变形后笼具有任意高次数，但需注意：次数越高，积分计算 \eqref{equ:bihc-basis_inte} 越复杂，求解坐标 \eqref{equ:bihc-final_BHC} 所需矩阵约束也越大，从而带来更高预计算时间。
+尽管本章方法允许变形后笼具有任意高次数，但需注意：次数越高，积分计算 \eqref{equ:bihc-basis_inte} 越复杂，求解坐标 \eqref{equ:bihc-final_BHC} 所需矩阵约束也越大，从而带来更高预计算时间。
 
 \begin{figure*}[t]
   \centering
@@ -505,17 +505,17 @@ C_D
 \end{figure*}
 
 \paragraph{对比}
-当初始笼为线性时，本文选择 Cubic MVC~\cite{Li2013} 与 Polynomial Green Coordinate（PolyGC）~\cite{MichelThiery2023} 作为对比方法；当初始笼为高阶时，本文选择文献~\cite{liu2024polygc} 与文献~\cite{Lin2024PolynomialCC} 进行对比。
+当初始笼为线性时，我们选择 Cubic MVC~\cite{Li2013} 与 Polynomial Green Coordinate（PolyGC）~\cite{MichelThiery2023} 作为对比方法；当初始笼为高阶时，我们选择文献~\cite{liu2024polygc} 与文献~\cite{Lin2024PolynomialCC} 进行对比。
 
-与本文坐标一样，Cubic MVC 同时插值边界上的函数值与导数。但该坐标与常规均值坐标一样会产生伪影，尤其在非凸形状上表现较差（见图~\ref{fig:bihc-cmp-cmvc}）。此外，本文坐标继承了调和坐标的优势，即最小化所谓 Hessian 能量~\cite{Stein2018NaturalBC}，并具有调和拉普拉斯，从而产生更低失真的变形（见图~\ref{fig:bihc-more-cmp}）。同时，Cubic MVC 不支持高阶笼。
+与本章坐标一样，Cubic MVC 同时插值边界上的函数值与导数。但该坐标与常规均值坐标一样会产生伪影，尤其在非凸形状上表现较差（见图~\ref{fig:bihc-cmp-cmvc}）。此外，本章坐标继承了调和坐标的优势，即最小化所谓 Hessian 能量~\cite{Stein2018NaturalBC}，并具有调和拉普拉斯，从而产生更低失真的变形（见图~\ref{fig:bihc-more-cmp}）。同时，Cubic MVC 不支持高阶笼。
 
 文献\cite{Lin2024PolynomialCC} 通过将多项式 Cauchy 坐标与其逆映射结合，实现了曲边笼之间的变形。然而，其方法需要用户额外指定一个中间线性笼，且逆映射计算依赖数值积分，不具解析表达。
-\tr{此外，他们的高阶笼需要后验调整，无法像本文方法那样紧密贴合变形后形状。
-这些原因和差异使本文无法与其进行公平对比。}
+\tr{此外，他们的高阶笼需要后验调整，无法像本章方法那样紧密贴合变形后形状。
+这些原因和差异使我们无法与其进行公平对比。}
 
-本文坐标在表达形式和变形结果上与 PolyGC 和 CurvedGC 更为接近。
-PolyGC 与 CurvedGC 用插值性换取保角性；而本文坐标提供了在保角性与插值性之间灵活折中的方式。
-如图~\ref{fig:bihc-weights} 与图~\ref{fig:bihc-more-curvedcmp} 所示，本文对所有点的坐标施加了简单线性加权。还可以采用更复杂的加权策略，例如以距离函数作为权重，从而允许用户指定笼内区域优先满足保角性或插值性。
+本章坐标在表达形式和变形结果上与 PolyGC 和 CurvedGC 更为接近。
+PolyGC 与 CurvedGC 用插值性换取保角性；而本章坐标提供了在保角性与插值性之间灵活折中的方式。
+如图~\ref{fig:bihc-weights} 与图~\ref{fig:bihc-more-curvedcmp} 所示，我们对所有点的坐标施加了简单线性加权。还可以采用更复杂的加权策略，例如以距离函数作为权重，从而允许用户指定笼内区域优先满足保角性或插值性。
 
 \section{本章小结}
-在本章中，针对第五章高阶柯西坐标在共形性与边界控制之间难以兼顾的问题，我们构造了适用于曲边笼的半解析半数值高阶双调合坐标。首先，我们回顾了双调和边值问题及其边界元求解基础；随后，在高阶边界元框架下，将曲边笼边界、边界条件与未知场统一表示为 Bernstein 多项式，建立了高阶单元上的积分计算、矩阵约束与坐标求解方法；进一步地，我们讨论了精度提升、变形能量以及不同权重下的边界控制策略。最后，通过时间与内存、不同目标次数以及与现有坐标方法的对比实验，验证了本文方法能够在增强边界可控性的同时保持较小的内部扭曲，并在保角性与插值性之间提供灵活的折中。
+在本章中，针对第五章高阶柯西坐标在共形性与边界控制之间难以兼顾的问题，我们构造了适用于曲边笼的半解析半数值高阶双调合坐标。首先，我们回顾了双调和边值问题及其边界元求解基础；随后，在高阶边界元框架下，将曲边笼边界、边界条件与未知场统一表示为 Bernstein 多项式，建立了高阶单元上的积分计算、矩阵约束与坐标求解方法；进一步地，我们讨论了精度提升、变形能量以及不同权重下的边界控制策略。最后，通过时间与内存、不同目标次数以及与现有坐标方法的对比实验，验证了本章方法能够在增强边界可控性的同时保持较小的内部扭曲，并在保角性与插值性之间提供灵活的折中。

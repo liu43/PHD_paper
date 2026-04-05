@@ -15,7 +15,7 @@ w_{\Gamma}(\mq) = \sum_k w_{\gamma_k}(\mq).
     w_\gamma(\mq):=\frac{1}{2 \pi}\int_0^1 \frac{\alpha(t) \beta'(t) - \alpha'(t) \beta(t)}{\alpha^2(t)+\beta^2(t)} dt.
 \end{equation}
 %
-由于非均匀有理 B 样条（NURBS）曲线总可通过节点插入转化为一组有理 \Bezier 曲线，本文重点计算有理 \Bezier 曲线的广义环绕数。
+由于非均匀有理 B 样条（NURBS）曲线总可通过节点插入转化为一组有理 \Bezier 曲线，本章重点计算有理 \Bezier 曲线的广义环绕数。
 %
 若 $\gamma$ 是一条 $n$ 次有理 \Bezier 曲线，控制点为 ${\mp}_k$、权重为 $\lambda_k$（其中 $k \in \left \{0,\dots,n\right\}$），则其表达为：
 \begin{equation}
@@ -44,7 +44,7 @@ w_{\Gamma}(\mq) = \sum_k w_{\gamma_k}(\mq).
 
 尽管任意有理多项式积分都存在闭式表达，但在给定多项式系数后，解析解系数通常要通过求解线性方程组获得。
 该过程计算代价高且易出现数值不稳定。
-因此，本文给出一个简洁且高效的闭式表达，\tr{核心基于留数定理}。
+因此，我们给出一个简洁且高效的闭式表达，\tr{核心基于留数定理}。
 
 \begin{figure}[t]
   \centering
@@ -87,7 +87,7 @@ w_{\Gamma}(\mq) = \sum_k w_{\gamma_k}(\mq).
 在线段 \([0,1]\) 外部，$G(\omega)$ 可分解为单值全纯分支。
 当 \(\omega\) 沿任一位于线段 \([0,1]\) 外的简单闭曲线绕行一圈时，\(\log(1-\omega)\) 与 \(\log(-\omega)\) 的辐角都增加 \(2\pi\)。又因 \(\log(1-\frac{1}{\omega})=\log(1-\omega)-\log(-\omega)\)，函数 $G(\omega)$ 的值保持不变。
 
-本文定义区域 $D$：其内部由大圆轮廓 \(\Gamma = \{ \omega : |\omega| = R \}\) 限定，并去除两个小圆 \(\gamma_1 = \{ \omega : |\omega| = \epsilon \}\) 与 \(\gamma_2 = \{ \omega : |\omega - 1| = \epsilon \}\) 的内部，\tr{其中 \(R\) 和 \(\epsilon\) 为正实数}，如图~\ref{fig:qry-complex} 所示。此处假设 \(\mq\) 不在 \Bezier 曲线段上，即 \([0,1]\) 内不存在 \(w_k\)。存在 \(w_k\) 的情形将在第~\ref{sec:qry-forboundary} 节详细讨论。
+我们定义区域 $D$：其内部由大圆轮廓 \(\Gamma = \{ \omega : |\omega| = R \}\) 限定，并去除两个小圆 \(\gamma_1 = \{ \omega : |\omega| = \epsilon \}\) 与 \(\gamma_2 = \{ \omega : |\omega - 1| = \epsilon \}\) 的内部，\tr{其中 \(R\) 和 \(\epsilon\) 为正实数}，如图~\ref{fig:qry-complex} 所示。此处假设 \(\mq\) 不在 \Bezier 曲线段上，即 \([0,1]\) 内不存在 \(w_k\)。存在 \(w_k\) 的情形将在第~\ref{sec:qry-forboundary} 节详细讨论。
 
 %
 对区域 $D$ 上的函数 $G(\omega)$ 应用留数定理，得到：
@@ -137,7 +137,7 @@ $\omega_1,\omega_1^*,\dots,\omega_n,\omega_n^*$ 是多项式 $x(t)^2+y(t)^2=(x(t
 c(t) :=x(t)+y(t) i= a_n t^n + \cdots + a_0 = a_n \prod_{i=1}^n (t - w_i).
 \end{equation}
 }
-对于次数小于 5 的多项式可采用解析求根公式；更高次数不存在统一解析公式，本文采用数值方法求根。
+对于次数小于 5 的多项式可采用解析求根公式；更高次数不存在统一解析公式，我们采用数值方法求根。
 
 \paragraph{一般根} 
 在最一般情形下，\(w_k\) 与 \(w_k^*\) 都是 \(G(t)\) 的单极点，且 \(\text{Res}(G(t), w_k)\) 与 \(\text{Res}(G(t), w_k^*)\) 互为复共轭。于是，若记 $h^k(t)=\tr{A}\prod_{j=1,j\neq k}^{n}(t-\omega_j)(t-\omega_j^*)$，则有：
@@ -212,7 +212,7 @@ f=(x+ yi)(y'+x'i)-(xx'+yy')i,
 例如当 $n=2$ 时，每条 \Bezier 曲线都是某抛物线的一部分。
 条件 \(\omega_1=\omega_2\) 表示查询点位于该抛物线焦点。
 更高次时，若多项式曲线满足某些代数条件，也会在类似焦点的特定位置出现重根。
-虽然本文在实践中尚未遇到该情况，但仍给出其计算形式。
+虽然我们在实践中尚未遇到该情况，但仍给出其计算形式。
 \(\omega_k\) 与 \(\omega_k^*\) 均为 $m$ 阶极点，且有：
 \begin{equation}\label{equ:qry-repeated_expression}
 \begin{aligned}
@@ -261,7 +261,7 @@ f=(x+ yi)(y'+x'i)-(xx'+yy')i,
 受此启发，若点位于曲线上，计算环绕数时将曲线划分为三段（若点是端点则为两段）：点附近无穷小邻域对应的曲线段，以及其余部分。无穷小邻域内曲线局部近似线段，对环绕数贡献为 0；因此仅需计算其余两段 \Bezier 曲线的环绕数，因为目标点不位于这两段上，可用常规环绕数计算处理，如图~\ref{fig:qry-boundary} 所示。
 
 \paragraph{边界点判定}
-为实现严格几何一致性，文献~\cite{Spainhour2024RobustCQ} 已给出有理曲线端点处 GWN 的计算方法。在此基础上，本文进一步给出曲线上任意点 GWN 的通用计算方法。
+为实现严格几何一致性，文献~\cite{Spainhour2024RobustCQ} 已给出有理曲线端点处 GWN 的计算方法。在此基础上，我们进一步给出曲线上任意点 GWN 的通用计算方法。
 仍有一个关键问题：判定给定点是否在有理曲线上。该问题以及点到曲线最短距离问题，通常都可转化为多项式方程求根。
 这类问题可用数值方法~\cite{Mortenson1985GeometricM} 或基于控制多边形的裁剪算法~\cite{Ma2003PointIA} 解决；而借助距离函数 \(h(t)\)，无需额外操作。
 \begin{theorem}\label{pro:qry-near_boundary}
@@ -272,7 +272,7 @@ f=(x+ yi)(y'+x'i)-(xx'+yy')i,
 \end{enumerate}
 \end{theorem}
 \begin{proof}
-结论 (1) 易验证，故仅证明 (2)。回顾 \eqref{equ:qry-root-decompose} 中 \(\omega_k\) 的计算，将 \(t=a+bi\) 代入方程 \(x(t)+y(t)i=0\)，得到：
+结论 1 易验证，故仅证明 结论 2。回顾 \eqref{equ:qry-root-decompose} 中 \(\omega_k\) 的计算，将 \(t=a+bi\) 代入方程 \(x(t)+y(t)i=0\)，得到：
 \begin{equation}
     x(a)+y(a)i+b( x'(a)i-y'(a))+b^2(X)=0,
 \end{equation}
@@ -310,7 +310,7 @@ x(a) \approx b y'(a), \quad y(a) \approx -b x'(a).
     \int_0^1\frac{f_l(t)}{h(t)^2}\,dt=\sum_{k=1}^n2\re\left(\res(\frac{f_l(t)}{h(t)^2}\log(1-\frac{1}{t}),\omega_k)\right),\  l=1,2.
 \end{equation}
 
-在 文献\cite{Scrivener2024WindingNF} 中，环绕数总变分被用于度量艺术家草图的方向并构建分割框架，如图~\ref{fig:qry-reorientation} 所示。其方法将曲线离散为分段线段后再计算总变分与 GWN 导数。相比之下，本文方法可更直接地计算这些导数，同时提升效率与精度。
+在 文献\cite{Scrivener2024WindingNF} 中，环绕数总变分被用于度量艺术家草图的方向并构建分割框架，如图~\ref{fig:qry-reorientation} 所示。其方法将曲线离散为分段线段后再计算总变分与 GWN 导数。相比之下，本章方法可更直接地计算这些导数，同时提升效率与精度。
 
 导数计算流程与 GWN 计算类似（见算法~\ref{alg:qry-encoding}），核心步骤是在不同根处评估分子多项式。
 

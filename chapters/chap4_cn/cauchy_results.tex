@@ -1,13 +1,13 @@
 \section{实验与评估}\label{sec:cau-results}
-本文方法采用 C++ 实现。
+本章方法采用 C++ 实现。
 所有实验均在一台台式机上完成，配置为 4.00 GHz Intel Core i7-4790K 处理器和 16 GB 内存。
 %
 除图~\ref{fig:cau-rational} 外，其他图中的高阶输入笼边均为多项式曲线。
 
 \paragraph{基于笼的变形}
-本文在图~\ref{fig:cau-more-example} 中展示了多组图像变形示例。
-本文坐标能够对有机形状和机械形状提供光滑且保角的变形结果。
-本文方法也支持对曲线段多项式次数进行升阶和降阶（图~\ref{fig:cau-diff-order}）。
+本章在图~\ref{fig:cau-more-example} 中展示了多组图像变形示例。
+本章坐标能够对有机形状和机械形状提供光滑且保角的变形结果。
+本章方法也支持对曲线段多项式次数进行升阶和降阶（图~\ref{fig:cau-diff-order}）。
 %\paragraph{Different orders}
 %We allow \( n_j < m_j \); 
 当输出次数低于输入次数时，先对曲线降阶会改变笼的初始形状，但不会影响艺术家后续的编辑过程。
@@ -27,12 +27,12 @@
 
 \paragraph{点到点（P2P）变形}
 %To achieve better control over the cage's deformation, 
-为支持由把手驱动的变形，本文利用坐标导数构建目标函数并进行优化求解，这与文献 \cite{Weber2009} 和 文献\cite{Lin2024PolynomialCC} 的做法类似。
+为支持由把手驱动的变形，我们利用坐标导数构建目标函数并进行优化求解，这与文献 \cite{Weber2009} 和 文献\cite{Lin2024PolynomialCC} 的做法类似。
 目标函数包含把手点之间距离平方和，以及一个由边界上坐标二阶导数的 $\ell_2$ 范数组成的光滑项。
 %
 该优化问题是最小二乘问题。
 通过线性求解得到最优解。
-此外，在线性系统中，拖动把手时系数矩阵保持不变；因此本文在预处理阶段仅做一次预分解，从而支持交互式把手编辑（图~\ref{fig:cau-teaser}、\ref{fig:cau-more-example} 和 \ref{fig:cau-diff-order}）。
+此外，在线性系统中，拖动把手时系数矩阵保持不变；因此我们在预处理阶段仅做一次预分解，从而支持交互式把手编辑（图~\ref{fig:cau-teaser}、\ref{fig:cau-more-example} 和 \ref{fig:cau-diff-order}）。
 %Minimizing this function is a least-squares problem, allowing users to edit handles interactively (Fig. \ref{fig:cau-teaser}, \ref{fig:cau-diff-order}).
 %for real-time handle editing by the user (Fig. \ref{fig:cau-teaser}, \ref{fig:cau-diff-order}).}
 %point-to-point term 
@@ -45,7 +45,7 @@
 			\put(6,0){\small 线性输入笼}
 			\put(56,0){\small 高阶输入笼}
 			\put(29,0){\small Cauchy 坐标}
-			\put(86,0){\small 本文方法}
+			\put(86,0){\small 本章方法}
 		}
 	\end{overpic}
 	\vspace{2mm}
@@ -60,9 +60,9 @@
 	\begin{overpic}[width=0.99\linewidth]{figures/chap4_comparep2p_poly.pdf}
 		{
 			\put(3,-2){\small 多项式 Cauchy 坐标}
-			\put(30,-2){\small 本文方法}
+			\put(30,-2){\small 本章方法}
 			\put(45,-2){\small 多项式 Cauchy 坐标}
-			\put(79,-2){\small 本文方法}
+			\put(79,-2){\small 本章方法}
 		}
 	\end{overpic}
 	\vspace{2mm}
@@ -77,7 +77,7 @@
 %All cage-based and P2P deformations achieve real-time performance across all demonstrated examples. 
 在文中展示的所有案例中，基于笼与 P2P 两类变形均可实时运行。
 %We focus solely on analysing the pre-computation time. 
-本文只分析预计算时间。
+本章只分析预计算时间。
 如第~\ref{sec:cau-details} 节所述，一旦根 \(\{\zeta_j\}\) 已确定，积分解析式的求值只涉及少量复数乘法和对数运算。
 在实践中，使用闭式表达计算 \(\{\zeta_j\}\) 会占据较多预计算时间（对二次曲线约占 24\%，对三次曲线约占 33\%）。
 %
@@ -173,7 +173,7 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 	\end{overpic}
 	\vspace{0mm}
 	\caption{
-		利用本文坐标及其导数在高阶输入笼上实现的多组基于笼变形与点到点变形结果。
+		利用本章坐标及其导数在高阶输入笼上实现的多组基于笼变形与点到点变形结果。
 	}
 	\label{fig:cau-more-example}
 \end{figure}
@@ -187,8 +187,8 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 			\put(1,-1.5){\small 线性输入笼（151 点）}
 			\put(43,-1.5){\small 三次输入笼（41 点）}
 			\put(22,-1.5){\small Cauchy 坐标的 P2P}
-			\put(64,-1.5){\small 本文坐标的 P2P}
-			\put(82,-1.5){\small 本文的笼变形}
+			\put(64,-1.5){\small 本章坐标的 P2P}
+			\put(82,-1.5){\small 本章笼变形}
 		}
 	\end{overpic}
     \vspace{2mm}
@@ -202,9 +202,9 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 \paragraph{与三次均值坐标~\cite{Li2013} 的比较}
 三次均值坐标（Cubic MVCs）~\cite{Li2013} 支持将直边笼变形为三次曲线。
 %
-由于线性笼是高阶笼的特例，本文坐标也可用于直边笼并实现保角变形。
+由于线性笼是高阶笼的特例，本章坐标也可用于直边笼并实现保角变形。
 %
-本文通过为线性输入笼的每条边指定不同的非线性参数化，获得不同的保角变形结果（图~\ref{fig:cau-cmp-mvc}）。
+我们通过为线性输入笼的每条边指定不同的非线性参数化，获得不同的保角变形结果（图~\ref{fig:cau-cmp-mvc}）。
 但 Cubic MVC 的结果存在较高畸变。
 
 \paragraph{与多项式柯西坐标~\cite{Lin2024PolynomialCC} 的比较}
@@ -212,7 +212,7 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 在给定相同线性输入笼与高阶变形笼时，多项式 Cauchy 坐标~\cite{Lin2024PolynomialCC} 与多项式 Green 坐标~\cite{MichelThiery2023} 产生相同变形。
 因此，这里只比较使用直边输入笼时的多项式 Cauchy 坐标~\cite{Lin2024PolynomialCC}。
 %
-为公平比较，多项式 Cauchy 坐标与本文方法使用相同数量的控制点。
+为公平比较，多项式 Cauchy 坐标与本章方法使用相同数量的控制点。
 在其变形中，变形曲线控制点在初始姿态共线，因此线性输入笼可能缺乏足够自由度来紧贴输入形状。
 %
 %For initially straight shapes, we compare our method with the polynomial Green coordinate (PolyGC)~\cite{MichelThiery2023}. 
@@ -224,7 +224,7 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 %This enables artists to obtain deformations that match their creative intent more precisely through high-order cage-based manipulation.
 因此，艺术家通过高阶笼操控可获得更光滑、也更符合意图的变形。
 %
-最后，在图~\ref{fig:cau-comparep2p_poly} 中，本文比较了在输入笼自由度相同条件下的 P2P 变形。
+最后，在图~\ref{fig:cau-comparep2p_poly} 中，我们比较了在输入笼自由度相同条件下的 P2P 变形。
 %
 在这些案例里，其线性笼无法紧密贴合输入形状（例如图~\ref{fig:cau-comparep2p_poly} 中大象后腿之间没有分离），从而产生不自然的 P2P 变形。
 高阶笼能够紧密包围形状，可避免该问题。
@@ -262,7 +262,7 @@ Cauchy 坐标~\cite{Weber2009} 将线性笼映射为线性笼。
 具体而言，其做法是在中间笼上应用多项式 Cauchy 坐标，以生成用于包围输入形状的高阶输入笼（图~\ref{fig:cau-cmp-poly-Cauchy}）。
 随后再通过数值方法计算从中间笼到输入笼映射的逆映射，进而得到形状变形。
 %
-本文坐标具有以下优势。
+本章坐标具有以下优势。
 首先，由于多项式 Cauchy 坐标不具插值性，其高阶输入笼生成方法无法产生任意有效的高阶输入笼。
 %their method cannot compute valid coordinates on arbitrarily shaped curved input cages. % due to their non-intuitive geometric constraints on the high-order input cages. %, significantly limiting its applicability to complex geometries.
 %the cage enclosing the shape can be directly manipulated via our coordinates  without
